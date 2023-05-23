@@ -1,0 +1,19 @@
+{
+  "name": "electron-progress-window-playground",
+  "version": "1.0.0",
+  "description": "Test out Electron Progress Window",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && electron ./dist/main/index.js"
+  },
+  "author": "Jeff Robbins",
+  "license": "MIT",
+  "dependencies": {
+    "electron-progress-window": "file:../.."
+  },
+  "devDependencies": {
+    "electron": "^24.3.1",
+    "typescript": "^5.0.4"
+  }
+}

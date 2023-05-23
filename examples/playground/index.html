@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data:; img-src 'self' data:; style-src 'self' 'unsafe-inline';" />
+    <title>Hello World!</title>
+  </head>
+  <body>
+    <div>
+      <button class="timer" data-time="3">3 seconds</button>
+      <button class="timer" data-time="10">10 seconds</button>
+      <button class="timer" data-time="30">30 seconds</button>
+      <button class="timer" data-time="60">60 seconds</button>
+    </div>
+    <div>
+      <button class="timer" data-time="3" data-description="true">3 seconds (description)</button>
+      <button class="timer" data-time="10" data-description="true">10 seconds (description)</button>
+      <button class="timer" data-time="30" data-description="true">30 seconds (description)</button>
+      <button class="timer" data-time="60" data-description="true">60 seconds (description)</button>
+    </div>
+
+    <div>
+      <button class="timer" data-time="5" data-indeterminate="true">5 seconds indeterminate</button>
+      <button class="timer" data-time="10" data-indeterminate="true">10 seconds indeterminate</button>
+    </div>
+    <div>
+      <button class="timer" data-time="5" data-persist="true">5 seconds persistent</button>
+      <button class="timer" data-time="10" data-persist="true">10 seconds persistent</button>
+    </div>
+    <div>
+      <button class="timer" data-time="20" data-title="This is a long title with very descriptive text explaining the thing that is happening right now but that should finish at some point in the future.">Long title</button>  
+      <button class="timer" data-time="20" data-description-text="This is a long description with very descriptive text explaining the thing that is happening right now but that should finish at some point in the future.">Long description</button>    
+    </div>
+  </body>
+</html>
