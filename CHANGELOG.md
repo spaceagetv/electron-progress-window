@@ -1,3 +1,10 @@
+# 1.0.0 (2023-05-25)
+
+
+### Features
+
+* new module ([c7ae432](https://github.com/spaceagetv/electron-progress-window/commit/c7ae432ad458a0a0e82db207a0bbd096b6d41e07))
+
 ## [1.0.1](https://github.com/spaceagetv/electron-mocks/compare/v1.0.0...v1.0.1) (2023-05-22)
 
 
