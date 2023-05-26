@@ -5,14 +5,17 @@ Display multiple progress bars in an Electron window.
 ## Advantages
 
 * Full Typescript support, including event types
+* Full [documentation](docs/electron-progress-window.md)
+* [Example](examples) playground to try it out in an Electron app 
 * Progress bars are displayed in a single window (or multiple windows if you prefer)
 * ProgressWindows and ProgressItems are event emitters
 * Progress items can be added and removed dynamically
 * Progress items can be updated dynamically
-* Progress bars can be indeterminate
+* Progress bars can be indeterminate (no value) or determinate (with value)
 * Window can adjust size automatically as progress items are added and removed
 * Automatically close window when all progress items are complete (or not)
 * Configure default options for ProgressWindow and ProgressItem instances
+* Choose whether individual progress bars are removed from window when complete
 * Individual progress bars can be paused and resumed, sending 'pause' event
 * Progress bars can be cancelled, sending 'will-cancel' and 'cancelled' event
 * Ability to add custom CSS or HTML (in title or detail)
