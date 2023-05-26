@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.3...v1.0.4) (2023-05-26)
+
+
+### Bug Fixes
+
+* etc ƒ to keep API Extractor happy ([bf80967](https://github.com/spaceagetv/electron-progress-window/commit/bf8096780dbf3eec5d08a111096014e520e4d7f4))
+
 ## [1.0.3](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.2...v1.0.3) (2023-05-26)
 
 
