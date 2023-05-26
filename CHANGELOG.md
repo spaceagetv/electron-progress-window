@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.0...v1.0.1) (2023-05-26)
+
+
+### Bug Fixes
+
+* 🎛️ switch from electron-mocha to mocha ([2b19a5e](https://github.com/spaceagetv/electron-progress-window/commit/2b19a5e5b8811b4c0945a93fada11530cf777b18))
+
 # 1.0.0 (2023-05-25)
 
 
