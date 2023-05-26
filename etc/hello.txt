@@ -1,0 +1,1 @@
+This is the etc folder. It contains the hello.txt file.
