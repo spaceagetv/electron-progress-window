@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.2...v1.0.3) (2023-05-26)
+
+
+### Bug Fixes
+
+* doc updates in release.yml ([8837168](https://github.com/spaceagetv/electron-progress-window/commit/8837168f351472469511989c303d42c8707d5992))
+
 ## [1.0.2](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.1...v1.0.2) (2023-05-26)
 
 
