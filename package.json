@@ -17,6 +17,7 @@
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:esm": "tsc -p tsconfig.esm.json",
     "build": "npm run build:cjs && npm run build:esm && npm run copy-html",
+    "build:docs": "npm run build && npm run docs",
     "lint": "eslint --ext .ts .",
     "lint:fix": "eslint --ext .ts . --fix",
     "semantic-release": "semantic-release",
@@ -24,7 +25,10 @@
     "test:coverage": "nyc electron-mocha -r ts-node/register 'test/**/*.test.ts'",
     "copy-html": "npm run copy-html:cjs && npm run copy-html:esm",
     "copy-html:cjs": "ncp src/index.html dist/cjs/index.html",
-    "copy-html:esm": "ncp src/index.html dist/esm/index.html"
+    "copy-html:esm": "ncp src/index.html dist/esm/index.html",
+    "extract-api": "api-extractor run --local",
+    "generate-docs": "api-documenter markdown --input-folder temp --output-folder docs",
+    "docs": "npm run extract-api && npm run generate-docs"
   },
   "keywords": [
     "electron",
@@ -38,6 +42,8 @@
   "author": "Jeff Robbins",
   "license": "MIT",
   "devDependencies": {
+    "@microsoft/api-documenter": "^7.22.6",
+    "@microsoft/api-extractor": "^7.35.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^8.0.7",
@@ -59,6 +65,7 @@
     "eslint": "^8.41.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-tsdoc": "^0.2.17",
     "mocha": "^10.2.0",
     "ncp": "^2.0.0",
     "nyc": "^15.1.0",

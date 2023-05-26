@@ -14,6 +14,11 @@ import TypedEmitter from 'typed-emitter'
 //   silly: console.debug,
 // }
 
+/**
+ * Options for creating a new progress item
+ * @see ProgressItem
+ * @public
+ */
 export type ProgressItemOptions = Pick<
   ProgressItem,
   | 'title'
@@ -27,18 +32,37 @@ export type ProgressItemOptions = Pick<
   | 'removeOnComplete'
 >
 
+/**
+ * Transferable version of ProgressItem - used for IPC
+ * @internal
+ */
 export type ProgressItemTransferable = ProgressItemOptions &
   Pick<ProgressItem, 'id' | 'paused'>
 
+/**
+ * Events emitted by a ProgressItem instance
+ * @public
+ */
 export type ProgressItemEvents = {
+  /** Item was updated - @public */
   update: () => void
+  /** Item was completed - @public */
   complete: () => void
+  /** Item was removed - @public */
   remove: () => void
+  /** Item was cancelled - @public */
   cancelled: () => void
+  /** Item was paused - @public */
   pause: (bool: boolean) => void
 }
 
+/**
+ * A progress bar item within a ProgressWindow. There shouldn't be much need to call this directly.
+ * Instead use ProgressWindow.addItem() or progressWindowInstance.addItem()
+ * @public
+ */
 export class ProgressItem extends (EventEmitter as new () => TypedEmitter<ProgressItemEvents>) {
+  /** Default options for a progress bar item. @readonly @public */
   readonly defaults: ProgressItemOptions = {
     title: '',
     detail: '',
@@ -51,27 +75,33 @@ export class ProgressItem extends (EventEmitter as new () => TypedEmitter<Progre
     removeOnComplete: true,
   }
 
-  /** Unique ID for the progress bar item - start with alpha for HTML id */
-  id: string = 'p' + Math.random().toString(36).substring(2, 11)
+  /** Unique ID for the progress bar item - start with alpha for HTML id - @public @readonly */
+  readonly id: string = 'p' + Math.random().toString(36).substring(2, 11)
 
   /** Title of the progress bar item */
   title: string
-  /** Detail */
+
+  /** Detail shown below the progress bar */
   detail: string
+
   /** Is the item indeterminate? */
   indeterminate: boolean
+
   /** Current (or initial) value */
   _value: number
+
   /** Maximum value */
   maxValue: number
 
   /** Is the item cancellable? Will show cancel button. Default: true */
   enableCancel: boolean
+
   /** Is the item pauseable? Will show pause button. Default: false */
   enablePause: boolean
 
-  /** Automatically complete if value >= maxValue. Default: true */
+  /** Automatically complete if value greater than or equals to maxValue. Default: true */
   autoComplete: boolean
+
   /** Remove immediately when item is completed? Or wait for window behavior. */
   removeOnComplete: boolean
 
@@ -104,6 +134,12 @@ export class ProgressItem extends (EventEmitter as new () => TypedEmitter<Progre
     this.setProgress(value)
   }
 
+  /**
+   * Set progress value and optionally update other options
+   * @param value - progress value
+   * @param otherOptions - other options to update
+   * @returns void
+   */
   setProgress(
     value: number,
     otherOptions = {} as Partial<ProgressItemOptions>
@@ -123,6 +159,12 @@ export class ProgressItem extends (EventEmitter as new () => TypedEmitter<Progre
     }
   }
 
+  /**
+   * Set the progress item to completed.
+   * Automatically sets value to maxValue.
+   * If removeOnComplete is true, the item will be removed.
+   * @returns void
+   */
   setCompleted() {
     // logger.debug('ProgressItem.setCompleted()')
     if (this.isCompleted() || this.removed) {
@@ -136,14 +178,17 @@ export class ProgressItem extends (EventEmitter as new () => TypedEmitter<Progre
     }
   }
 
+  /** Is this item completed? */
   isCompleted() {
     return this.completed
   }
 
+  /** Is this item in progress? */
   isInProgress() {
     return !this.isCompleted()
   }
 
+  /** Is this item indeterminate? */
   isIndeterminate() {
     return this.indeterminate
   }
@@ -166,7 +211,10 @@ export class ProgressItem extends (EventEmitter as new () => TypedEmitter<Progre
     this.remove()
   }
 
-  /** Pause the ProgressItem */
+  /**
+   * Pause/resume the ProgressItem
+   * @param shouldPause - should the item be paused? Default: true
+   */
   pause(shouldPause = true) {
     // logger.debug('ProgressItem.pause()')
     // istanbul ignore if
@@ -177,14 +225,17 @@ export class ProgressItem extends (EventEmitter as new () => TypedEmitter<Progre
     this.emit('pause', shouldPause)
   }
 
+  /** Resume if paused */
   resume() {
     this.pause(false)
   }
 
+  /** Toggle pause state */
   togglePause() {
     this.pause(!this.paused)
   }
 
+  /** Get a transferable object for IPC - @internal */
   transferable() {
     return {
       id: this.id,
