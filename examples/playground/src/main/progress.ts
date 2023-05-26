@@ -6,6 +6,14 @@ ProgressWindow.configure({
   itemDefaults: {
     enablePause: true,
   },
+  // css: `
+  //   body {
+  //     background-color: #fce2a9;
+  //   }
+  //   .progress-item {
+  //     border: 1px solid #444;
+  //   }
+  // `,
   windowOptions: {
     height: 50,
     width: 500,
@@ -22,7 +30,16 @@ ipcMain.on(
   'timer-button-click',
   async (
     event,
-    { time, indeterminate, persist, description, title, descriptionText }
+    {
+      time,
+      indeterminate,
+      persist,
+      description,
+      title,
+      descriptionText,
+      enablePause,
+      enableCancel,
+    }
   ) => {
     title =
       title ||
@@ -42,6 +59,8 @@ ipcMain.on(
       indeterminate,
       maxValue: 1,
       removeOnComplete: !persist,
+      enablePause,
+      enableCancel,
     })
     const handle = runTimer(time * 1000, (progressValue, finished) => {
       let detail: string | undefined

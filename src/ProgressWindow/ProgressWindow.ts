@@ -34,6 +34,8 @@ export interface ProgressWindowOptions {
   cancelOnClose?: boolean
   /** Focus the window when adding a new item. Default: true */
   focusWhenAddingItem?: boolean
+  /** Animate when varying the height/width the BrowserWindow (on Mac) */
+  animateResize?: boolean
   /** Additional CSS for the window */
   css?: string
   /** Options for the BrowserWindow instance */
@@ -174,6 +176,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     variableWidth: false,
     closeOnComplete: true,
     focusWhenAddingItem: true,
+    animateResize: true,
     windowOptions: {
       width: 300,
       height: 60,
@@ -267,7 +270,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    * Use the returned item to update the progress, or change the title or detail.
    */
   static addItem(
-    options = {} as Partial<ProgressItemOptions>
+    options = {} as Partial<ProgressItemOptions> | ProgressItem
   ): Promise<ProgressItem> {
     return this.instance.addItem(options)
   }
@@ -438,15 +441,21 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    * Add a new progress bar to the window
    * @public
    */
-  async addItem(options = {} as Partial<ProgressItemOptions>) {
+  async addItem(options = {} as Partial<ProgressItemOptions> | ProgressItem) {
     // logger.debug('ProgressWindow.addItem()', options)
     // istanbul ignore next
     if (!this.browserWindow) {
       throw new Error('ProgressWindow.addItem() called without window instance')
     }
     await this.whenReady()
-    options = merge({}, this.itemDefaults, options)
-    const item = new ProgressItem(options)
+
+    let item: ProgressItem
+    if (options instanceof ProgressItem) {
+      item = options
+    } else {
+      options = merge({}, this.itemDefaults, options)
+      item = new ProgressItem(options)
+    }
     item.on('update', () => {
       this.updateItem(item)
     })
@@ -613,7 +622,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
       width: Math.round(width),
       height: Math.round(height),
     }
-    this.browserWindow.setContentBounds(bounds, true)
+    this.browserWindow.setContentBounds(bounds, this.options.animateResize)
   }
 
   /** Close the window if all items are completed */

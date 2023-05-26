@@ -157,6 +157,7 @@ class ProgressWidget {
       <progress class="progress-item-progress"></progress>
       <div class="progress-item-detail">${item.detail}</div>
     `
+    this.element.classList.toggle('paused', item.paused)
     this.progressElement = this.element.querySelector(
       '.progress-item-progress'
     ) as HTMLProgressElement
@@ -192,6 +193,7 @@ class ProgressWidget {
     this.titleElement.innerText = item.title
     this.detailElement.innerText = item.detail
     if (item.enablePause && oldItem.paused !== item.paused) {
+      this.element.classList.toggle('paused', item.paused)
       if (item.paused) {
         this.pauseElement.innerHTML = resumeSvg
       } else {

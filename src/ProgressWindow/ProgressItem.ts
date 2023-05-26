@@ -48,6 +48,7 @@ export type ProgressItemTransferable = ProgressItemOptions &
  * - `update` - Item was updated. listener: `() => void`
  * - `complete` - Item was completed. listener: `() => void`
  * - `remove` - Item was removed. listener: `() => void`
+ * - `will-cancel` - Item will cancel. Call event.preventDefault() to stop it. listener: `(event: Event) => void`
  * - `cancelled` - Item was cancelled. listener: `() => void`
  * - `pause` - Item was paused. listener: `(isPaused: boolean) => void`
  *
@@ -60,6 +61,8 @@ export type ProgressItemEvents = {
   complete: () => void
   /** Item was removed - @public */
   remove: () => void
+  /** Item will cancel. Call event.preventDefault() to stop it. */
+  'will-cancel': (event: Event) => void
   /** Item was cancelled - @public */
   cancelled: () => void
   /** Item was paused - @public */
@@ -221,6 +224,11 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   /** Cancel the ProgressItem */
   cancel() {
     if (this.cancelled || this.removed) {
+      return
+    }
+    const event = new Event('will-cancel', { cancelable: true })
+    this.emit('will-cancel', event)
+    if (event.defaultPrevented) {
       return
     }
     // logger.debug('ProgressItem.cancel()')

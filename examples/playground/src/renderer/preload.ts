@@ -20,6 +20,10 @@ function init() {
         const title = el.dataset.title
         const description = el.dataset.description
         const descriptionText = el.dataset.descriptionText
+        const enablePause =
+          !el.dataset.enablePause || el.dataset.enablePause === 'true'
+        const enableCancel =
+          !el.dataset.enableCancel || el.dataset.enableCancel === 'true'
         const time = parseInt(timeString, 10)
         ipcRenderer.send('timer-button-click', {
           time,
@@ -28,6 +32,8 @@ function init() {
           title,
           description,
           descriptionText,
+          enablePause,
+          enableCancel,
         })
       }
     }
