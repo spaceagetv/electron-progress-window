@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.5...v1.0.6) (2023-05-26)
+
+
+### Bug Fixes
+
+* 🛠️🛠️🛠️ lots of bits and pieces ([e1926df](https://github.com/spaceagetv/electron-progress-window/commit/e1926df4756d399e94f6283a5522e0fee0def08a))
+
 ## [1.0.5](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.4...v1.0.5) (2023-05-26)
 
 ## [1.0.4](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.3...v1.0.4) (2023-05-26)
