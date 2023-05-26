@@ -23,11 +23,22 @@ jobs:
       - name: Build
         run: npm run build
 
-      # - name: Run tests
-      #   run: npm test
-
       - name: Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
+
+      - name: Build Documentation
+        run: npm run docs
+
+      - name: Commit Documentation Changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Actions"
+          git add -A
+          git commit -m "Generate API docs" || echo "No changes to commit"
+          git push
+
+
+
