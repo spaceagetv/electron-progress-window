@@ -8,5 +8,6 @@
   "editor.formatOnSave": false,
   "eslint.format.enable": true,
   "eslint.codeActionsOnSave.mode": "all",
-  "typescript.preferences.importModuleSpecifier": "relative"
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "files.associations": { "*.json": "jsonc" },
 }

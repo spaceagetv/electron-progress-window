@@ -1,6 +1,6 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'prettier'],
+  plugins: ['@typescript-eslint', 'eslint-plugin-tsdoc', 'prettier'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
@@ -16,8 +16,8 @@ module.exports = {
   },
   rules: {
     'prettier/prettier': 'error',
-    // allow unused variables that start with an underscore
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    'tsdoc/syntax': 'warn',
   },
   ignorePatterns: ['node_modules/', 'dist/', 'coverage/'],
 }

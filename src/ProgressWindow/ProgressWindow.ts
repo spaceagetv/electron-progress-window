@@ -19,7 +19,11 @@ import { ProgressItemOptions, ProgressItem } from './ProgressItem'
 //   silly: console.debug,
 // }
 
-interface ProgressWindowOptions {
+/**
+ * Options for creating/configuring a ProgressWindow
+ * @public
+ */
+export interface ProgressWindowOptions {
   /** Expand height of window as needed? Default: true. Scroll otherwise. */
   variableHeight?: boolean
   /** Expand width of window as needed? Default: false */
@@ -36,34 +40,107 @@ interface ProgressWindowOptions {
   windowOptions?: Partial<Electron.BrowserWindowConstructorOptions>
   /** Default options for new ProgressItem */
   itemDefaults?: Partial<ProgressItemOptions>
-  /** Options for testing */
+  /** @internal - Options for testing */
   testingFixtures?: {
     bw?: typeof Electron.BrowserWindow
     scr?: Electron.Screen
   }
 }
 
-type ProgressWindowStaticEvents = {
+/**
+ * Events emitted by ProgressWindow.emitter
+ * @public
+ */
+export type ProgressWindowStaticEvents = {
   /** New ProgressWindows has been created */
   created: (progressWindow: ProgressWindow) => void
+  /** ProgressWindow has been destroyed */
+  destroyed: (progressWindow: ProgressWindow) => void
 }
 
-type ProgressWindowInstanceEvents = {
+/**
+ * Events emitted by ProgressWindow instances
+ * @public
+ */
+export type ProgressWindowInstanceEvents = {
+  /** New window has been created and is ready. */
   ready: () => void
+  /** New item has been added. */
   itemAdded: (item: ProgressItem) => void
+  /** Item has been updated. */
   itemUpdated: (item: ProgressItem) => void
+  /** Item has been removed. */
   itemRemoved: (itemId: string) => void
+  /** Item has been cancelled. */
   itemCancelled: (item: ProgressItem) => void
+  /** BrowserWindow has closed. */
   windowClosed: () => void
 }
 
+/**
+ * An Electron Window that displays progress items.
+ * This class has a singleton instance that is created on demand,
+ * and gets destroyed when the window is closed and/or all of its
+ * ProgressItems have completed.
+ *
+ * It has static methods for configuring the window and adding items
+ * to the default instance.
+ *
+ * However, you can create multiple instances, if you want to create multiple
+ * windows, or if you want to have multiple windows with different configurations.
+ * @public
+ *
+ * @example
+ * ```ts
+ * // configure the default instance
+ * ProgressWindow.configure({
+ *  variableHeight: true,
+ *  variableWidth: false,
+ *  closeOnComplete: true,
+ *  focusWhenAddingItem: true,
+ *  windowOptions: { // these are Electron BrowserWindow options
+ *   width: 300,
+ *   height: 60,
+ *   backgroundColor: '#f00',
+ *  },
+ * })
+ *
+ * const item1 = await ProgressWindow.addItem({
+ *   title: 'My Progress Item',
+ *   detail: '0% complete',
+ *   maxValue: 100,
+ * })
+ *
+ * setTimeout(() => {
+ *  item1.setProgress(50, { detail: '50% complete' })
+ * }, 200)
+ * setTimeout(() => {
+ *  item1.setProgress(100, { detail: '100% complete' })
+ * }, 400)
+ *
+ * // once the item is complete, it will be removed from the window
+ * // once the last item is complete, the window will close
+ * ```
+ */
 export class ProgressWindow extends (EventEmitter as new () => TypedEmitter<ProgressWindowInstanceEvents>) {
+  /** @internal */
   static _options = {} as ProgressWindowOptions
+  /** @internal */
   static _instance: ProgressWindow | null = null
 
+  /**
+   * @see ProgressWindowStaticEvents
+   */
   static readonly emitter =
     new EventEmitter() as TypedEmitter<ProgressWindowStaticEvents>
 
+  /**
+   * Readonly convenience to see default options for new ProgressWindows.
+   * Override these with ProgressWindow.configure().
+   * @see ProgressWindowOptions
+   * @readonly
+   * @public
+   */
   static readonly defaults: ProgressWindowOptions = {
     variableHeight: true,
     variableWidth: false,
@@ -77,6 +154,7 @@ export class ProgressWindow extends (EventEmitter as new () => TypedEmitter<Prog
       maximizable: false,
       show: false,
     },
+    itemDefaults: {},
     css: '',
     testingFixtures: {
       // default to using the real BrowserWindow
@@ -85,6 +163,33 @@ export class ProgressWindow extends (EventEmitter as new () => TypedEmitter<Prog
     },
   }
 
+  /**
+   * Configure new ProgressWindow instances with these options.
+   * @see ProgressWindowOptions
+   * @public
+   *
+   * @example
+   * ```ts
+   * ProgressWindow.configure({
+   *  variableHeight: true,
+   *  variableWidth: false,
+   *  closeOnComplete: true,
+   *  itemDefaults: {
+   *    closeOnComplete: false,
+   *  },
+   *  windowOptions: { // these are Electron BrowserWindow options
+   *    width: 300,
+   *    height: 60, // variableHeight means this will expand as items are added
+   *    backgroundColor: '#0f0',
+   *  },
+   *  css: `
+   *   .progress-item {
+   *     background-color: #f0f;
+   *   }
+   *  `,
+   * })
+   * ```
+   */
   static configure(options: ProgressWindowOptions) {
     if (this._instance) {
       throw new Error(
@@ -94,32 +199,48 @@ export class ProgressWindow extends (EventEmitter as new () => TypedEmitter<Prog
     merge(this._options, options)
   }
 
+  /**
+   * Get/create the default ProgressWindow instance.
+   */
   static get instance() {
     if (!this._instance) {
       this._instance = new ProgressWindow(this._options)
       this._instance.on('windowClosed', () => {
-        this._instance = null
+        this.destroy()
       })
     }
     return this._instance
   }
 
   /**
-   * Asynchronously create a the ProgressWindow instance
-   * @returns {Promise<ProgressWindow>} - resolves when the window is ready
+   * Asynchronously create the ProgressWindow instance
+   * @returns a promise which resolves with the current ProgressWindow instance when it is ready.
    */
   static async create() {
     return await this.instance.whenReady()
   }
 
+  /**
+   * Destroy the ProgressWindow instance.
+   */
   static destroy() {
     if (this._instance) {
       this.instance.close()
+      this.emitter.emit('destroyed', this._instance)
       this._instance = null
     }
   }
 
-  static addItem(options = {} as Partial<ProgressItemOptions>) {
+  /**
+   * Add a new item to the default ProgressWindow instance.
+   * If the window is not yet created, it will be created.
+   * @param options - options for the new item
+   * @returns a promise that resolves to the new ProgressItem.
+   * Use the returned item to update the progress, or change the title or detail.
+   */
+  static addItem(
+    options = {} as Partial<ProgressItemOptions>
+  ): Promise<ProgressItem> {
     return this.instance.addItem(options)
   }
 
@@ -131,26 +252,64 @@ export class ProgressWindow extends (EventEmitter as new () => TypedEmitter<Prog
   //   return this.instance.removeItem(id)
   // }
 
-  static close() {
+  /**
+   * Close the default ProgressWindow instance (if open).
+   */
+  static close(): void {
     if (!this._instance) return
     return this.instance.close()
   }
 
+  /**
+   * @readonly defaults for the current instance
+   */
   readonly defaults = ProgressWindow.defaults
 
+  /**
+   * The Electron BrowserWindow instance.
+   * @see https://www.electronjs.org/docs/api/browser-window
+   *
+   * Use this to access the BrowserWindow directly, for example to set the window title.
+   */
   browserWindow: BrowserWindow | null = null
+
+  /**
+   * The options used to create this ProgressWindow instance.
+   * @see ProgressWindowOptions
+   */
   options: ProgressWindowOptions
 
+  /** @internal - used for testing */
   _screenInstance: typeof Electron.screen
 
+  /**
+   * Default values for new ProgressItems added to this ProgressWindow instance.
+   */
   itemDefaults: Partial<ProgressItemOptions>
 
+  /**
+   * The current ProgressItems in this ProgressWindow instance.
+   * This is is an object, keyed by the item id.
+   * @see ProgressItem
+   */
   progressItems: {
     [id: string]: ProgressItem
   } = {}
 
+  /** @internal */
   private _ready: Promise<ProgressWindow>
 
+  /**
+   * If you want to work with a single window, you won't need to call this directly.
+   * Call ProgressWindow.addItem() and things will "just work".
+   *
+   * However, if you want to create multiple windows, you can use this constructor
+   * to create a new ProgressWindow instance.
+   *
+   * @param options - options for this ProgressWindow instance
+   * @see ProgressWindowOptions
+   * @see ProgressWindow.configure()
+   */
   constructor(options = {} as ProgressWindowOptions) {
     super()
     const overrides = {
@@ -238,12 +397,19 @@ export class ProgressWindow extends (EventEmitter as new () => TypedEmitter<Prog
     ProgressWindow.emitter.emit('created', this)
   }
 
-  async whenReady() {
+  /**
+   * A promise that resolves when the window is ready to use.
+   * @returns a promise which resolves to progressWindow instance when ready
+   */
+  async whenReady(): Promise<ProgressWindow> {
     await this._ready
     return this
   }
 
-  /** Add a new progress bar to the window */
+  /**
+   * Add a new progress bar to the window
+   * @public
+   */
   async addItem(options = {} as Partial<ProgressItemOptions>) {
     // logger.debug('ProgressWindow.addItem()', options)
     // istanbul ignore next
@@ -281,7 +447,11 @@ export class ProgressWindow extends (EventEmitter as new () => TypedEmitter<Prog
     return item
   }
 
-  /** Update a ProgressItem (via event) */
+  /**
+   * Update a ProgressItem (via event)
+   * Don't call this directly. There are other methods for updating items.
+   * @internal
+   */
   private async updateItem(item: ProgressItem) {
     // logger.silly('ProgressWindow.updateItem()', item)
     // istanbul ignore next
@@ -301,6 +471,11 @@ export class ProgressWindow extends (EventEmitter as new () => TypedEmitter<Prog
     return item
   }
 
+  /**
+   * Remove an item from the window
+   * @param id - the id of the item to remove
+   * @returns - resolves when the item has been removed
+   */
   async removeItem(id: string) {
     // logger.debug('ProgressWindow.removeItem()', id)
     // istanbul ignore next
@@ -319,11 +494,18 @@ export class ProgressWindow extends (EventEmitter as new () => TypedEmitter<Prog
     this.maybeCloseWindow()
   }
 
+  /**
+   * Cancel all items + trigger the 'cancelled' event on each item.
+   * Items will be removed after they are cancelled.
+   */
   cancelAll() {
     // logger.debug('ProgressWindow.cancelAll()')
     Object.values(this.progressItems).forEach((item) => item.cancel())
   }
 
+  /**
+   * Remove all items (without cancelling them)
+   */
   removeAll() {
     // logger.debug('ProgressWindow.removeAll()')
     Object.keys(this.progressItems).forEach((id) => this.removeItem(id))
@@ -428,9 +610,7 @@ export class ProgressWindow extends (EventEmitter as new () => TypedEmitter<Prog
     // logger.debug('ProgressWindow.close()')
     // istanbul ignore next
     if (!this.browserWindow) {
-      throw new Error(
-        'ProgressWindow.closeWindow() called before window was created'
-      )
+      return
     }
     this.browserWindow.close()
   }
