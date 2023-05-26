@@ -16,3 +16,7 @@ export type ProgressWindowStaticEvents = {
 ```
 **References:** [ProgressWindow](./electron-progress-window.progresswindow.md)
 
+## Remarks
+
+Events: - `created` - New ProgressWindows has been created. listener: `(progressWindow: ProgressWindow) => void` - `destroyed` - ProgressWindow has been destroyed. listener: `(progressWindow: ProgressWindow) => void`
+

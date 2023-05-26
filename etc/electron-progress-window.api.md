@@ -7,10 +7,15 @@
 import { BrowserWindow } from 'electron';
 import TypedEmitter from 'typed-emitter';
 
-// Warning: (ae-forgotten-export) The symbol "ProgressItem_base" needs to be exported by the entry point index.d.ts
+// Warning: (ae-internal-missing-underscore) The name "EventEmitterAsTypedEmitterProgressWindowInstanceEvents" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal (undocumented)
+export const EventEmitterAsTypedEmitterProgressWindowInstanceEvents: TypedEmitterProgressWindowInstanceEvents;
+
+// Warning: (ae-incompatible-release-tags) The symbol "ProgressItem" is marked as @public, but its signature references "ProgressItemEventsEmitter" which is marked as @internal
 //
 // @public
-export class ProgressItem extends ProgressItem_base {
+export class ProgressItem extends ProgressItemEventsEmitter {
     constructor(options?: Partial<ProgressItemOptions>);
     autoComplete: boolean;
     cancel(): void;
@@ -48,8 +53,13 @@ export type ProgressItemEvents = {
     complete: () => void;
     remove: () => void;
     cancelled: () => void;
-    pause: (bool: boolean) => void;
+    pause: (isPaused: boolean) => void;
 };
+
+// Warning: (ae-internal-missing-underscore) The name "ProgressItemEventsEmitter" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal (undocumented)
+export const ProgressItemEventsEmitter: TypedEmitterProgressItemEvents;
 
 // @public
 export type ProgressItemOptions = Pick<ProgressItem, 'title' | 'detail' | 'indeterminate' | 'value' | 'maxValue' | 'enableCancel' | 'enablePause' | 'autoComplete' | 'removeOnComplete'>;
@@ -59,10 +69,10 @@ export type ProgressItemOptions = Pick<ProgressItem, 'title' | 'detail' | 'indet
 // @internal
 export type ProgressItemTransferable = ProgressItemOptions & Pick<ProgressItem, 'id' | 'paused'>;
 
-// Warning: (ae-forgotten-export) The symbol "ProgressWindow_base" needs to be exported by the entry point index.d.ts
+// Warning: (ae-incompatible-release-tags) The symbol "ProgressWindow" is marked as @public, but its signature references "EventEmitterAsTypedEmitterProgressWindowInstanceEvents" which is marked as @internal
 //
 // @public
-export class ProgressWindow extends ProgressWindow_base {
+export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInstanceEvents {
     constructor(options?: ProgressWindowOptions);
     static addItem(options?: Partial<ProgressItemOptions>): Promise<ProgressItem>;
     addItem(options?: Partial<ProgressItemOptions>): Promise<ProgressItem>;
@@ -75,7 +85,7 @@ export class ProgressWindow extends ProgressWindow_base {
     static readonly defaults: ProgressWindowOptions;
     readonly defaults: ProgressWindowOptions;
     static destroy(): void;
-    // (undocumented)
+    // @eventProperty
     static readonly emitter: TypedEmitter<ProgressWindowStaticEvents>;
     static get instance(): ProgressWindow;
     // @internal (undocumented)
@@ -126,6 +136,16 @@ export type ProgressWindowStaticEvents = {
     created: (progressWindow: ProgressWindow) => void;
     destroyed: (progressWindow: ProgressWindow) => void;
 };
+
+// Warning: (ae-internal-missing-underscore) The name "TypedEmitterProgressItemEvents" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal (undocumented)
+export type TypedEmitterProgressItemEvents = new () => TypedEmitter<ProgressItemEvents>;
+
+// Warning: (ae-internal-missing-underscore) The name "TypedEmitterProgressWindowInstanceEvents" should be prefixed with an underscore because the declaration is marked as @internal
+//
+// @internal (undocumented)
+export type TypedEmitterProgressWindowInstanceEvents = new () => TypedEmitter<ProgressWindowInstanceEvents>;
 
 // (No @packageDocumentation comment for this package)
 

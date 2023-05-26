@@ -20,3 +20,7 @@ export type ProgressWindowInstanceEvents = {
 ```
 **References:** [ProgressItem](./electron-progress-window.progressitem.md)
 
+## Remarks
+
+Events: - `ready` - New window has been created and is ready. listener: `() => void` - `itemAdded` - New item has been added. listener: `(item: ProgressItem) => void` - `itemUpdated` - Item has been updated. listener: `(item: ProgressItem) => void` - `itemRemoved` - Item has been removed. listener: `(itemId: string) => void` - `itemCancelled` - Item has been cancelled. listener: `(item: ProgressItem) => void` - `windowClosed` - BrowserWindow has closed. listener: `() => void`
+

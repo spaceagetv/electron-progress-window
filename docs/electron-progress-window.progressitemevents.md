@@ -14,6 +14,11 @@ export type ProgressItemEvents = {
     complete: () => void;
     remove: () => void;
     cancelled: () => void;
-    pause: (bool: boolean) => void;
+    pause: (isPaused: boolean) => void;
 };
 ```
+
+## Remarks
+
+Events: - `update` - Item was updated. listener: `() => void` - `complete` - Item was completed. listener: `() => void` - `remove` - Item was removed. listener: `() => void` - `cancelled` - Item was cancelled. listener: `() => void` - `pause` - Item was paused. listener: `(isPaused: boolean) => void`
+
