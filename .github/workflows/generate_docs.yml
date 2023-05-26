@@ -28,6 +28,9 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Build
+      run: npm run build
+
     - name: Generate API and Docs
       run: npm run extract-api && npm run generate-docs
 
