@@ -52,6 +52,7 @@ export type ProgressItemEvents = {
     update: () => void;
     complete: () => void;
     remove: () => void;
+    'will-cancel': (event: Event) => void;
     cancelled: () => void;
     pause: (isPaused: boolean) => void;
 };
@@ -74,8 +75,8 @@ export type ProgressItemTransferable = ProgressItemOptions & Pick<ProgressItem, 
 // @public
 export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInstanceEvents {
     constructor(options?: ProgressWindowOptions);
-    static addItem(options?: Partial<ProgressItemOptions>): Promise<ProgressItem>;
-    addItem(options?: Partial<ProgressItemOptions>): Promise<ProgressItem>;
+    static addItem(options?: ProgressItem | Partial<ProgressItemOptions>): Promise<ProgressItem>;
+    addItem(options?: ProgressItem | Partial<ProgressItemOptions>): Promise<ProgressItem>;
     browserWindow: BrowserWindow | null;
     cancelAll(): void;
     static close(): void;
@@ -116,6 +117,7 @@ export type ProgressWindowInstanceEvents = {
 
 // @public
 export interface ProgressWindowOptions {
+    animateResize?: boolean;
     cancelOnClose?: boolean;
     closeOnComplete?: boolean;
     css?: string;

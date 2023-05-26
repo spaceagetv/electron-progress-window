@@ -16,6 +16,7 @@ export interface ProgressWindowOptions
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
+|  [animateResize?](./electron-progress-window.progresswindowoptions.animateresize.md) |  | boolean | _(Optional)_ Animate when varying the height/width the BrowserWindow (on Mac) |
 |  [cancelOnClose?](./electron-progress-window.progresswindowoptions.cancelonclose.md) |  | boolean | _(Optional)_ Send 'cancelled' for all current items when closing the window. Default: false |
 |  [closeOnComplete?](./electron-progress-window.progresswindowoptions.closeoncomplete.md) |  | boolean | _(Optional)_ Close window automatically when all items complete. Default: true |
 |  [css?](./electron-progress-window.progresswindowoptions.css.md) |  | string | _(Optional)_ Additional CSS for the window |

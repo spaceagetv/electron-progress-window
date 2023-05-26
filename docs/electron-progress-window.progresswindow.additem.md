@@ -9,14 +9,14 @@ Add a new item to the default ProgressWindow instance. If the window is not yet 
 **Signature:**
 
 ```typescript
-static addItem(options?: Partial<ProgressItemOptions>): Promise<ProgressItem>;
+static addItem(options?: ProgressItem | Partial<ProgressItemOptions>): Promise<ProgressItem>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | Partial&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt; | _(Optional)_ options for the new item |
+|  options | [ProgressItem](./electron-progress-window.progressitem.md) \| Partial&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt; | _(Optional)_ options for the new item |
 
 **Returns:**
 

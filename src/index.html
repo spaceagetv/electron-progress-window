@@ -37,11 +37,27 @@
       .progress-item-detail {
         font-size: .8em;
       }
+      .progress-item.paused {
+        background: #a3a3a338;
+      }
+      /** 👇 ADDITIONAL STYLES WILL BE INSERTED BELOW 👇 */
       /** additional styles insert point */
     </style>
   </head>
   <body class="progress-window">
     <div id="progress-items">
+      <!-- 
+      EXAMPLE ITEM MARKUP:
+      <div class="progress-item" id="progressItemId">
+        <div class="progress-item-actions">
+          <span class="progress-item-pause"><svg></svg></span>
+          <span class="progress-item-cancel"><svg></svg></span>
+        </div>
+        <div class="progress-item-title">Title</div>
+        <progress class="progress-item-progress" value="0" max="100"></progress>
+        <div class="progress-item-detail">Detail</div>
+      </div> 
+      -->
     </div>
   </body>
 </html>

@@ -2,7 +2,7 @@ import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import sinonChai from 'sinon-chai'
 import { MockBrowserWindow, MockScreen } from 'electron-mocks'
-import { ProgressWindow } from '../src/index'
+import { ProgressItem, ProgressWindow } from '../src/index'
 import { withTimeout } from './withTimeout'
 import { pause } from './pause'
 
@@ -476,5 +476,49 @@ describe('ProgressWindow', () => {
     await expect(cancelPromise).to.be.rejectedWith(
       'cancelled event never fired'
     )
+  })
+
+  it('should allow adding pre-constructed items via addItem()', async () => {
+    const item1 = new ProgressItem({
+      title: 'Hello World',
+      value: 0.1,
+      maxValue: 1,
+      detail: 'detail',
+    })
+    const progressWindow = new ProgressWindow()
+    await progressWindow.addItem(item1)
+    expect(progressWindow.progressItems[item1.id]).to.deep.equal(item1)
+    expect(progressWindow.browserWindow).to.be.ok
+    if (!progressWindow.browserWindow) throw new Error('no browserWindow')
+    const itemUpdatePromise = new Promise<void>((resolve) => {
+      item1.on('update', () => resolve())
+    })
+    item1.value = 0.2
+    await withTimeout(itemUpdatePromise, 1000, 'update event never fired')
+  })
+
+  it('should be able to prevent canceling items', async () => {
+    const item1 = await ProgressWindow.addItem()
+    expect(item1).to.be.ok
+    expect(item1.cancelled).to.be.false
+    const willCancelPromise = new Promise<void>((resolve) => {
+      item1.once('will-cancel', (event) => {
+        event.preventDefault()
+        resolve()
+      })
+    })
+    const cancelPromise = withTimeout(
+      new Promise<void>((resolve) => {
+        item1.once('cancelled', () => resolve())
+      }),
+      100,
+      'cancelled event never fired'
+    )
+    item1.cancel()
+    await willCancelPromise
+    await expect(cancelPromise).to.be.rejectedWith(
+      'cancelled event never fired'
+    )
+    expect(item1.cancelled).to.be.false
   })
 })
