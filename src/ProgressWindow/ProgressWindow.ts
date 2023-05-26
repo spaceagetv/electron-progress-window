@@ -49,6 +49,13 @@ export interface ProgressWindowOptions {
 
 /**
  * Events emitted by ProgressWindow.emitter
+ *
+ * @remarks
+ *
+ * Events:
+ * - `created` - New ProgressWindows has been created. listener: `(progressWindow: ProgressWindow) => void`
+ * - `destroyed` - ProgressWindow has been destroyed. listener: `(progressWindow: ProgressWindow) => void`
+ *
  * @public
  */
 export type ProgressWindowStaticEvents = {
@@ -60,6 +67,17 @@ export type ProgressWindowStaticEvents = {
 
 /**
  * Events emitted by ProgressWindow instances
+ *
+ * @remarks
+ *
+ * Events:
+ * - `ready` - New window has been created and is ready. listener: `() => void`
+ * - `itemAdded` - New item has been added. listener: `(item: ProgressItem) => void`
+ * - `itemUpdated` - Item has been updated. listener: `(item: ProgressItem) => void`
+ * - `itemRemoved` - Item has been removed. listener: `(itemId: string) => void`
+ * - `itemCancelled` - Item has been cancelled. listener: `(item: ProgressItem) => void`
+ * - `windowClosed` - BrowserWindow has closed. listener: `() => void`
+ *
  * @public
  */
 export type ProgressWindowInstanceEvents = {
@@ -76,6 +94,14 @@ export type ProgressWindowInstanceEvents = {
   /** BrowserWindow has closed. */
   windowClosed: () => void
 }
+
+/** @internal */
+export type TypedEmitterProgressWindowInstanceEvents =
+  new () => TypedEmitter<ProgressWindowInstanceEvents>
+
+/** @internal */
+export const EventEmitterAsTypedEmitterProgressWindowInstanceEvents =
+  EventEmitter as TypedEmitterProgressWindowInstanceEvents
 
 /**
  * An Electron Window that displays progress items.
@@ -122,14 +148,16 @@ export type ProgressWindowInstanceEvents = {
  * // once the last item is complete, the window will close
  * ```
  */
-export class ProgressWindow extends (EventEmitter as new () => TypedEmitter<ProgressWindowInstanceEvents>) {
+export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInstanceEvents {
   /** @internal */
   static _options = {} as ProgressWindowOptions
   /** @internal */
   static _instance: ProgressWindow | null = null
 
   /**
+   * Static event emitter for ProgressWindow events
    * @see ProgressWindowStaticEvents
+   * @eventProperty
    */
   static readonly emitter =
     new EventEmitter() as TypedEmitter<ProgressWindowStaticEvents>

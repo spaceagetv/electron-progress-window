@@ -4,6 +4,8 @@
 
 ## ProgressWindow.emitter property
 
+Static event emitter for ProgressWindow events
+
 **Signature:**
 
 ```typescript

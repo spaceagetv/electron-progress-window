@@ -41,6 +41,16 @@ export type ProgressItemTransferable = ProgressItemOptions &
 
 /**
  * Events emitted by a ProgressItem instance
+ *
+ * @remarks
+ *
+ * Events:
+ * - `update` - Item was updated. listener: `() => void`
+ * - `complete` - Item was completed. listener: `() => void`
+ * - `remove` - Item was removed. listener: `() => void`
+ * - `cancelled` - Item was cancelled. listener: `() => void`
+ * - `pause` - Item was paused. listener: `(isPaused: boolean) => void`
+ *
  * @public
  */
 export type ProgressItemEvents = {
@@ -53,15 +63,23 @@ export type ProgressItemEvents = {
   /** Item was cancelled - @public */
   cancelled: () => void
   /** Item was paused - @public */
-  pause: (bool: boolean) => void
+  pause: (isPaused: boolean) => void
 }
+
+/** @internal */
+export type TypedEmitterProgressItemEvents =
+  new () => TypedEmitter<ProgressItemEvents>
+
+/** @internal */
+export const ProgressItemEventsEmitter =
+  EventEmitter as TypedEmitterProgressItemEvents
 
 /**
  * A progress bar item within a ProgressWindow. There shouldn't be much need to call this directly.
  * Instead use ProgressWindow.addItem() or progressWindowInstance.addItem()
  * @public
  */
-export class ProgressItem extends (EventEmitter as new () => TypedEmitter<ProgressItemEvents>) {
+export class ProgressItem extends ProgressItemEventsEmitter {
   /** Default options for a progress bar item. @readonly @public */
   readonly defaults: ProgressItemOptions = {
     title: '',

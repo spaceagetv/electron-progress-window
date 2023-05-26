@@ -13,9 +13,9 @@ However, you can create multiple instances, if you want to create multiple windo
 **Signature:**
 
 ```typescript
-export declare class ProgressWindow extends ProgressWindow_base 
+export declare class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInstanceEvents 
 ```
-**Extends:** ProgressWindow\_base
+**Extends:** EventEmitterAsTypedEmitterProgressWindowInstanceEvents
 
 ## Example
 
@@ -51,6 +51,12 @@ setTimeout(() => {
 // once the last item is complete, the window will close
 ```
 
+## Events
+
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [emitter](./electron-progress-window.progresswindow.emitter.md) | <p><code>static</code></p><p><code>readonly</code></p> | TypedEmitter&lt;[ProgressWindowStaticEvents](./electron-progress-window.progresswindowstaticevents.md)<!-- -->&gt; | Static event emitter for ProgressWindow events |
+
 ## Constructors
 
 |  Constructor | Modifiers | Description |
@@ -64,7 +70,6 @@ setTimeout(() => {
 |  [browserWindow](./electron-progress-window.progresswindow.browserwindow.md) |  | BrowserWindow \| null | The Electron BrowserWindow instance. |
 |  [defaults](./electron-progress-window.progresswindow.defaults.md) | <code>readonly</code> | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | defaults for the current instance |
 |  [defaults](./electron-progress-window.progresswindow.defaults.md) | <p><code>static</code></p><p><code>readonly</code></p> | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | Readonly convenience to see default options for new ProgressWindows. Override these with ProgressWindow.configure(). |
-|  [emitter](./electron-progress-window.progresswindow.emitter.md) | <p><code>static</code></p><p><code>readonly</code></p> | TypedEmitter&lt;[ProgressWindowStaticEvents](./electron-progress-window.progresswindowstaticevents.md)<!-- -->&gt; |  |
 |  [instance](./electron-progress-window.progresswindow.instance.md) | <p><code>static</code></p><p><code>readonly</code></p> | [ProgressWindow](./electron-progress-window.progresswindow.md) | Get/create the default ProgressWindow instance. |
 |  [itemDefaults](./electron-progress-window.progresswindow.itemdefaults.md) |  | Partial&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt; | Default values for new ProgressItems added to this ProgressWindow instance. |
 |  [options](./electron-progress-window.progresswindow.options.md) |  | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | The options used to create this ProgressWindow instance. |

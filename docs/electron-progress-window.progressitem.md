@@ -9,9 +9,9 @@ A progress bar item within a ProgressWindow. There shouldn't be much need to cal
 **Signature:**
 
 ```typescript
-export declare class ProgressItem extends ProgressItem_base 
+export declare class ProgressItem extends ProgressItemEventsEmitter 
 ```
-**Extends:** ProgressItem\_base
+**Extends:** ProgressItemEventsEmitter
 
 ## Constructors
 
