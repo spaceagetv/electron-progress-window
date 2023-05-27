@@ -54,9 +54,9 @@ export interface ProgressWindowOptions {
  *
  * @remarks
  *
- * Events:
- * - `created` - New ProgressWindows has been created. listener: `(progressWindow: ProgressWindow) => void`
- * - `destroyed` - ProgressWindow has been destroyed. listener: `(progressWindow: ProgressWindow) => void`
+ * Events:<br/>
+ * - `created` - New ProgressWindows has been created. listener: `(progressWindow: ProgressWindow) => void`<br/>
+ * - `destroyed` - ProgressWindow has been destroyed. listener: `(progressWindow: ProgressWindow) => void`<br/>
  *
  * @public
  */
@@ -72,13 +72,13 @@ export type ProgressWindowStaticEvents = {
  *
  * @remarks
  *
- * Events:
- * - `ready` - New window has been created and is ready. listener: `() => void`
- * - `itemAdded` - New item has been added. listener: `(item: ProgressItem) => void`
- * - `itemUpdated` - Item has been updated. listener: `(item: ProgressItem) => void`
- * - `itemRemoved` - Item has been removed. listener: `(itemId: string) => void`
- * - `itemCancelled` - Item has been cancelled. listener: `(item: ProgressItem) => void`
- * - `windowClosed` - BrowserWindow has closed. listener: `() => void`
+ * Events:<br/>
+ * - `ready` - New window has been created and is ready. listener: `() => void`<br/>
+ * - `itemAdded` - New item has been added. listener: `(item: ProgressItem) => void`<br/>
+ * - `itemUpdated` - Item has been updated. listener: `(item: ProgressItem) => void`<br/>
+ * - `itemRemoved` - Item has been removed. listener: `(itemId: string) => void`<br/>
+ * - `itemCancelled` - Item has been cancelled. listener: `(item: ProgressItem) => void`<br/>
+ * - `windowClosed` - BrowserWindow has closed. listener: `() => void`<br/>
  *
  * @public
  */
@@ -157,7 +157,14 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
   static _instance: ProgressWindow | null = null
 
   /**
-   * Static event emitter for ProgressWindow events
+   * Static event emitter for ProgressWindow events.
+   *
+   * @remarks
+   *
+   * Events:<br/>
+   * - `created` - New ProgressWindows has been created. listener: `(progressWindow: ProgressWindow) => void`<br/>
+   * - `destroyed` - ProgressWindow has been destroyed. listener: `(progressWindow: ProgressWindow) => void`<br/>
+   *
    * @see ProgressWindowStaticEvents
    * @eventProperty
    */
