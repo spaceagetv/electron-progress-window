@@ -2,6 +2,7 @@ node_modules
 temp
 out
 dist
+npmrc
 coverage
 .nyc_output
-env.*
+env.*.sh
