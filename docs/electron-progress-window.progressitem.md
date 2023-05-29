@@ -26,7 +26,7 @@ export declare class ProgressItem extends ProgressItemEventsEmitter
 |  [\_value](./electron-progress-window.progressitem._value.md) |  | number | Current (or initial) value |
 |  [autoComplete](./electron-progress-window.progressitem.autocomplete.md) |  | boolean | Automatically complete if value greater than or equals to maxValue. Default: true |
 |  [cancelled](./electron-progress-window.progressitem.cancelled.md) |  | boolean | Has this progress item been cancelled? |
-|  [defaults](./electron-progress-window.progressitem.defaults.md) | <code>readonly</code> | [ProgressItemOptions](./electron-progress-window.progressitemoptions.md) | Default options for a progress bar item. |
+|  [defaults](./electron-progress-window.progressitem.defaults.md) | <code>readonly</code> | Required&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt; | Default options for a progress bar item. |
 |  [detail](./electron-progress-window.progressitem.detail.md) |  | string | Detail shown below the progress bar |
 |  [enableCancel](./electron-progress-window.progressitem.enablecancel.md) |  | boolean | Is the item cancellable? Will show cancel button. Default: true |
 |  [enablePause](./electron-progress-window.progressitem.enablepause.md) |  | boolean | Is the item pauseable? Will show pause button. Default: false |

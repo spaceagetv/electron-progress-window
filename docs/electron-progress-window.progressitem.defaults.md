@@ -9,5 +9,5 @@ Default options for a progress bar item.
 **Signature:**
 
 ```typescript
-readonly defaults: ProgressItemOptions;
+readonly defaults: Required<ProgressItemOptions>;
 ```

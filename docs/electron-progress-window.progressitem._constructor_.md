@@ -9,12 +9,12 @@ Constructs a new instance of the `ProgressItem` class
 **Signature:**
 
 ```typescript
-constructor(options?: Partial<ProgressItemOptions>);
+constructor(options?: Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | Partial&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt; | _(Optional)_ |
+|  options | Partial&lt;Pick&lt;[ProgressItem](./electron-progress-window.progressitem.md)<!-- -->, "detail" \| "value" \| "title" \| "indeterminate" \| "maxValue" \| "enableCancel" \| "enablePause" \| "autoComplete" \| "removeOnComplete"&gt;&gt; | _(Optional)_ |
 

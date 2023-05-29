@@ -16,11 +16,11 @@ export const EventEmitterAsTypedEmitterProgressWindowInstanceEvents: TypedEmitte
 //
 // @public
 export class ProgressItem extends ProgressItemEventsEmitter {
-    constructor(options?: Partial<ProgressItemOptions>);
+    constructor(options?: Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>);
     autoComplete: boolean;
     cancel(): void;
     cancelled: boolean;
-    readonly defaults: ProgressItemOptions;
+    readonly defaults: Required<ProgressItemOptions>;
     detail: string;
     enableCancel: boolean;
     enablePause: boolean;
@@ -37,7 +37,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     removeOnComplete: boolean;
     resume(): void;
     setCompleted(): void;
-    setProgress(value: number, otherOptions?: Partial<ProgressItemOptions>): void;
+    setProgress(value: number, otherOptions?: Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>): void;
     title: string;
     togglePause(): void;
     // @internal
@@ -63,7 +63,7 @@ export type ProgressItemEvents = {
 export const ProgressItemEventsEmitter: TypedEmitterProgressItemEvents;
 
 // @public
-export type ProgressItemOptions = Pick<ProgressItem, 'title' | 'detail' | 'indeterminate' | 'value' | 'maxValue' | 'enableCancel' | 'enablePause' | 'autoComplete' | 'removeOnComplete'>;
+export type ProgressItemOptions = Partial<Pick<ProgressItem, 'title' | 'detail' | 'indeterminate' | 'value' | 'maxValue' | 'enableCancel' | 'enablePause' | 'autoComplete' | 'removeOnComplete'>>;
 
 // Warning: (ae-internal-missing-underscore) The name "ProgressItemTransferable" should be prefixed with an underscore because the declaration is marked as @internal
 //
@@ -75,8 +75,8 @@ export type ProgressItemTransferable = ProgressItemOptions & Pick<ProgressItem, 
 // @public
 export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInstanceEvents {
     constructor(options?: ProgressWindowOptions);
-    static addItem(options?: ProgressItem | Partial<ProgressItemOptions>): Promise<ProgressItem>;
-    addItem(options?: ProgressItem | Partial<ProgressItemOptions>): Promise<ProgressItem>;
+    static addItem(options?: ProgressItem | Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>): Promise<ProgressItem>;
+    addItem(options?: ProgressItem | Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>): Promise<ProgressItem>;
     browserWindow: BrowserWindow | null;
     cancelAll(): void;
     static close(): void;
@@ -91,7 +91,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     static get instance(): ProgressWindow;
     // @internal (undocumented)
     static _instance: ProgressWindow | null;
-    itemDefaults: Partial<ProgressItemOptions>;
+    itemDefaults: ProgressItemOptions;
     options: ProgressWindowOptions;
     // @internal (undocumented)
     static _options: ProgressWindowOptions;
@@ -122,7 +122,7 @@ export interface ProgressWindowOptions {
     closeOnComplete?: boolean;
     css?: string;
     focusWhenAddingItem?: boolean;
-    itemDefaults?: Partial<ProgressItemOptions>;
+    itemDefaults?: ProgressItemOptions;
     // @internal
     testingFixtures?: {
         bw?: typeof Electron.BrowserWindow;

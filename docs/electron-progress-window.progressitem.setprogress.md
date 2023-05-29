@@ -9,7 +9,7 @@ Set progress value and optionally update other options
 **Signature:**
 
 ```typescript
-setProgress(value: number, otherOptions?: Partial<ProgressItemOptions>): void;
+setProgress(value: number, otherOptions?: Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>): void;
 ```
 
 ## Parameters
@@ -17,7 +17,7 @@ setProgress(value: number, otherOptions?: Partial<ProgressItemOptions>): void;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  value | number | progress value |
-|  otherOptions | Partial&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt; | _(Optional)_ other options to update |
+|  otherOptions | Partial&lt;Pick&lt;[ProgressItem](./electron-progress-window.progressitem.md)<!-- -->, "detail" \| "value" \| "title" \| "indeterminate" \| "maxValue" \| "enableCancel" \| "enablePause" \| "autoComplete" \| "removeOnComplete"&gt;&gt; | _(Optional)_ other options to update |
 
 **Returns:**
 
