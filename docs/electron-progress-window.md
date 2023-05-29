@@ -17,6 +17,13 @@
 |  --- | --- |
 |  [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | Options for creating/configuring a ProgressWindow |
 
+## Variables
+
+|  Variable | Description |
+|  --- | --- |
+|  [htmlPath](./electron-progress-window.htmlpath.md) | If you're having issues with Webpack, import/require this... |
+|  [preloadPath](./electron-progress-window.preloadpath.md) | If you're having issues with Webpack, import/require this... |
+
 ## Type Aliases
 
 |  Type Alias | Description |

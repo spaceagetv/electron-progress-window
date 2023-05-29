@@ -4,12 +4,12 @@
 
 ## ProgressItem.setProgress() method
 
-Set progress value and optionally update other options
+Set progress value and optionally update other properties
 
 **Signature:**
 
 ```typescript
-setProgress(value: number, otherOptions?: Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>): void;
+setProgress(value: number, otherOptions?: Omit<Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>, "value">): void;
 ```
 
 ## Parameters
@@ -17,7 +17,7 @@ setProgress(value: number, otherOptions?: Partial<Pick<ProgressItem, "detail" | 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  value | number | progress value |
-|  otherOptions | Partial&lt;Pick&lt;[ProgressItem](./electron-progress-window.progressitem.md)<!-- -->, "detail" \| "value" \| "title" \| "indeterminate" \| "maxValue" \| "enableCancel" \| "enablePause" \| "autoComplete" \| "removeOnComplete"&gt;&gt; | _(Optional)_ other options to update |
+|  otherOptions | Omit&lt;Partial&lt;Pick&lt;[ProgressItem](./electron-progress-window.progressitem.md)<!-- -->, "detail" \| "value" \| "title" \| "indeterminate" \| "maxValue" \| "enableCancel" \| "enablePause" \| "autoComplete" \| "removeOnComplete"&gt;&gt;, "value"&gt; | _(Optional)_ other options to update |
 
 **Returns:**
 

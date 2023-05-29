@@ -12,6 +12,12 @@ import TypedEmitter from 'typed-emitter';
 // @internal (undocumented)
 export const EventEmitterAsTypedEmitterProgressWindowInstanceEvents: TypedEmitterProgressWindowInstanceEvents;
 
+// @public
+export const htmlPath: string;
+
+// @public
+export const preloadPath: string;
+
 // Warning: (ae-incompatible-release-tags) The symbol "ProgressItem" is marked as @public, but its signature references "ProgressItemEventsEmitter" which is marked as @internal
 //
 // @public
@@ -37,13 +43,14 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     removeOnComplete: boolean;
     resume(): void;
     setCompleted(): void;
-    setProgress(value: number, otherOptions?: Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>): void;
+    setProgress(value: number, otherOptions?: Omit<Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>, "value">): void;
     title: string;
     togglePause(): void;
     // @internal
     transferable(): ProgressItemTransferable;
     get value(): number;
     set value(value: number);
+    // @internal
     _value: number;
 }
 

@@ -23,7 +23,6 @@ export declare class ProgressItem extends ProgressItemEventsEmitter
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [\_value](./electron-progress-window.progressitem._value.md) |  | number | Current (or initial) value |
 |  [autoComplete](./electron-progress-window.progressitem.autocomplete.md) |  | boolean | Automatically complete if value greater than or equals to maxValue. Default: true |
 |  [cancelled](./electron-progress-window.progressitem.cancelled.md) |  | boolean | Has this progress item been cancelled? |
 |  [defaults](./electron-progress-window.progressitem.defaults.md) | <code>readonly</code> | Required&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt; | Default options for a progress bar item. |
@@ -51,6 +50,6 @@ export declare class ProgressItem extends ProgressItemEventsEmitter
 |  [remove()](./electron-progress-window.progressitem.remove.md) |  | Remove the ProgressItem from the ProgressWindow |
 |  [resume()](./electron-progress-window.progressitem.resume.md) |  | Resume if paused |
 |  [setCompleted()](./electron-progress-window.progressitem.setcompleted.md) |  | Set the progress item to completed. Automatically sets value to maxValue. If removeOnComplete is true, the item will be removed. |
-|  [setProgress(value, otherOptions)](./electron-progress-window.progressitem.setprogress.md) |  | Set progress value and optionally update other options |
+|  [setProgress(value, otherOptions)](./electron-progress-window.progressitem.setprogress.md) |  | Set progress value and optionally update other properties |
 |  [togglePause()](./electron-progress-window.progressitem.togglepause.md) |  | Toggle pause state |
 
