@@ -1,3 +1,10 @@
+## [1.0.10](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.9...v1.0.10) (2023-05-29)
+
+
+### Bug Fixes
+
+* npm publish? ([90fee62](https://github.com/spaceagetv/electron-progress-window/commit/90fee6254ef8c0f89bd465c4d8297c88cc342e2c))
+
 ## [1.0.9](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.8...v1.0.9) (2023-05-29)
 
 
