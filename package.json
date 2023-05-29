@@ -1,6 +1,6 @@
 {
   "name": "@spaceagetv/electron-progress-window",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Display single or multiple progress bars in an Electron app",
   "repository": {
     "type": "git",

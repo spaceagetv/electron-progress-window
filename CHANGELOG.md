@@ -1,3 +1,10 @@
+## [1.0.12](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.11...v1.0.12) (2023-05-29)
+
+
+### Bug Fixes
+
+* maybe fix issues using module in webpack build ([3d078cc](https://github.com/spaceagetv/electron-progress-window/commit/3d078cc96695c853cf0bb4a8ffc99c3440a39da9))
+
 ## [1.0.11](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.10...v1.0.11) (2023-05-29)
 
 
