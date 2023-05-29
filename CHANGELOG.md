@@ -1,3 +1,10 @@
+## [1.0.8](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.7...v1.0.8) (2023-05-29)
+
+
+### Bug Fixes
+
+* .npmrc to build for GitHub packages ([8dd3ae0](https://github.com/spaceagetv/electron-progress-window/commit/8dd3ae03ebf9bf2bb57410cf73a56d0b80af4748))
+
 ## [1.0.7](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.6...v1.0.7) (2023-05-26)
 
 ## [1.0.6](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.5...v1.0.6) (2023-05-26)
