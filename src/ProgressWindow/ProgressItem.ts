@@ -19,17 +19,19 @@ import TypedEmitter from 'typed-emitter'
  * @see ProgressItem
  * @public
  */
-export type ProgressItemOptions = Pick<
-  ProgressItem,
-  | 'title'
-  | 'detail'
-  | 'indeterminate'
-  | 'value'
-  | 'maxValue'
-  | 'enableCancel'
-  | 'enablePause'
-  | 'autoComplete'
-  | 'removeOnComplete'
+export type ProgressItemOptions = Partial<
+  Pick<
+    ProgressItem,
+    | 'title'
+    | 'detail'
+    | 'indeterminate'
+    | 'value'
+    | 'maxValue'
+    | 'enableCancel'
+    | 'enablePause'
+    | 'autoComplete'
+    | 'removeOnComplete'
+  >
 >
 
 /**
@@ -84,7 +86,7 @@ export const ProgressItemEventsEmitter =
  */
 export class ProgressItem extends ProgressItemEventsEmitter {
   /** Default options for a progress bar item. @readonly @public */
-  readonly defaults: ProgressItemOptions = {
+  readonly defaults: Required<ProgressItemOptions> = {
     title: '',
     detail: '',
     indeterminate: false,
@@ -138,7 +140,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   /** Has the item been removed? */
   removed = false
 
-  constructor(options = {} as Partial<ProgressItemOptions>) {
+  constructor(options = {} as ProgressItemOptions) {
     super()
     this._value = options.value || this.defaults.value
     const o = { ...options }
@@ -161,10 +163,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
    * @param otherOptions - other options to update
    * @returns void
    */
-  setProgress(
-    value: number,
-    otherOptions = {} as Partial<ProgressItemOptions>
-  ) {
+  setProgress(value: number, otherOptions = {} as ProgressItemOptions) {
     // istanbul ignore if
     if (this.removed) {
       return
