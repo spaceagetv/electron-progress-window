@@ -21,5 +21,5 @@ export type ProgressItemEvents = {
 
 ## Remarks
 
-Events: - `update` - Item was updated. listener: `() => void` - `complete` - Item was completed. listener: `() => void` - `remove` - Item was removed. listener: `() => void` - `will-cancel` - Item will cancel. Call event.preventDefault() to stop it. listener: `(event: Event) => void` - `cancelled` - Item was cancelled. listener: `() => void` - `pause` - Item was paused. listener: `(isPaused: boolean) => void`
+Events:<br/> - `update` - Item was updated. listener: `() => void`<br/> - `complete` - Item was completed. listener: `() => void`<br/> - `remove` - Item was removed. listener: `() => void`<br/> - `will-cancel` - Item will cancel. Call event.preventDefault() to stop it. listener: `(event: Event) => void`<br/> - `cancelled` - Item was cancelled. listener: `() => void`<br/> - `pause` - Item was paused. listener: `(isPaused: boolean) => void`<br/>
 

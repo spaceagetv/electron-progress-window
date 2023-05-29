@@ -18,5 +18,5 @@ export type ProgressWindowStaticEvents = {
 
 ## Remarks
 
-Events: - `created` - New ProgressWindows has been created. listener: `(progressWindow: ProgressWindow) => void` - `destroyed` - ProgressWindow has been destroyed. listener: `(progressWindow: ProgressWindow) => void`
+Events:<br/> - `created` - New ProgressWindows has been created. listener: `(progressWindow: ProgressWindow) => void`<br/> - `destroyed` - ProgressWindow has been destroyed. listener: `(progressWindow: ProgressWindow) => void`<br/>
 

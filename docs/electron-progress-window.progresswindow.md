@@ -55,7 +55,7 @@ setTimeout(() => {
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [emitter](./electron-progress-window.progresswindow.emitter.md) | <p><code>static</code></p><p><code>readonly</code></p> | TypedEmitter&lt;[ProgressWindowStaticEvents](./electron-progress-window.progresswindowstaticevents.md)<!-- -->&gt; | Static event emitter for ProgressWindow events |
+|  [emitter](./electron-progress-window.progresswindow.emitter.md) | <p><code>static</code></p><p><code>readonly</code></p> | TypedEmitter&lt;[ProgressWindowStaticEvents](./electron-progress-window.progresswindowstaticevents.md)<!-- -->&gt; | Static event emitter for ProgressWindow events. |
 
 ## Constructors
 
