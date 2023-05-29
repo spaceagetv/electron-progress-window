@@ -92,8 +92,8 @@ ipcMain.on(
 
 /**
  * Run a timer for the given time and call the callback with the progress value
- * @param time time in milliseconds
- * @param progressCallback callback to be called with progress value
+ * @param time - time in milliseconds
+ * @param progressCallback - callback to be called with progress value
  * @returns handle with pause, resume, and cancel methods
  */
 function runTimer(
