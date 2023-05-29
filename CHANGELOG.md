@@ -1,3 +1,10 @@
+## [1.0.11](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.10...v1.0.11) (2023-05-29)
+
+
+### Bug Fixes
+
+* types for ProgressItemOptions ([9d2dc48](https://github.com/spaceagetv/electron-progress-window/commit/9d2dc48019fa69bae4fba6ecc9b34bbf182318a3))
+
 ## [1.0.10](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.9...v1.0.10) (2023-05-29)
 
 
