@@ -1,12 +1,16 @@
 import { BrowserWindow, screen } from 'electron'
 import { EventEmitter } from 'events'
 import fs from 'fs'
-import path from 'path'
 import { merge } from 'lodash'
 import TypedEmitter from 'typed-emitter'
 
 // import { logger } from '../logger'
 import { ProgressItemOptions, ProgressItem } from './ProgressItem'
+
+/** If you're having issues with Webpack, import/require this... */
+export const htmlPath = require.resolve('../index.html')
+/** If you're having issues with Webpack, import/require this... */
+export const preloadPath = require.resolve('./preload')
 
 // create a dummy instance for logger
 
@@ -353,7 +357,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     const overrides = {
       windowOptions: {
         webPreferences: {
-          preload: require.resolve('./preload'),
+          preload: preloadPath,
         },
       },
     } as ProgressWindowOptions
@@ -381,10 +385,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
         resolve(this)
       })
     })
-    const htmlContent = fs.readFileSync(
-      path.join(__dirname, '../index.html'),
-      'utf8'
-    )
+    const htmlContent = fs.readFileSync(htmlPath, 'utf8')
     const htmlWithCss = this.options.css
       ? htmlContent.replace(
           '/** additional styles insert point */',

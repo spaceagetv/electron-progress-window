@@ -110,7 +110,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   /** Is the item indeterminate? */
   indeterminate: boolean
 
-  /** Current (or initial) value */
+  /** Current (or initial) value - @internal */
   _value: number
 
   /** Maximum value */
@@ -158,12 +158,15 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   }
 
   /**
-   * Set progress value and optionally update other options
+   * Set progress value and optionally update other properties
    * @param value - progress value
    * @param otherOptions - other options to update
    * @returns void
    */
-  setProgress(value: number, otherOptions = {} as ProgressItemOptions) {
+  setProgress(
+    value: number,
+    otherOptions = {} as Omit<ProgressItemOptions, 'value'>
+  ) {
     // istanbul ignore if
     if (this.removed) {
       return
