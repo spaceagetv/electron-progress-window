@@ -1,3 +1,10 @@
+## [1.0.9](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.8...v1.0.9) (2023-05-29)
+
+
+### Bug Fixes
+
+* remove package.private to publish to GitHub (privately) ([5cef60a](https://github.com/spaceagetv/electron-progress-window/commit/5cef60a11470f309358ff4eecc467340ee78d8a8))
+
 ## [1.0.8](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.7...v1.0.8) (2023-05-29)
 
 
