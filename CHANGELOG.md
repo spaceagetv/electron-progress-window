@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.12...v1.1.0) (2023-05-31)
+
+
+### Features
+
+* webpack compatibility ([8380f92](https://github.com/spaceagetv/electron-progress-window/commit/8380f923ed5ec5f21287dc2a43c4122161030da1))
+
 ## [1.0.12](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.11...v1.0.12) (2023-05-29)
 
 
