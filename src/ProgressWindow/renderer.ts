@@ -1,21 +1,12 @@
-import { ipcRenderer } from 'electron'
+// use require so that it works in the HTML with node enabled
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { ipcRenderer } = require('electron')
 import type { ProgressItemTransferable } from './ProgressItem'
 // import { logger } from '../logger'
 
 // logger.setLevel(LogLevel.DEBUG)
 
 const progressItems: ProgressWidget[] = []
-
-// const logger = {
-//   log: console.log,
-//   error: console.error,
-//   warn: console.warn,
-//   info: console.info,
-//   debug: console.debug,
-//   silly: console.debug,
-// }
-
-// logger.log('preload script 👍')
 
 document.addEventListener('DOMContentLoaded', () => {
   // logger.log('DOMContentLoaded 👍')
