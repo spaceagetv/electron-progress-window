@@ -1,3 +1,12 @@
+## [1.1.1](https://github.com/spaceagetv/electron-progress-window/compare/v1.1.0...v1.1.1) (2023-05-31)
+
+
+### Bug Fixes
+
+* don’t removeComments, so we still get intelliSense ([2039000](https://github.com/spaceagetv/electron-progress-window/commit/2039000e4a66b790562971f83a8374eca3f2096a))
+* prevent navigation in ProgressWindow ([f219961](https://github.com/spaceagetv/electron-progress-window/commit/f21996126a8ab440f7191c5cd8235088dc46ba15))
+* updateContentSize() on every update ([c684a85](https://github.com/spaceagetv/electron-progress-window/commit/c684a856997f47d2f84b7d65b8e7deb2794c9a5c))
+
 # [1.1.0](https://github.com/spaceagetv/electron-progress-window/compare/v1.0.12...v1.1.0) (2023-05-31)
 
 
