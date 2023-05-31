@@ -8,9 +8,7 @@ import TypedEmitter from 'typed-emitter'
 import { ProgressItemOptions, ProgressItem } from './ProgressItem'
 
 /** If you're having issues with Webpack, import/require this... */
-export const htmlPath = require.resolve('../index.html')
-/** If you're having issues with Webpack, import/require this... */
-export const preloadPath = require.resolve('./preload')
+export const htmlPath = require.resolve('./index.html')
 
 // create a dummy instance for logger
 
@@ -357,7 +355,8 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     const overrides = {
       windowOptions: {
         webPreferences: {
-          preload: preloadPath,
+          nodeIntegration: true,
+          contextIsolation: false,
         },
       },
     } as ProgressWindowOptions

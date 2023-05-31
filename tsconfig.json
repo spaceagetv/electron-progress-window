@@ -10,6 +10,7 @@
     "baseUrl": ".",
     "declaration": true,
     "declarationMap": true,
+    "removeComments": true,
     "paths": {
       "*": [
         "node_modules/*",

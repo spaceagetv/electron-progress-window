@@ -1,0 +1,19 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+  margin: auto;
+  max-width: 38rem;
+  padding: 2rem;
+}
+
+#text-inputs > div {
+  display: flex;
+  flex-direction: column;
+  margin: .5rem 0;
+}
+
+#seconds-input {
+  width: 4rem;
+}
+
+
