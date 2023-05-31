@@ -4,8 +4,6 @@
 
 ## ProgressWindow.addItem() method
 
-Add a new item to the default ProgressWindow instance. If the window is not yet created, it will be created.
-
 **Signature:**
 
 ```typescript
@@ -16,11 +14,9 @@ static addItem(options?: ProgressItem | Partial<Pick<ProgressItem, "detail" | "v
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | [ProgressItem](./electron-progress-window.progressitem.md) \| Partial&lt;Pick&lt;[ProgressItem](./electron-progress-window.progressitem.md)<!-- -->, "detail" \| "value" \| "title" \| "indeterminate" \| "maxValue" \| "enableCancel" \| "enablePause" \| "autoComplete" \| "removeOnComplete"&gt;&gt; | _(Optional)_ options for the new item |
+|  options | [ProgressItem](./electron-progress-window.progressitem.md) \| Partial&lt;Pick&lt;[ProgressItem](./electron-progress-window.progressitem.md)<!-- -->, "detail" \| "value" \| "title" \| "indeterminate" \| "maxValue" \| "enableCancel" \| "enablePause" \| "autoComplete" \| "removeOnComplete"&gt;&gt; | _(Optional)_ |
 
 **Returns:**
 
 Promise&lt;[ProgressItem](./electron-progress-window.progressitem.md)<!-- -->&gt;
-
-a promise that resolves to the new ProgressItem. Use the returned item to update the progress, or change the title or detail.
 

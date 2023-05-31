@@ -4,8 +4,6 @@
 
 ## ProgressWindow.instance property
 
-Get/create the default ProgressWindow instance.
-
 **Signature:**
 
 ```typescript

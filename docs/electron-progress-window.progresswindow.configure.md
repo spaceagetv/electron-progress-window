@@ -4,8 +4,6 @@
 
 ## ProgressWindow.configure() method
 
-Configure new ProgressWindow instances with these options.
-
 **Signature:**
 
 ```typescript
@@ -21,28 +19,4 @@ static configure(options: ProgressWindowOptions): void;
 **Returns:**
 
 void
-
-## Example
-
-
-```ts
-ProgressWindow.configure({
- variableHeight: true,
- variableWidth: false,
- closeOnComplete: true,
- itemDefaults: {
-   closeOnComplete: false,
- },
- windowOptions: { // these are Electron BrowserWindow options
-   width: 300,
-   height: 60, // variableHeight means this will expand as items are added
-   backgroundColor: '#0f0',
- },
- css: `
-  .progress-item {
-    background-color: #f0f;
-  }
- `,
-})
-```
 

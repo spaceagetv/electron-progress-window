@@ -8,28 +8,32 @@
 
 |  Class | Description |
 |  --- | --- |
-|  [ProgressItem](./electron-progress-window.progressitem.md) | A progress bar item within a ProgressWindow. There shouldn't be much need to call this directly. Instead use ProgressWindow.addItem() or progressWindowInstance.addItem() |
-|  [ProgressWindow](./electron-progress-window.progresswindow.md) | <p>An Electron Window that displays progress items. This class has a singleton instance that is created on demand, and gets destroyed when the window is closed and/or all of its ProgressItems have completed.</p><p>It has static methods for configuring the window and adding items to the default instance.</p><p>However, you can create multiple instances, if you want to create multiple windows, or if you want to have multiple windows with different configurations.</p> |
+|  [ProgressItem](./electron-progress-window.progressitem.md) |  |
+|  [ProgressWindow](./electron-progress-window.progresswindow.md) |  |
 
 ## Interfaces
 
 |  Interface | Description |
 |  --- | --- |
-|  [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | Options for creating/configuring a ProgressWindow |
+|  [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) |  |
 
 ## Variables
 
 |  Variable | Description |
 |  --- | --- |
-|  [htmlPath](./electron-progress-window.htmlpath.md) | If you're having issues with Webpack, import/require this... |
-|  [preloadPath](./electron-progress-window.preloadpath.md) | If you're having issues with Webpack, import/require this... |
+|  [EventEmitterAsTypedEmitterProgressWindowInstanceEvents](./electron-progress-window.eventemitterastypedemitterprogresswindowinstanceevents.md) |  |
+|  [htmlPath](./electron-progress-window.htmlpath.md) |  |
+|  [ProgressItemEventsEmitter](./electron-progress-window.progressitemeventsemitter.md) |  |
 
 ## Type Aliases
 
 |  Type Alias | Description |
 |  --- | --- |
-|  [ProgressItemEvents](./electron-progress-window.progressitemevents.md) | Events emitted by a ProgressItem instance |
-|  [ProgressItemOptions](./electron-progress-window.progressitemoptions.md) | Options for creating a new progress item |
-|  [ProgressWindowInstanceEvents](./electron-progress-window.progresswindowinstanceevents.md) | Events emitted by ProgressWindow instances |
-|  [ProgressWindowStaticEvents](./electron-progress-window.progresswindowstaticevents.md) | Events emitted by ProgressWindow.emitter |
+|  [ProgressItemEvents](./electron-progress-window.progressitemevents.md) |  |
+|  [ProgressItemOptions](./electron-progress-window.progressitemoptions.md) |  |
+|  [ProgressItemTransferable](./electron-progress-window.progressitemtransferable.md) |  |
+|  [ProgressWindowInstanceEvents](./electron-progress-window.progresswindowinstanceevents.md) |  |
+|  [ProgressWindowStaticEvents](./electron-progress-window.progresswindowstaticevents.md) |  |
+|  [TypedEmitterProgressItemEvents](./electron-progress-window.typedemitterprogressitemevents.md) |  |
+|  [TypedEmitterProgressWindowInstanceEvents](./electron-progress-window.typedemitterprogresswindowinstanceevents.md) |  |
 

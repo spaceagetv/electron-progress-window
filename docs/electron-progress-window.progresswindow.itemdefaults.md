@@ -4,8 +4,6 @@
 
 ## ProgressWindow.itemDefaults property
 
-Default values for new ProgressItems added to this ProgressWindow instance.
-
 **Signature:**
 
 ```typescript

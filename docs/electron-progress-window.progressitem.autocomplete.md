@@ -4,8 +4,6 @@
 
 ## ProgressItem.autoComplete property
 
-Automatically complete if value greater than or equals to maxValue. Default: true
-
 **Signature:**
 
 ```typescript

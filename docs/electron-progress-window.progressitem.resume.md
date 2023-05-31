@@ -4,8 +4,6 @@
 
 ## ProgressItem.resume() method
 
-Resume if paused
-
 **Signature:**
 
 ```typescript

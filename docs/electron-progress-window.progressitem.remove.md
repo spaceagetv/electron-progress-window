@@ -4,8 +4,6 @@
 
 ## ProgressItem.remove() method
 
-Remove the ProgressItem from the ProgressWindow
-
 **Signature:**
 
 ```typescript

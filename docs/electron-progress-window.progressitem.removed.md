@@ -4,8 +4,6 @@
 
 ## ProgressItem.removed property
 
-Has the item been removed?
-
 **Signature:**
 
 ```typescript

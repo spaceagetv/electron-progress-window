@@ -4,8 +4,6 @@
 
 ## ProgressItem.paused property
 
-Is this progress item paused?
-
 **Signature:**
 
 ```typescript

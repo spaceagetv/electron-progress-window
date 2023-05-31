@@ -4,8 +4,6 @@
 
 ## ProgressWindow.progressItems property
 
-The current ProgressItems in this ProgressWindow instance. This is is an object, keyed by the item id.
-
 **Signature:**
 
 ```typescript

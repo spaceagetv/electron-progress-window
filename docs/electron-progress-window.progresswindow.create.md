@@ -4,8 +4,6 @@
 
 ## ProgressWindow.create() method
 
-Asynchronously create the ProgressWindow instance
-
 **Signature:**
 
 ```typescript
@@ -14,6 +12,4 @@ static create(): Promise<ProgressWindow>;
 **Returns:**
 
 Promise&lt;[ProgressWindow](./electron-progress-window.progresswindow.md)<!-- -->&gt;
-
-a promise which resolves with the current ProgressWindow instance when it is ready.
 

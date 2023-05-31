@@ -4,8 +4,6 @@
 
 ## ProgressWindowOptions.itemDefaults property
 
-Default options for new ProgressItem
-
 **Signature:**
 
 ```typescript

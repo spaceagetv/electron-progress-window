@@ -4,16 +4,12 @@
 
 ## ProgressItem.setCompleted() method
 
-Set the progress item to completed. Automatically sets value to maxValue. If removeOnComplete is true, the item will be removed.
-
 **Signature:**
 
 ```typescript
 setCompleted(): void;
 ```
 **Returns:**
-
-void
 
 void
 

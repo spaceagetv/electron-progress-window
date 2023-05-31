@@ -4,8 +4,6 @@
 
 ## ProgressItem.title property
 
-Title of the progress bar item
-
 **Signature:**
 
 ```typescript

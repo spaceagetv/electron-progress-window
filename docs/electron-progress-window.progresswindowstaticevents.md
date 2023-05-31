@@ -4,8 +4,6 @@
 
 ## ProgressWindowStaticEvents type
 
-Events emitted by ProgressWindow.emitter
-
 **Signature:**
 
 ```typescript
@@ -15,8 +13,4 @@ export type ProgressWindowStaticEvents = {
 };
 ```
 **References:** [ProgressWindow](./electron-progress-window.progresswindow.md)
-
-## Remarks
-
-Events:<br/> - `created` - New ProgressWindows has been created. listener: `(progressWindow: ProgressWindow) => void`<br/> - `destroyed` - ProgressWindow has been destroyed. listener: `(progressWindow: ProgressWindow) => void`<br/>
 

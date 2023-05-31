@@ -4,15 +4,8 @@
 
 ## ProgressWindow.emitter property
 
-Static event emitter for ProgressWindow events.
-
 **Signature:**
 
 ```typescript
 static readonly emitter: TypedEmitter<ProgressWindowStaticEvents>;
 ```
-
-## Remarks
-
-Events:<br/> - `created` - New ProgressWindows has been created. listener: `(progressWindow: ProgressWindow) => void`<br/> - `destroyed` - ProgressWindow has been destroyed. listener: `(progressWindow: ProgressWindow) => void`<br/>
-

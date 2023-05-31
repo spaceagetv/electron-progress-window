@@ -4,8 +4,6 @@
 
 ## ProgressWindowInstanceEvents type
 
-Events emitted by ProgressWindow instances
-
 **Signature:**
 
 ```typescript
@@ -19,8 +17,4 @@ export type ProgressWindowInstanceEvents = {
 };
 ```
 **References:** [ProgressItem](./electron-progress-window.progressitem.md)
-
-## Remarks
-
-Events:<br/> - `ready` - New window has been created and is ready. listener: `() => void`<br/> - `itemAdded` - New item has been added. listener: `(item: ProgressItem) => void`<br/> - `itemUpdated` - Item has been updated. listener: `(item: ProgressItem) => void`<br/> - `itemRemoved` - Item has been removed. listener: `(itemId: string) => void`<br/> - `itemCancelled` - Item has been cancelled. listener: `(item: ProgressItem) => void`<br/> - `windowClosed` - BrowserWindow has closed. listener: `() => void`<br/>
 

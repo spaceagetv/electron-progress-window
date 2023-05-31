@@ -4,8 +4,6 @@
 
 ## ProgressItemEvents type
 
-Events emitted by a ProgressItem instance
-
 **Signature:**
 
 ```typescript
@@ -18,8 +16,3 @@ export type ProgressItemEvents = {
     pause: (isPaused: boolean) => void;
 };
 ```
-
-## Remarks
-
-Events:<br/> - `update` - Item was updated. listener: `() => void`<br/> - `complete` - Item was completed. listener: `() => void`<br/> - `remove` - Item was removed. listener: `() => void`<br/> - `will-cancel` - Item will cancel. Call event.preventDefault() to stop it. listener: `(event: Event) => void`<br/> - `cancelled` - Item was cancelled. listener: `() => void`<br/> - `pause` - Item was paused. listener: `(isPaused: boolean) => void`<br/>
-

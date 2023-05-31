@@ -7,54 +7,71 @@
 import { BrowserWindow } from 'electron';
 import TypedEmitter from 'typed-emitter';
 
-// Warning: (ae-internal-missing-underscore) The name "EventEmitterAsTypedEmitterProgressWindowInstanceEvents" should be prefixed with an underscore because the declaration is marked as @internal
-//
-// @internal (undocumented)
+// @public (undocumented)
 export const EventEmitterAsTypedEmitterProgressWindowInstanceEvents: TypedEmitterProgressWindowInstanceEvents;
 
-// @public
+// @public (undocumented)
 export const htmlPath: string;
 
-// @public
-export const preloadPath: string;
-
-// Warning: (ae-incompatible-release-tags) The symbol "ProgressItem" is marked as @public, but its signature references "ProgressItemEventsEmitter" which is marked as @internal
-//
-// @public
+// @public (undocumented)
 export class ProgressItem extends ProgressItemEventsEmitter {
     constructor(options?: Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>);
+    // (undocumented)
     autoComplete: boolean;
+    // (undocumented)
     cancel(): void;
+    // (undocumented)
     cancelled: boolean;
+    // (undocumented)
     readonly defaults: Required<ProgressItemOptions>;
+    // (undocumented)
     detail: string;
+    // (undocumented)
     enableCancel: boolean;
+    // (undocumented)
     enablePause: boolean;
+    // (undocumented)
     readonly id: string;
+    // (undocumented)
     indeterminate: boolean;
+    // (undocumented)
     isCompleted(): boolean;
+    // (undocumented)
     isIndeterminate(): boolean;
+    // (undocumented)
     isInProgress(): boolean;
+    // (undocumented)
     maxValue: number;
+    // (undocumented)
     pause(shouldPause?: boolean): void;
+    // (undocumented)
     paused: boolean;
+    // (undocumented)
     remove(): void;
+    // (undocumented)
     removed: boolean;
+    // (undocumented)
     removeOnComplete: boolean;
+    // (undocumented)
     resume(): void;
+    // (undocumented)
     setCompleted(): void;
+    // (undocumented)
     setProgress(value: number, otherOptions?: Omit<Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>, "value">): void;
+    // (undocumented)
     title: string;
+    // (undocumented)
     togglePause(): void;
-    // @internal
+    // (undocumented)
     transferable(): ProgressItemTransferable;
+    // (undocumented)
     get value(): number;
     set value(value: number);
-    // @internal
+    // (undocumented)
     _value: number;
 }
 
-// @public
+// @public (undocumented)
 export type ProgressItemEvents = {
     update: () => void;
     complete: () => void;
@@ -64,55 +81,67 @@ export type ProgressItemEvents = {
     pause: (isPaused: boolean) => void;
 };
 
-// Warning: (ae-internal-missing-underscore) The name "ProgressItemEventsEmitter" should be prefixed with an underscore because the declaration is marked as @internal
-//
-// @internal (undocumented)
+// @public (undocumented)
 export const ProgressItemEventsEmitter: TypedEmitterProgressItemEvents;
 
-// @public
+// @public (undocumented)
 export type ProgressItemOptions = Partial<Pick<ProgressItem, 'title' | 'detail' | 'indeterminate' | 'value' | 'maxValue' | 'enableCancel' | 'enablePause' | 'autoComplete' | 'removeOnComplete'>>;
 
-// Warning: (ae-internal-missing-underscore) The name "ProgressItemTransferable" should be prefixed with an underscore because the declaration is marked as @internal
-//
-// @internal
+// @public (undocumented)
 export type ProgressItemTransferable = ProgressItemOptions & Pick<ProgressItem, 'id' | 'paused'>;
 
-// Warning: (ae-incompatible-release-tags) The symbol "ProgressWindow" is marked as @public, but its signature references "EventEmitterAsTypedEmitterProgressWindowInstanceEvents" which is marked as @internal
-//
-// @public
+// @public (undocumented)
 export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInstanceEvents {
     constructor(options?: ProgressWindowOptions);
+    // (undocumented)
     static addItem(options?: ProgressItem | Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>): Promise<ProgressItem>;
+    // (undocumented)
     addItem(options?: ProgressItem | Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>): Promise<ProgressItem>;
+    // (undocumented)
     browserWindow: BrowserWindow | null;
+    // (undocumented)
     cancelAll(): void;
+    // (undocumented)
     static close(): void;
+    // (undocumented)
     close(): void;
+    // (undocumented)
     static configure(options: ProgressWindowOptions): void;
+    // (undocumented)
     static create(): Promise<ProgressWindow>;
+    // (undocumented)
     static readonly defaults: ProgressWindowOptions;
+    // (undocumented)
     readonly defaults: ProgressWindowOptions;
+    // (undocumented)
     static destroy(): void;
-    // @eventProperty
+    // (undocumented)
     static readonly emitter: TypedEmitter<ProgressWindowStaticEvents>;
+    // (undocumented)
     static get instance(): ProgressWindow;
-    // @internal (undocumented)
+    // (undocumented)
     static _instance: ProgressWindow | null;
+    // (undocumented)
     itemDefaults: ProgressItemOptions;
+    // (undocumented)
     options: ProgressWindowOptions;
-    // @internal (undocumented)
+    // (undocumented)
     static _options: ProgressWindowOptions;
+    // (undocumented)
     progressItems: {
         [id: string]: ProgressItem;
     };
+    // (undocumented)
     removeAll(): void;
+    // (undocumented)
     removeItem(id: string): Promise<void>;
-    // @internal
+    // (undocumented)
     _screenInstance: typeof Electron.screen;
+    // (undocumented)
     whenReady(): Promise<ProgressWindow>;
 }
 
-// @public
+// @public (undocumented)
 export type ProgressWindowInstanceEvents = {
     ready: () => void;
     itemAdded: (item: ProgressItem) => void;
@@ -122,38 +151,43 @@ export type ProgressWindowInstanceEvents = {
     windowClosed: () => void;
 };
 
-// @public
+// @public (undocumented)
 export interface ProgressWindowOptions {
+    // (undocumented)
     animateResize?: boolean;
+    // (undocumented)
     cancelOnClose?: boolean;
+    // (undocumented)
     closeOnComplete?: boolean;
+    // (undocumented)
     css?: string;
+    // (undocumented)
     focusWhenAddingItem?: boolean;
+    // (undocumented)
     itemDefaults?: ProgressItemOptions;
-    // @internal
+    // (undocumented)
     testingFixtures?: {
         bw?: typeof Electron.BrowserWindow;
         scr?: Electron.Screen;
     };
+    // (undocumented)
     variableHeight?: boolean;
+    // (undocumented)
     variableWidth?: boolean;
+    // (undocumented)
     windowOptions?: Partial<Electron.BrowserWindowConstructorOptions>;
 }
 
-// @public
+// @public (undocumented)
 export type ProgressWindowStaticEvents = {
     created: (progressWindow: ProgressWindow) => void;
     destroyed: (progressWindow: ProgressWindow) => void;
 };
 
-// Warning: (ae-internal-missing-underscore) The name "TypedEmitterProgressItemEvents" should be prefixed with an underscore because the declaration is marked as @internal
-//
-// @internal (undocumented)
+// @public (undocumented)
 export type TypedEmitterProgressItemEvents = new () => TypedEmitter<ProgressItemEvents>;
 
-// Warning: (ae-internal-missing-underscore) The name "TypedEmitterProgressWindowInstanceEvents" should be prefixed with an underscore because the declaration is marked as @internal
-//
-// @internal (undocumented)
+// @public (undocumented)
 export type TypedEmitterProgressWindowInstanceEvents = new () => TypedEmitter<ProgressWindowInstanceEvents>;
 
 // (No @packageDocumentation comment for this package)

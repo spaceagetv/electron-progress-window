@@ -4,8 +4,6 @@
 
 ## ProgressWindowOptions.variableHeight property
 
-Expand height of window as needed? Default: true. Scroll otherwise.
-
 **Signature:**
 
 ```typescript

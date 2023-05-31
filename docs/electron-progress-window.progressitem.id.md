@@ -4,8 +4,6 @@
 
 ## ProgressItem.id property
 
-Unique ID for the progress bar item - start with alpha for HTML id -
-
 **Signature:**
 
 ```typescript

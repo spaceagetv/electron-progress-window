@@ -4,8 +4,6 @@
 
 ## ProgressItem.enablePause property
 
-Is the item pauseable? Will show pause button. Default: false
-
 **Signature:**
 
 ```typescript

@@ -4,8 +4,6 @@
 
 ## ProgressItem.isInProgress() method
 
-Is this item in progress?
-
 **Signature:**
 
 ```typescript

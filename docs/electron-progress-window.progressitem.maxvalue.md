@@ -4,8 +4,6 @@
 
 ## ProgressItem.maxValue property
 
-Maximum value
-
 **Signature:**
 
 ```typescript

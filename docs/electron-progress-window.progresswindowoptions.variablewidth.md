@@ -4,8 +4,6 @@
 
 ## ProgressWindowOptions.variableWidth property
 
-Expand width of window as needed? Default: false
-
 **Signature:**
 
 ```typescript
