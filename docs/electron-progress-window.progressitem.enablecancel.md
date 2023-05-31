@@ -4,6 +4,8 @@
 
 ## ProgressItem.enableCancel property
 
+Is the item cancellable? Will show cancel button. Default: true
+
 **Signature:**
 
 ```typescript

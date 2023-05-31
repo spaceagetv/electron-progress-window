@@ -4,6 +4,8 @@
 
 ## ProgressWindow.browserWindow property
 
+The Electron BrowserWindow instance.
+
 **Signature:**
 
 ```typescript

@@ -4,6 +4,8 @@
 
 ## ProgressWindow.destroy() method
 
+Destroy the ProgressWindow instance.
+
 **Signature:**
 
 ```typescript

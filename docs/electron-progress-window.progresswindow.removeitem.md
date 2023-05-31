@@ -4,6 +4,8 @@
 
 ## ProgressWindow.removeItem() method
 
+Remove an item from the window
+
 **Signature:**
 
 ```typescript
@@ -14,9 +16,11 @@ removeItem(id: string): Promise<void>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  id | string |  |
+|  id | string | the id of the item to remove |
 
 **Returns:**
 
 Promise&lt;void&gt;
+
+- resolves when the item has been removed
 

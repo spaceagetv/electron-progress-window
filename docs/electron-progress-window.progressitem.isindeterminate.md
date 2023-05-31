@@ -4,6 +4,8 @@
 
 ## ProgressItem.isIndeterminate() method
 
+Is this item indeterminate?
+
 **Signature:**
 
 ```typescript

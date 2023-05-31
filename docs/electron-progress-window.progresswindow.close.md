@@ -4,6 +4,8 @@
 
 ## ProgressWindow.close() method
 
+Close the default ProgressWindow instance (if open).
+
 **Signature:**
 
 ```typescript

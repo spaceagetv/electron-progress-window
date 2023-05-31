@@ -4,6 +4,8 @@
 
 ## ProgressWindow.removeAll() method
 
+Remove all items (without cancelling them)
+
 **Signature:**
 
 ```typescript

@@ -4,6 +4,12 @@
 
 ## ProgressWindow class
 
+An Electron Window that displays progress items. This class has a singleton instance that is created on demand, and gets destroyed when the window is closed and/or all of its ProgressItems have completed.
+
+It has static methods for configuring the window and adding items to the default instance.
+
+However, you can create multiple instances, if you want to create multiple windows, or if you want to have multiple windows with different configurations.
+
 **Signature:**
 
 ```typescript
@@ -11,41 +17,77 @@ export declare class ProgressWindow extends EventEmitterAsTypedEmitterProgressWi
 ```
 **Extends:** EventEmitterAsTypedEmitterProgressWindowInstanceEvents
 
+## Example
+
+
+```ts
+// configure the default instance
+ProgressWindow.configure({
+ variableHeight: true,
+ variableWidth: false,
+ closeOnComplete: true,
+ focusWhenAddingItem: true,
+ windowOptions: { // these are Electron BrowserWindow options
+  width: 300,
+  height: 60,
+  backgroundColor: '#f00',
+ },
+})
+
+const item1 = await ProgressWindow.addItem({
+  title: 'My Progress Item',
+  detail: '0% complete',
+  maxValue: 100,
+})
+
+setTimeout(() => {
+ item1.setProgress(50, { detail: '50% complete' })
+}, 200)
+setTimeout(() => {
+ item1.setProgress(100, { detail: '100% complete' })
+}, 400)
+
+// once the item is complete, it will be removed from the window
+// once the last item is complete, the window will close
+```
+
+## Events
+
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [emitter](./electron-progress-window.progresswindow.emitter.md) | <p><code>static</code></p><p><code>readonly</code></p> | TypedEmitter&lt;[ProgressWindowStaticEvents](./electron-progress-window.progresswindowstaticevents.md)<!-- -->&gt; | Static event emitter for ProgressWindow events. |
+
 ## Constructors
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(options)](./electron-progress-window.progresswindow._constructor_.md) |  | Constructs a new instance of the <code>ProgressWindow</code> class |
+|  [(constructor)(options)](./electron-progress-window.progresswindow._constructor_.md) |  | <p>If you want to work with a single window, you won't need to call this directly. Call ProgressWindow.addItem() and things will "just work".</p><p>However, if you want to create multiple windows, you can use this constructor to create a new ProgressWindow instance.</p> |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [\_instance](./electron-progress-window.progresswindow._instance.md) | <code>static</code> | [ProgressWindow](./electron-progress-window.progresswindow.md) \| null |  |
-|  [\_options](./electron-progress-window.progresswindow._options.md) | <code>static</code> | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) |  |
-|  [\_screenInstance](./electron-progress-window.progresswindow._screeninstance.md) |  | typeof Electron.screen |  |
-|  [browserWindow](./electron-progress-window.progresswindow.browserwindow.md) |  | BrowserWindow \| null |  |
-|  [defaults](./electron-progress-window.progresswindow.defaults.md) | <code>readonly</code> | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) |  |
-|  [defaults](./electron-progress-window.progresswindow.defaults.md) | <p><code>static</code></p><p><code>readonly</code></p> | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) |  |
-|  [emitter](./electron-progress-window.progresswindow.emitter.md) | <p><code>static</code></p><p><code>readonly</code></p> | TypedEmitter&lt;[ProgressWindowStaticEvents](./electron-progress-window.progresswindowstaticevents.md)<!-- -->&gt; |  |
-|  [instance](./electron-progress-window.progresswindow.instance.md) | <p><code>static</code></p><p><code>readonly</code></p> | [ProgressWindow](./electron-progress-window.progresswindow.md) |  |
-|  [itemDefaults](./electron-progress-window.progresswindow.itemdefaults.md) |  | [ProgressItemOptions](./electron-progress-window.progressitemoptions.md) |  |
-|  [options](./electron-progress-window.progresswindow.options.md) |  | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) |  |
-|  [progressItems](./electron-progress-window.progresswindow.progressitems.md) |  | { \[id: string\]: [ProgressItem](./electron-progress-window.progressitem.md)<!-- -->; } |  |
+|  [browserWindow](./electron-progress-window.progresswindow.browserwindow.md) |  | BrowserWindow \| null | The Electron BrowserWindow instance. |
+|  [defaults](./electron-progress-window.progresswindow.defaults.md) | <code>readonly</code> | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | defaults for the current instance |
+|  [defaults](./electron-progress-window.progresswindow.defaults.md) | <p><code>static</code></p><p><code>readonly</code></p> | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | Readonly convenience to see default options for new ProgressWindows. Override these with ProgressWindow.configure(). |
+|  [instance](./electron-progress-window.progresswindow.instance.md) | <p><code>static</code></p><p><code>readonly</code></p> | [ProgressWindow](./electron-progress-window.progresswindow.md) | Get/create the default ProgressWindow instance. |
+|  [itemDefaults](./electron-progress-window.progresswindow.itemdefaults.md) |  | [ProgressItemOptions](./electron-progress-window.progressitemoptions.md) | Default values for new ProgressItems added to this ProgressWindow instance. |
+|  [options](./electron-progress-window.progresswindow.options.md) |  | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | The options used to create this ProgressWindow instance. |
+|  [progressItems](./electron-progress-window.progresswindow.progressitems.md) |  | { \[id: string\]: [ProgressItem](./electron-progress-window.progressitem.md)<!-- -->; } | The current ProgressItems in this ProgressWindow instance. This is is an object, keyed by the item id. |
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [addItem(options)](./electron-progress-window.progresswindow.additem.md) |  |  |
-|  [addItem(options)](./electron-progress-window.progresswindow.additem.md) | <code>static</code> |  |
-|  [cancelAll()](./electron-progress-window.progresswindow.cancelall.md) |  |  |
-|  [close()](./electron-progress-window.progresswindow.close.md) |  |  |
-|  [close()](./electron-progress-window.progresswindow.close.md) | <code>static</code> |  |
-|  [configure(options)](./electron-progress-window.progresswindow.configure.md) | <code>static</code> |  |
-|  [create()](./electron-progress-window.progresswindow.create.md) | <code>static</code> |  |
-|  [destroy()](./electron-progress-window.progresswindow.destroy.md) | <code>static</code> |  |
-|  [removeAll()](./electron-progress-window.progresswindow.removeall.md) |  |  |
-|  [removeItem(id)](./electron-progress-window.progresswindow.removeitem.md) |  |  |
-|  [whenReady()](./electron-progress-window.progresswindow.whenready.md) |  |  |
+|  [addItem(options)](./electron-progress-window.progresswindow.additem.md) |  | Add a new progress bar to the window |
+|  [addItem(options)](./electron-progress-window.progresswindow.additem.md) | <code>static</code> | Add a new item to the default ProgressWindow instance. If the window is not yet created, it will be created. |
+|  [cancelAll()](./electron-progress-window.progresswindow.cancelall.md) |  | Cancel all items + trigger the 'cancelled' event on each item. Items will be removed after they are cancelled. |
+|  [close()](./electron-progress-window.progresswindow.close.md) |  | Close the window |
+|  [close()](./electron-progress-window.progresswindow.close.md) | <code>static</code> | Close the default ProgressWindow instance (if open). |
+|  [configure(options)](./electron-progress-window.progresswindow.configure.md) | <code>static</code> | Configure new ProgressWindow instances with these options. |
+|  [create()](./electron-progress-window.progresswindow.create.md) | <code>static</code> | Asynchronously create the ProgressWindow instance |
+|  [destroy()](./electron-progress-window.progresswindow.destroy.md) | <code>static</code> | Destroy the ProgressWindow instance. |
+|  [removeAll()](./electron-progress-window.progresswindow.removeall.md) |  | Remove all items (without cancelling them) |
+|  [removeItem(id)](./electron-progress-window.progresswindow.removeitem.md) |  | Remove an item from the window |
+|  [whenReady()](./electron-progress-window.progresswindow.whenready.md) |  | A promise that resolves when the window is ready to use. |
 

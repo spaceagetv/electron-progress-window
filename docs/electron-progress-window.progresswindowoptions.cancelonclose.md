@@ -4,6 +4,8 @@
 
 ## ProgressWindowOptions.cancelOnClose property
 
+Send 'cancelled' for all current items when closing the window. Default: false
+
 **Signature:**
 
 ```typescript

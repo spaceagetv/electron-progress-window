@@ -4,6 +4,8 @@
 
 ## ProgressItem.cancel() method
 
+Cancel the ProgressItem
+
 **Signature:**
 
 ```typescript

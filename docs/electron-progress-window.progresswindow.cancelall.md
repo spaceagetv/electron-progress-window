@@ -4,6 +4,8 @@
 
 ## ProgressWindow.cancelAll() method
 
+Cancel all items + trigger the 'cancelled' event on each item. Items will be removed after they are cancelled.
+
 **Signature:**
 
 ```typescript

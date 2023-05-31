@@ -4,7 +4,9 @@
 
 ## ProgressWindow.(constructor)
 
-Constructs a new instance of the `ProgressWindow` class
+If you want to work with a single window, you won't need to call this directly. Call ProgressWindow.addItem() and things will "just work".
+
+However, if you want to create multiple windows, you can use this constructor to create a new ProgressWindow instance.
 
 **Signature:**
 
@@ -16,5 +18,5 @@ constructor(options?: ProgressWindowOptions);
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | _(Optional)_ |
+|  options | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | _(Optional)_ options for this ProgressWindow instance |
 

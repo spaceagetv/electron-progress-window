@@ -4,6 +4,8 @@
 
 ## ProgressWindow.options property
 
+The options used to create this ProgressWindow instance.
+
 **Signature:**
 
 ```typescript

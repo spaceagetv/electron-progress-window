@@ -4,6 +4,8 @@
 
 ## ProgressItem.isCompleted() method
 
+Is this item completed?
+
 **Signature:**
 
 ```typescript

@@ -4,6 +4,8 @@
 
 ## ProgressItem.togglePause() method
 
+Toggle pause state
+
 **Signature:**
 
 ```typescript

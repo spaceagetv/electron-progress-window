@@ -4,6 +4,8 @@
 
 ## ProgressItem.value property
 
+Get/set the current progress value
+
 **Signature:**
 
 ```typescript

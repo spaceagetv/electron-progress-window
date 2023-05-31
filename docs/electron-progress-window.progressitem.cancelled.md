@@ -4,6 +4,8 @@
 
 ## ProgressItem.cancelled property
 
+Has this progress item been cancelled?
+
 **Signature:**
 
 ```typescript

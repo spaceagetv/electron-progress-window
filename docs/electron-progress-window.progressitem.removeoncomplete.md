@@ -4,6 +4,8 @@
 
 ## ProgressItem.removeOnComplete property
 
+Remove immediately when item is completed? Or wait for window behavior.
+
 **Signature:**
 
 ```typescript

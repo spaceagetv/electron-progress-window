@@ -4,6 +4,8 @@
 
 ## ProgressWindow.whenReady() method
 
+A promise that resolves when the window is ready to use.
+
 **Signature:**
 
 ```typescript
@@ -12,4 +14,6 @@ whenReady(): Promise<ProgressWindow>;
 **Returns:**
 
 Promise&lt;[ProgressWindow](./electron-progress-window.progresswindow.md)<!-- -->&gt;
+
+a promise which resolves to progressWindow instance when ready
 

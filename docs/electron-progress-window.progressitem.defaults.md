@@ -4,6 +4,8 @@
 
 ## ProgressItem.defaults property
 
+Default options for a progress bar item.
+
 **Signature:**
 
 ```typescript

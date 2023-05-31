@@ -4,6 +4,8 @@
 
 ## ProgressWindow.defaults property
 
+Readonly convenience to see default options for new ProgressWindows. Override these with ProgressWindow.configure().
+
 **Signature:**
 
 ```typescript

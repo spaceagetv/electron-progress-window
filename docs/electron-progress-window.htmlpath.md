@@ -4,6 +4,8 @@
 
 ## htmlPath variable
 
+If you're having issues with Webpack, import/require this...
+
 **Signature:**
 
 ```typescript

@@ -4,6 +4,8 @@
 
 ## ProgressWindowOptions.focusWhenAddingItem property
 
+Focus the window when adding a new item. Default: true
+
 **Signature:**
 
 ```typescript

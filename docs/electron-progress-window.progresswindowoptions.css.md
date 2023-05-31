@@ -4,6 +4,8 @@
 
 ## ProgressWindowOptions.css property
 
+Additional CSS for the window
+
 **Signature:**
 
 ```typescript

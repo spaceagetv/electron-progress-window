@@ -4,6 +4,8 @@
 
 ## ProgressWindowOptions.windowOptions property
 
+Options for the BrowserWindow instance
+
 **Signature:**
 
 ```typescript

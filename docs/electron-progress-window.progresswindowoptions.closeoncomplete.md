@@ -4,6 +4,8 @@
 
 ## ProgressWindowOptions.closeOnComplete property
 
+Close window automatically when all items complete. Default: true
+
 **Signature:**
 
 ```typescript

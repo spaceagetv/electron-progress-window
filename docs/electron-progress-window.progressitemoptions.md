@@ -4,6 +4,8 @@
 
 ## ProgressItemOptions type
 
+Options for creating a new progress item
+
 **Signature:**
 
 ```typescript

@@ -4,6 +4,8 @@
 
 ## ProgressItem.pause() method
 
+Pause/resume the ProgressItem
+
 **Signature:**
 
 ```typescript
@@ -14,7 +16,7 @@ pause(shouldPause?: boolean): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  shouldPause | boolean | _(Optional)_ |
+|  shouldPause | boolean | _(Optional)_ should the item be paused? Default: true |
 
 **Returns:**
 

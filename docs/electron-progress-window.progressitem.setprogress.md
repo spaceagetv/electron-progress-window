@@ -4,6 +4,8 @@
 
 ## ProgressItem.setProgress() method
 
+Set progress value and optionally update other properties
+
 **Signature:**
 
 ```typescript
@@ -14,10 +16,12 @@ setProgress(value: number, otherOptions?: Omit<Partial<Pick<ProgressItem, "detai
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  value | number |  |
-|  otherOptions | Omit&lt;Partial&lt;Pick&lt;[ProgressItem](./electron-progress-window.progressitem.md)<!-- -->, "detail" \| "value" \| "title" \| "indeterminate" \| "maxValue" \| "enableCancel" \| "enablePause" \| "autoComplete" \| "removeOnComplete"&gt;&gt;, "value"&gt; | _(Optional)_ |
+|  value | number | progress value |
+|  otherOptions | Omit&lt;Partial&lt;Pick&lt;[ProgressItem](./electron-progress-window.progressitem.md)<!-- -->, "detail" \| "value" \| "title" \| "indeterminate" \| "maxValue" \| "enableCancel" \| "enablePause" \| "autoComplete" \| "removeOnComplete"&gt;&gt;, "value"&gt; | _(Optional)_ other options to update |
 
 **Returns:**
+
+void
 
 void
 

@@ -4,6 +4,8 @@
 
 ## ProgressWindowOptions interface
 
+Options for creating/configuring a ProgressWindow
+
 **Signature:**
 
 ```typescript
@@ -14,14 +16,13 @@ export interface ProgressWindowOptions
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [animateResize?](./electron-progress-window.progresswindowoptions.animateresize.md) |  | boolean | _(Optional)_ |
-|  [cancelOnClose?](./electron-progress-window.progresswindowoptions.cancelonclose.md) |  | boolean | _(Optional)_ |
-|  [closeOnComplete?](./electron-progress-window.progresswindowoptions.closeoncomplete.md) |  | boolean | _(Optional)_ |
-|  [css?](./electron-progress-window.progresswindowoptions.css.md) |  | string | _(Optional)_ |
-|  [focusWhenAddingItem?](./electron-progress-window.progresswindowoptions.focuswhenaddingitem.md) |  | boolean | _(Optional)_ |
-|  [itemDefaults?](./electron-progress-window.progresswindowoptions.itemdefaults.md) |  | [ProgressItemOptions](./electron-progress-window.progressitemoptions.md) | _(Optional)_ |
-|  [testingFixtures?](./electron-progress-window.progresswindowoptions.testingfixtures.md) |  | { bw?: typeof Electron.BrowserWindow; scr?: Electron.Screen; } | _(Optional)_ |
-|  [variableHeight?](./electron-progress-window.progresswindowoptions.variableheight.md) |  | boolean | _(Optional)_ |
-|  [variableWidth?](./electron-progress-window.progresswindowoptions.variablewidth.md) |  | boolean | _(Optional)_ |
-|  [windowOptions?](./electron-progress-window.progresswindowoptions.windowoptions.md) |  | Partial&lt;Electron.BrowserWindowConstructorOptions&gt; | _(Optional)_ |
+|  [animateResize?](./electron-progress-window.progresswindowoptions.animateresize.md) |  | boolean | _(Optional)_ Animate when varying the height/width the BrowserWindow (on Mac) |
+|  [cancelOnClose?](./electron-progress-window.progresswindowoptions.cancelonclose.md) |  | boolean | _(Optional)_ Send 'cancelled' for all current items when closing the window. Default: false |
+|  [closeOnComplete?](./electron-progress-window.progresswindowoptions.closeoncomplete.md) |  | boolean | _(Optional)_ Close window automatically when all items complete. Default: true |
+|  [css?](./electron-progress-window.progresswindowoptions.css.md) |  | string | _(Optional)_ Additional CSS for the window |
+|  [focusWhenAddingItem?](./electron-progress-window.progresswindowoptions.focuswhenaddingitem.md) |  | boolean | _(Optional)_ Focus the window when adding a new item. Default: true |
+|  [itemDefaults?](./electron-progress-window.progresswindowoptions.itemdefaults.md) |  | [ProgressItemOptions](./electron-progress-window.progressitemoptions.md) | _(Optional)_ Default options for new ProgressItem |
+|  [variableHeight?](./electron-progress-window.progresswindowoptions.variableheight.md) |  | boolean | _(Optional)_ Expand height of window as needed? Default: true. Scroll otherwise. |
+|  [variableWidth?](./electron-progress-window.progresswindowoptions.variablewidth.md) |  | boolean | _(Optional)_ Expand width of window as needed? Default: false |
+|  [windowOptions?](./electron-progress-window.progresswindowoptions.windowoptions.md) |  | Partial&lt;Electron.BrowserWindowConstructorOptions&gt; | _(Optional)_ Options for the BrowserWindow instance |
 
