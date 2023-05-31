@@ -4,22 +4,10 @@ import fs from 'fs'
 import { merge } from 'lodash'
 import TypedEmitter from 'typed-emitter'
 
-// import { logger } from '../logger'
 import { ProgressItemOptions, ProgressItem } from './ProgressItem'
 
 /** If you're having issues with Webpack, import/require this... */
 export const htmlPath = require.resolve('./index.html')
-
-// create a dummy instance for logger
-
-// const logger = {
-//   log: console.log,
-//   error: console.error,
-//   warn: console.warn,
-//   info: console.info,
-//   debug: console.debug,
-//   silly: console.debug,
-// }
 
 /**
  * Options for creating/configuring a ProgressWindow
@@ -357,6 +345,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
         webPreferences: {
           nodeIntegration: true,
           contextIsolation: false,
+          navigateOnDragDrop: false,
         },
       },
     } as ProgressWindowOptions
@@ -377,6 +366,10 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     this._screenInstance = this.options.testingFixtures.scr
     this.itemDefaults = this.options.itemDefaults
     this.browserWindow = new bwFunction(this.options.windowOptions)
+    // prevent the window from navigating away from the initial URL
+    this.browserWindow.webContents.on('will-navigate', (event) => {
+      event.preventDefault()
+    })
     this._ready = new Promise((resolve) => {
       this.browserWindow.on('ready-to-show', () => {
         this.browserWindow?.show()
