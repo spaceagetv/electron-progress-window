@@ -2,9 +2,6 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { ipcRenderer } = require('electron')
 import type { ProgressItemTransferable } from './ProgressItem'
-// import { logger } from '../logger'
-
-// logger.setLevel(LogLevel.DEBUG)
 
 const progressItems: ProgressWidget[] = []
 
@@ -70,6 +67,7 @@ ipcRenderer.on(
     if (widget) {
       widget.update(progressItem)
     }
+    updateContentSize()
   }
 )
 
