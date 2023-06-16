@@ -362,9 +362,14 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     )
     // logger.debug('Merged options', this.options)
     // logger.debug('ProgressWindow options', this.options)
+
+    // Are we using BrowserWindow or a mock?
     const bwFunction = this.options.testingFixtures.bw
+    // Are we using screen or a mock?
     this._screenInstance = this.options.testingFixtures.scr
     this.itemDefaults = this.options.itemDefaults
+
+    // create the window
     this.browserWindow = new bwFunction(this.options.windowOptions)
     // prevent the window from navigating away from the initial URL
     this.browserWindow.webContents.on('will-navigate', (event) => {
