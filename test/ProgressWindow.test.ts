@@ -39,6 +39,7 @@ describe('ProgressWindow', () => {
     ProgressWindow.destroy()
     // reset the defaults
     ProgressWindow._options = {}
+    ProgressWindow._optionsFunction = null
     // set the testing fixtures
     ProgressWindow.configure({
       testingFixtures: {
@@ -56,10 +57,40 @@ describe('ProgressWindow', () => {
   })
 
   it('should be able to configure the ProgressWindow', () => {
-    expect(ProgressWindow._options.testingFixtures?.bw).to.be.ok
-    expect(ProgressWindow._options.testingFixtures?.bw).to.equal(
+    expect(ProgressWindow.options.testingFixtures?.bw).to.be.ok
+    expect(ProgressWindow.options.testingFixtures?.bw).to.equal(
       MockBrowserWindow
     )
+  })
+
+  it('should be able to configure the ProgressWindow with configure()', () => {
+    ProgressWindow.configure({
+      windowOptions: { width: 400, height: 100, backgroundColor: '#F00' },
+    })
+    expect(ProgressWindow.options.windowOptions).to.be.ok
+    expect(ProgressWindow.options.windowOptions).to.deep.equal({
+      width: 400,
+      height: 100,
+      backgroundColor: '#F00',
+    })
+  })
+
+  it('should be able to configure the ProgressWindow with a function', () => {
+    ProgressWindow.configure(() => {
+      return {
+        windowOptions: {
+          width: 410,
+          height: 110,
+          backgroundColor: '#F01',
+        },
+      }
+    })
+    expect(ProgressWindow.options.windowOptions).to.be.ok
+    expect(ProgressWindow.options.windowOptions).to.deep.equal({
+      width: 410,
+      height: 110,
+      backgroundColor: '#F01',
+    })
   })
 
   it('should create the default instance', () => {
@@ -86,6 +117,40 @@ describe('ProgressWindow', () => {
     const bounds = progressWindow.browserWindow.getBounds()
     expect(bounds.width).to.equal(300)
     expect(bounds.height).to.equal(60)
+  })
+
+  it('should create a window with the specified configuration', async () => {
+    ProgressWindow.configure({
+      windowOptions: { width: 536, height: 124, backgroundColor: '#F12' },
+    })
+    const progressWindow = new ProgressWindow()
+    await progressWindow.whenReady()
+    expect(progressWindow).to.be.an.instanceof(ProgressWindow)
+    expect(progressWindow.browserWindow).to.be.ok
+    if (!progressWindow.browserWindow) return
+    expect(progressWindow.browserWindow.loadURL).called
+    const bounds = progressWindow.browserWindow.getBounds()
+    expect(bounds.width).to.equal(536)
+    expect(bounds.height).to.equal(124)
+    expect(progressWindow.browserWindow.getBackgroundColor()).to.equal('#F12')
+  })
+
+  it('should create a window with the specified configuration function', async () => {
+    ProgressWindow.configure(() => {
+      return {
+        windowOptions: { width: 516, height: 324, backgroundColor: '#F11' },
+      }
+    })
+    const progressWindow = new ProgressWindow()
+    await progressWindow.whenReady()
+    expect(progressWindow).to.be.an.instanceof(ProgressWindow)
+    expect(progressWindow.browserWindow).to.be.ok
+    if (!progressWindow.browserWindow) return
+    expect(progressWindow.browserWindow.loadURL).called
+    const bounds = progressWindow.browserWindow.getBounds()
+    expect(bounds.width).to.equal(516)
+    expect(bounds.height).to.equal(324)
+    expect(progressWindow.browserWindow.getBackgroundColor()).to.equal('#F11')
   })
 
   it('should create a window with the specified options', async () => {

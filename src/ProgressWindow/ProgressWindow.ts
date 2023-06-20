@@ -38,6 +38,13 @@ export interface ProgressWindowOptions {
 }
 
 /**
+ * Use a function that returns ProgressWindowOptions to allow for dynamic options.
+ * @public
+ * @see ProgressWindowOptions
+ */
+export type ProgressWindowOptionsFunction = () => ProgressWindowOptions
+
+/**
  * Events emitted by ProgressWindow.emitter
  *
  * @remarks
@@ -140,7 +147,9 @@ export const EventEmitterAsTypedEmitterProgressWindowInstanceEvents =
  */
 export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInstanceEvents {
   /** @internal */
-  static _options = {} as ProgressWindowOptions
+  static _options: ProgressWindowOptions = {}
+  /** @internal */
+  static _optionsFunction: ProgressWindowOptionsFunction | null = null
   /** @internal */
   static _instance: ProgressWindow | null = null
 
@@ -217,13 +226,34 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    * })
    * ```
    */
-  static configure(options: ProgressWindowOptions) {
+  static configure(
+    options: ProgressWindowOptions | ProgressWindowOptionsFunction
+  ) {
     if (this._instance) {
       throw new Error(
         'ProgressWindow.configure() must be set before the first ProgressWindow is created'
       )
     }
-    merge(this._options, options)
+    if (typeof options === 'function') {
+      // if there are functions involved, overwrite the options
+      this._optionsFunction = options
+    } else {
+      // otherwise, merge the options
+      merge(this._options, options)
+    }
+  }
+
+  /**
+   * Get the current options for new ProgressWindow instances.
+   * @see ProgressWindowOptions
+   * @readonly
+   * @public
+   */
+  static get options(): ProgressWindowOptions {
+    if (this._optionsFunction) {
+      return merge({}, this._options, this._optionsFunction())
+    }
+    return this._options
   }
 
   /**
@@ -231,7 +261,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    */
   static get instance() {
     if (!this._instance) {
-      this._instance = new ProgressWindow(this._options)
+      this._instance = new ProgressWindow(this.options)
       this._instance.on('windowClosed', () => {
         this.destroy()
       })
@@ -355,7 +385,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     this.options = merge(
       {},
       this.defaults,
-      ProgressWindow._options,
+      ProgressWindow.options,
       options,
       overrides
     )
