@@ -6,6 +6,7 @@ import type { ProgressItemTransferable } from './ProgressItem'
 const progressItems: ProgressWidget[] = []
 
 document.addEventListener('DOMContentLoaded', () => {
+  window.name = 'electron-progress-window'
   // logger.log('DOMContentLoaded 👍')
   document.body.addEventListener('click', (event) => {
     // logger.debug('click event', event)
