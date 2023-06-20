@@ -11,12 +11,55 @@ chai.use(sinonChai)
 
 describe('ProgressItem', () => {
   describe('event emitters', () => {
-    it('should emit a "update" event when updated', () => {
+    it('should emit a "update" event on setProgress()', () => {
       const updateSpy = sinon.spy()
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
       progressItem.setProgress(0.1)
+
+      expect(updateSpy.calledOnce).to.be.true
+    })
+
+    it('should emit a "update" event on update()', () => {
+      const updateSpy = sinon.spy()
+      const progressItem = new ProgressItem()
+      progressItem.on('update', updateSpy)
+
+      progressItem.update({ value: 0.1 })
+
+      expect(updateSpy.calledOnce).to.be.true
+    })
+
+    it('should emit a "update" event on assignment of "value"', () => {
+      const updateSpy = sinon.spy()
+
+      const progressItem = new ProgressItem()
+      progressItem.on('update', updateSpy)
+
+      progressItem.value = 0.1
+
+      expect(updateSpy.calledOnce).to.be.true
+    })
+
+    it('should emit a "update" event on assignment of "maxValue"', () => {
+      const updateSpy = sinon.spy()
+
+      const progressItem = new ProgressItem()
+      progressItem.on('update', updateSpy)
+
+      progressItem.maxValue = 0.1
+
+      expect(updateSpy.calledOnce).to.be.true
+    })
+
+    it('should emit a "update" event on assignment of "indeterminate"', () => {
+      const updateSpy = sinon.spy()
+
+      const progressItem = new ProgressItem()
+      progressItem.on('update', updateSpy)
+
+      progressItem.indeterminate = true
 
       expect(updateSpy.calledOnce).to.be.true
     })
