@@ -114,7 +114,7 @@ class ProgressWidget {
   titleElement: HTMLDivElement
   progressElement: HTMLProgressElement
   detailElement: HTMLDivElement
-  item: ProgressItemTransferable
+  item = {} as ProgressItemTransferable
 
   constructor(item: ProgressItemTransferable) {
     this.id = item.id
@@ -173,15 +173,20 @@ class ProgressWidget {
   update(item: ProgressItemTransferable) {
     const oldItem = this.item
     this.item = item
-    if (!item.indeterminate) {
+    // compare old and new item
+    if (!item.indeterminate && oldItem.value !== item.value) {
       this.progressElement.value = item.value
       this.progressElement.max = item.maxValue
-    } else {
+    } else if (item.indeterminate !== oldItem.indeterminate) {
       this.progressElement.removeAttribute('value')
       this.progressElement.removeAttribute('max')
     }
-    this.titleElement.innerText = item.title
-    this.detailElement.innerText = item.detail
+    if (oldItem.title !== item.title) {
+      this.titleElement.innerText = item.title
+    }
+    if (oldItem.detail !== item.detail) {
+      this.detailElement.innerText = item.detail
+    }
     if (item.enablePause && oldItem.paused !== item.paused) {
       this.element.classList.toggle('paused', item.paused)
       if (item.paused) {

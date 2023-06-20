@@ -606,7 +606,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     }
     // normalize all progress values to 0-1
     const values = items.map(
-      (item) => Math.min(item._value, item.maxValue) / item.maxValue
+      (item) => Math.min(item.value, item.maxValue) / item.maxValue
     )
     // if all items are complete, hide the system progress bar
     const allComplete = items.every((item) => item.isCompleted())
@@ -636,14 +636,33 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     }
     // logger.debug('ProgressWindow.updateContentSize()', dimensions)
     if (!this.options.variableHeight && !this.options.variableWidth) {
+      // we shouldn't be resizing the window
       return
     }
+    // find the display that the window is currently on
     const display = this._screenInstance.getDisplayMatching(
       this.browserWindow.getBounds()
     )
-    const { width: displayWidth, height: displayHeight } = display.workAreaSize
-    const { width: oldWidth, height: oldHeight } =
-      this.browserWindow.getBounds()
+    // get the display's work area
+    const {
+      width: displayWidth,
+      height: displayHeight,
+      x: displayX,
+      y: displayY,
+    } = display.workArea
+    // get the bounds of the Progress window
+    const {
+      width: oldWidth,
+      height: oldHeight,
+      x: windowOldX,
+      y: windowOldY,
+    } = this.browserWindow.getContentBounds()
+
+    // get the height of the title bar
+    const titleBarHeight =
+      this.browserWindow.getNormalBounds().height - oldHeight
+
+    // calculate the new window size
     const width = this.options.variableWidth
       ? Math.min(dimensions.width, displayWidth)
       : oldWidth
@@ -652,10 +671,24 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
       : oldHeight
     const widthDiff = width - oldWidth
     const heightDiff = height - oldHeight
-    const { x, y } = this.browserWindow.getContentBounds()
+    if (widthDiff === 0 && heightDiff === 0) {
+      // no change in size
+      return
+    }
+
+    // make sure window isn't overlapping edge of display
+    const x = Math.min(
+      Math.max(windowOldX - widthDiff / 2, displayX),
+      displayX + displayWidth - width
+    )
+    const y = Math.min(
+      Math.max(windowOldY - heightDiff / 2, displayY),
+      displayY + displayHeight - height
+    )
+
     const bounds = {
-      x: Math.round(x - widthDiff / 2),
-      y: Math.round(y - heightDiff / 2),
+      x: Math.round(x),
+      y: Math.round(y + titleBarHeight),
       width: Math.round(width),
       height: Math.round(height),
     }
