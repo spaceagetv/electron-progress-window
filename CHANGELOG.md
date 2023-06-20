@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/spaceagetv/electron-progress-window/compare/v1.1.3...v1.2.0) (2023-06-20)
+
+
+### Features
+
+* use function for ProgressWindow.configure() ([7545e86](https://github.com/spaceagetv/electron-progress-window/commit/7545e86dbf8d00c2dfb64c6ea9b0627828e8c94d))
+
 ## [1.1.3](https://github.com/spaceagetv/electron-progress-window/compare/v1.1.2...v1.1.3) (2023-06-20)
 
 
