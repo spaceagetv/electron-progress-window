@@ -1,3 +1,12 @@
+## [1.2.1](https://github.com/spaceagetv/electron-progress-window/compare/v1.2.0...v1.2.1) (2023-06-20)
+
+
+### Bug Fixes
+
+* **🛠️:** better window resizing ([e2ea3ba](https://github.com/spaceagetv/electron-progress-window/commit/e2ea3ba97fad781647511488aa398fbf2a049b22))
+* **🛠️:** ProgressItem option setters for all properties ([e4e3b71](https://github.com/spaceagetv/electron-progress-window/commit/e4e3b71241edb0145d12c1efbb098067dd230843))
+* **🛠️:** renderer: only repaint changed properties ([644d53a](https://github.com/spaceagetv/electron-progress-window/commit/644d53af72bf09dbf9954728ee928aa4a4b642c1))
+
 # [1.2.0](https://github.com/spaceagetv/electron-progress-window/compare/v1.1.3...v1.2.0) (2023-06-20)
 
 
