@@ -24,5 +24,6 @@
 |  [ProgressItemEvents](./electron-progress-window.progressitemevents.md) | Events emitted by a ProgressItem instance |
 |  [ProgressItemOptions](./electron-progress-window.progressitemoptions.md) | Options for creating a new progress item |
 |  [ProgressWindowInstanceEvents](./electron-progress-window.progresswindowinstanceevents.md) | Events emitted by ProgressWindow instances |
+|  [ProgressWindowOptionsFunction](./electron-progress-window.progresswindowoptionsfunction.md) | Use a function that returns ProgressWindowOptions to allow for dynamic options. |
 |  [ProgressWindowStaticEvents](./electron-progress-window.progresswindowstaticevents.md) | Events emitted by ProgressWindow.emitter |
 

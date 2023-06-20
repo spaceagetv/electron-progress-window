@@ -4,10 +4,10 @@
 
 ## ProgressWindow.options property
 
-The options used to create this ProgressWindow instance.
+Get the current options for new ProgressWindow instances.
 
 **Signature:**
 
 ```typescript
-options: ProgressWindowOptions;
+static get options(): ProgressWindowOptions;
 ```

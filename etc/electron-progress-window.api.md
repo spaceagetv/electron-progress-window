@@ -82,7 +82,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     cancelAll(): void;
     static close(): void;
     close(): void;
-    static configure(options: ProgressWindowOptions): void;
+    static configure(options: ProgressWindowOptions | ProgressWindowOptionsFunction): void;
     static create(): Promise<ProgressWindow>;
     static readonly defaults: ProgressWindowOptions;
     readonly defaults: ProgressWindowOptions;
@@ -93,9 +93,12 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     // @internal (undocumented)
     static _instance: ProgressWindow | null;
     itemDefaults: ProgressItemOptions;
+    static get options(): ProgressWindowOptions;
     options: ProgressWindowOptions;
     // @internal (undocumented)
     static _options: ProgressWindowOptions;
+    // @internal (undocumented)
+    static _optionsFunction: ProgressWindowOptionsFunction | null;
     progressItems: {
         [id: string]: ProgressItem;
     };
@@ -133,6 +136,9 @@ export interface ProgressWindowOptions {
     variableWidth?: boolean;
     windowOptions?: Partial<Electron.BrowserWindowConstructorOptions>;
 }
+
+// @public
+export type ProgressWindowOptionsFunction = () => ProgressWindowOptions;
 
 // @public
 export type ProgressWindowStaticEvents = {

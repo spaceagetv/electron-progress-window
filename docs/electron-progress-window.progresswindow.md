@@ -73,6 +73,7 @@ setTimeout(() => {
 |  [instance](./electron-progress-window.progresswindow.instance.md) | <p><code>static</code></p><p><code>readonly</code></p> | [ProgressWindow](./electron-progress-window.progresswindow.md) | Get/create the default ProgressWindow instance. |
 |  [itemDefaults](./electron-progress-window.progresswindow.itemdefaults.md) |  | [ProgressItemOptions](./electron-progress-window.progressitemoptions.md) | Default values for new ProgressItems added to this ProgressWindow instance. |
 |  [options](./electron-progress-window.progresswindow.options.md) |  | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | The options used to create this ProgressWindow instance. |
+|  [options](./electron-progress-window.progresswindow.options.md) | <p><code>static</code></p><p><code>readonly</code></p> | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | Get the current options for new ProgressWindow instances. |
 |  [progressItems](./electron-progress-window.progresswindow.progressitems.md) |  | { \[id: string\]: [ProgressItem](./electron-progress-window.progressitem.md)<!-- -->; } | The current ProgressItems in this ProgressWindow instance. This is is an object, keyed by the item id. |
 
 ## Methods

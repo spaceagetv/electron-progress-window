@@ -9,14 +9,14 @@ Configure new ProgressWindow instances with these options.
 **Signature:**
 
 ```typescript
-static configure(options: ProgressWindowOptions): void;
+static configure(options: ProgressWindowOptions | ProgressWindowOptionsFunction): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) |  |
+|  options | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) \| [ProgressWindowOptionsFunction](./electron-progress-window.progresswindowoptionsfunction.md) |  |
 
 **Returns:**
 
