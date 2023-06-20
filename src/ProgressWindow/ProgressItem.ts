@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import { merge } from 'lodash'
+import { isEqual, merge } from 'lodash'
 import TypedEmitter from 'typed-emitter'
 // import { logger } from '../logger'
 
@@ -85,8 +85,8 @@ export const ProgressItemEventsEmitter =
  * @public
  */
 export class ProgressItem extends ProgressItemEventsEmitter {
-  /** Default options for a progress bar item. @readonly @public */
-  readonly defaults: Required<ProgressItemOptions> = {
+  /** Private properties for a progress bar item. @internal */
+  _privates: ProgressItemOptions = {
     title: '',
     detail: '',
     indeterminate: false,
@@ -101,35 +101,8 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   /** Unique ID for the progress bar item - start with alpha for HTML id - @public @readonly */
   readonly id: string = 'p' + Math.random().toString(36).substring(2, 11)
 
-  /** Title of the progress bar item */
-  title: string
-
-  /** Detail shown below the progress bar */
-  detail: string
-
-  /** Is the item indeterminate? */
-  indeterminate: boolean
-
-  /** Current (or initial) value - @internal */
-  _value: number
-
-  /** Maximum value */
-  maxValue: number
-
-  /** Is the item cancellable? Will show cancel button. Default: true */
-  enableCancel: boolean
-
-  /** Is the item pauseable? Will show pause button. Default: false */
-  enablePause: boolean
-
-  /** Automatically complete if value greater than or equals to maxValue. Default: true */
-  autoComplete: boolean
-
-  /** Remove immediately when item is completed? Or wait for window behavior. */
-  removeOnComplete: boolean
-
   /** Is the item completed? */
-  private completed = false
+  private _completed = false
 
   /** Is this progress item paused? */
   paused = false
@@ -142,19 +115,87 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   constructor(options = {} as ProgressItemOptions) {
     super()
-    this._value = options.value || this.defaults.value
-    const o = { ...options }
-    delete o.value
-    merge(this, this.defaults, o)
+    merge(this._privates, options)
   }
 
   /** Get/set the current progress value */
   get value() {
-    return this._value
+    return this._privates.value
   }
 
   set value(value: number) {
-    this.setProgress(value)
+    this.update({ value })
+  }
+
+  /** Get/set the title */
+  get title() {
+    return this._privates.title
+  }
+
+  set title(title: string) {
+    this.update({ title })
+  }
+
+  get detail() {
+    return this._privates.detail
+  }
+
+  set detail(detail: string) {
+    this.update({ detail })
+  }
+
+  /** Is the item indeterminate? */
+  get indeterminate(): boolean {
+    return this._privates.indeterminate
+  }
+
+  set indeterminate(indeterminate: boolean) {
+    this.update({ indeterminate })
+  }
+
+  /** Maximum value */
+  get maxValue(): number {
+    return this._privates.maxValue
+  }
+
+  set maxValue(maxValue: number) {
+    this.update({ maxValue })
+  }
+
+  /** Is the item cancellable? Will show cancel button. Default: true */
+  get enableCancel(): boolean {
+    return this._privates.enableCancel
+  }
+
+  set enableCancel(enableCancel: boolean) {
+    this.update({ enableCancel })
+  }
+
+  /** Is the item pauseable? Will show pause button. Default: false */
+  get enablePause(): boolean {
+    return this._privates.enablePause
+  }
+
+  set enablePause(enablePause: boolean) {
+    this.update({ enablePause })
+  }
+
+  /** Automatically complete if value greater than or equals to maxValue. Default: true */
+  get autoComplete(): boolean {
+    return this._privates.autoComplete
+  }
+
+  set autoComplete(autoComplete: boolean) {
+    this.update({ autoComplete })
+  }
+
+  /** Remove immediately when item is completed? Or wait for window behavior. */
+  get removeOnComplete(): boolean {
+    return this._privates.removeOnComplete
+  }
+
+  set removeOnComplete(removeOnComplete: boolean) {
+    this.update({ removeOnComplete })
   }
 
   /**
@@ -167,17 +208,30 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     value: number,
     otherOptions = {} as Omit<ProgressItemOptions, 'value'>
   ) {
+    if (this.indeterminate) return
+    this.update({ value, ...otherOptions })
+  }
+
+  /**
+   * Update one or more values simultaneously
+   * @param options - options to update
+   */
+  update(options: Partial<ProgressItemOptions>) {
+    // logger.silly('ProgressItem.update()', options)
     // istanbul ignore if
     if (this.removed) {
       return
     }
-    // logger.silly('ProgressItem.setProgress()', value, otherOptions)
-    if (!this.isIndeterminate()) {
-      this._value = Math.min(value, this.maxValue)
+    if (isEqual(this._privates, options)) {
+      return
     }
-    merge(this, otherOptions)
+    this._privates = { ...this._privates, ...options }
     this.emit('update')
-    if (this.autoComplete && this._value === this.maxValue) {
+    if (
+      !this.isCompleted() &&
+      this.autoComplete &&
+      this._privates.value >= this.maxValue
+    ) {
       this.setCompleted()
     }
   }
@@ -193,8 +247,8 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     if (this.isCompleted() || this.removed) {
       return
     }
-    this._value = this.maxValue
-    this.completed = true
+    this._privates.value = this.maxValue
+    this._completed = true
     this.emit('complete')
     if (this.removeOnComplete) {
       this.remove()
@@ -203,7 +257,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   /** Is this item completed? */
   isCompleted() {
-    return this.completed
+    return this._completed
   }
 
   /** Is this item in progress? */
@@ -275,7 +329,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
       maxValue: this.maxValue,
       enableCancel: this.enableCancel,
       enablePause: this.enablePause,
-      completed: this.completed,
+      completed: this._completed,
       removeOnComplete: this.removeOnComplete,
       paused: this.paused,
     } as ProgressItemTransferable
