@@ -40,7 +40,7 @@
     "typescript": "~4.5.4"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0",
-    "electron-progress-window": "file:../.."
+    "electron-progress-window": "file:../..",
+    "electron-squirrel-startup": "^1.0.0"
   }
 }

@@ -19,11 +19,17 @@ const origHtmlFilePath = path.resolve(
 const cjsPath = path.resolve(distDir, 'cjs')
 const esmPath = path.resolve(distDir, 'esm')
 
-// the path where the html files will be copied to
-const cjsHtmlPath = path.resolve(cjsPath, 'ProgressWindow/index.html')
-const esmHtmlPath = path.resolve(esmPath, 'ProgressWindow/index.html')
-
+const rendererJsPathCjs = path.resolve(cjsPath, 'ProgressWindow/renderer.js')
+const rendererJsDefinitionsPathCjs = path.resolve(
+  cjsPath,
+  'ProgressWindow/renderer.d.ts'
+)
 const rendererJsPathEsm = path.resolve(esmPath, 'ProgressWindow/renderer.js')
+const rendererJsDefinitionsPathEsm = path.resolve(
+  esmPath,
+  'ProgressWindow/renderer.d.ts'
+)
+
 const rendererJSEsmContent = fs.readFileSync(rendererJsPathEsm, 'utf-8')
 
 // insert esm script into both html files
@@ -38,5 +44,51 @@ const htmlContentWithScript = htmlContent.replace(
   </body>`
 )
 
-fs.writeFileSync(cjsHtmlPath, htmlContentWithScript)
-fs.writeFileSync(esmHtmlPath, htmlContentWithScript)
+const cjsScriptPath = path.resolve(cjsPath, 'ProgressWindow/ProgressWindow.js')
+const esmScriptPath = path.resolve(esmPath, 'ProgressWindow/ProgressWindow.js')
+
+function escapeHtml(html) {
+  return html
+    .replace(/`/g, '\\`')
+    .replace(/\$/g, '\\$')
+    .replace(/{/g, '\\{')
+    .replace(/}/g, '\\}')
+}
+
+const cjsScriptContent = fs.readFileSync(cjsScriptPath, 'utf-8')
+const esmScriptContent = fs.readFileSync(esmScriptPath, 'utf-8')
+
+// find the line that start with `const htmlContent = ` and replace everything after it until `;`
+// example: const htmlContent = fs.readFileSync(htmlPath, 'utf8');
+// should become: const htmlContent = `<!DOCTYPE html> ...`;
+const regex = /const htmlContent = [^;]+;/
+
+// test it
+// console.log('cjs matching?', regex.test(cjsScriptContent))
+// console.log('esm matching?', regex.test(esmScriptContent))
+
+const cjsScriptContentWithRenderer = cjsScriptContent.replace(
+  regex,
+  `const htmlContent = \`${escapeHtml(htmlContentWithScript)}\`;`
+)
+const esmScriptContentWithRenderer = esmScriptContent.replace(
+  regex,
+  `const htmlContent = \`${escapeHtml(htmlContentWithScript)}\`;`
+)
+
+// console.log('cjsScriptContentWithRenderer', cjsScriptContentWithRenderer)
+// console.log('esmScriptContentWithRenderer', esmScriptContentWithRenderer)
+
+fs.writeFileSync(cjsScriptPath, cjsScriptContentWithRenderer)
+fs.writeFileSync(esmScriptPath, esmScriptContentWithRenderer)
+
+// remove the renderer.js files
+fs.unlinkSync(rendererJsPathCjs)
+fs.unlinkSync(rendererJsPathCjs + '.map')
+fs.unlinkSync(rendererJsDefinitionsPathCjs)
+fs.unlinkSync(rendererJsDefinitionsPathCjs + '.map')
+
+fs.unlinkSync(rendererJsPathEsm)
+fs.unlinkSync(rendererJsPathEsm + '.map')
+fs.unlinkSync(rendererJsDefinitionsPathEsm)
+fs.unlinkSync(rendererJsDefinitionsPathEsm + '.map')

@@ -1,13 +1,11 @@
 import { BrowserWindow, screen } from 'electron'
 import { EventEmitter } from 'events'
+import path from 'path'
 import fs from 'fs'
 import { merge } from 'lodash'
 import TypedEmitter from 'typed-emitter'
 
 import { ProgressItemOptions, ProgressItem } from './ProgressItem'
-
-/** If you're having issues with Webpack, import/require this... */
-export const htmlPath = require.resolve('./index.html')
 
 /**
  * Options for creating/configuring a ProgressWindow
@@ -181,6 +179,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
       fullscreenable: false,
       maximizable: false,
       show: false,
+      acceptFirstMouse: true,
     },
     itemDefaults: {},
     css: '',
@@ -377,7 +376,10 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
         resolve(this)
       })
     })
-    const htmlContent = fs.readFileSync(htmlPath, 'utf8')
+    const htmlContent = fs.readFileSync(
+      path.resolve(__dirname, 'index.html'),
+      'utf8'
+    )
     const htmlWithCss = this.options.css
       ? htmlContent.replace(
           '/** additional styles insert point */',
