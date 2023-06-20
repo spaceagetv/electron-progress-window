@@ -2,7 +2,7 @@ import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import sinonChai from 'sinon-chai'
 import { MockBrowserWindow, MockScreen } from 'electron-mocks'
-import { ProgressItem, ProgressWindow } from '../src/index'
+import { ProgressItem, ProgressWindow } from '../src/ProgressWindow'
 import { withTimeout } from './withTimeout'
 import { pause } from './pause'
 
