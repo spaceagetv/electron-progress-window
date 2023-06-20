@@ -1,3 +1,11 @@
+## [1.1.2](https://github.com/spaceagetv/electron-progress-window/compare/v1.1.1...v1.1.2) (2023-06-20)
+
+
+### Bug Fixes
+
+* sinon is only a devDependency ([58126b2](https://github.com/spaceagetv/electron-progress-window/commit/58126b2985a9494cbf9e78205c40f6eb650184b3))
+* window.name is electron-progress-window ([e9fcbcf](https://github.com/spaceagetv/electron-progress-window/commit/e9fcbcf592fa29400c44bbaedb0c31e17089a1e9))
+
 ## [1.1.1](https://github.com/spaceagetv/electron-progress-window/compare/v1.1.0...v1.1.1) (2023-05-31)
 
 
