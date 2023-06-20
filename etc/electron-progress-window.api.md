@@ -12,9 +12,6 @@ import TypedEmitter from 'typed-emitter';
 // @internal (undocumented)
 export const EventEmitterAsTypedEmitterProgressWindowInstanceEvents: TypedEmitterProgressWindowInstanceEvents;
 
-// @public
-export const htmlPath: string;
-
 // Warning: (ae-incompatible-release-tags) The symbol "ProgressItem" is marked as @public, but its signature references "ProgressItemEventsEmitter" which is marked as @internal
 //
 // @public
