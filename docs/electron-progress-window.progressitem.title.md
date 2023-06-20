@@ -4,10 +4,12 @@
 
 ## ProgressItem.title property
 
-Title of the progress bar item
+Get/set the title
 
 **Signature:**
 
 ```typescript
-title: string;
+get title(): string;
+
+set title(title: string);
 ```

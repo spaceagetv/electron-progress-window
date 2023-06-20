@@ -9,5 +9,7 @@ Is the item cancellable? Will show cancel button. Default: true
 **Signature:**
 
 ```typescript
-enableCancel: boolean;
+get enableCancel(): boolean;
+
+set enableCancel(enableCancel: boolean);
 ```

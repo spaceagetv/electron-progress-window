@@ -17,35 +17,44 @@ export const EventEmitterAsTypedEmitterProgressWindowInstanceEvents: TypedEmitte
 // @public
 export class ProgressItem extends ProgressItemEventsEmitter {
     constructor(options?: Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>);
-    autoComplete: boolean;
+    get autoComplete(): boolean;
+    set autoComplete(autoComplete: boolean);
     cancel(): void;
     cancelled: boolean;
-    readonly defaults: Required<ProgressItemOptions>;
-    detail: string;
-    enableCancel: boolean;
-    enablePause: boolean;
+    // (undocumented)
+    get detail(): string;
+    set detail(detail: string);
+    get enableCancel(): boolean;
+    set enableCancel(enableCancel: boolean);
+    get enablePause(): boolean;
+    set enablePause(enablePause: boolean);
     readonly id: string;
-    indeterminate: boolean;
+    get indeterminate(): boolean;
+    set indeterminate(indeterminate: boolean);
     isCompleted(): boolean;
     isIndeterminate(): boolean;
     isInProgress(): boolean;
-    maxValue: number;
+    get maxValue(): number;
+    set maxValue(maxValue: number);
     pause(shouldPause?: boolean): void;
     paused: boolean;
+    // @internal
+    _privates: ProgressItemOptions;
     remove(): void;
     removed: boolean;
-    removeOnComplete: boolean;
+    get removeOnComplete(): boolean;
+    set removeOnComplete(removeOnComplete: boolean);
     resume(): void;
     setCompleted(): void;
     setProgress(value: number, otherOptions?: Omit<Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>, "value">): void;
-    title: string;
+    get title(): string;
+    set title(title: string);
     togglePause(): void;
     // @internal
     transferable(): ProgressItemTransferable;
+    update(options: Partial<ProgressItemOptions>): void;
     get value(): number;
     set value(value: number);
-    // @internal
-    _value: number;
 }
 
 // @public

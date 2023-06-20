@@ -9,5 +9,7 @@ Maximum value
 **Signature:**
 
 ```typescript
-maxValue: number;
+get maxValue(): number;
+
+set maxValue(maxValue: number);
 ```

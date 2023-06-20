@@ -9,5 +9,7 @@ Is the item indeterminate?
 **Signature:**
 
 ```typescript
-indeterminate: boolean;
+get indeterminate(): boolean;
+
+set indeterminate(indeterminate: boolean);
 ```

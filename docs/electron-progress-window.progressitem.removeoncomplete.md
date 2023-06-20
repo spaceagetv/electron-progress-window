@@ -9,5 +9,7 @@ Remove immediately when item is completed? Or wait for window behavior.
 **Signature:**
 
 ```typescript
-removeOnComplete: boolean;
+get removeOnComplete(): boolean;
+
+set removeOnComplete(removeOnComplete: boolean);
 ```

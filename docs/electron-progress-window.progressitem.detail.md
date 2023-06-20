@@ -4,10 +4,10 @@
 
 ## ProgressItem.detail property
 
-Detail shown below the progress bar
-
 **Signature:**
 
 ```typescript
-detail: string;
+get detail(): string;
+
+set detail(detail: string);
 ```

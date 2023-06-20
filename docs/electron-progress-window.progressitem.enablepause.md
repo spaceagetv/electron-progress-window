@@ -9,5 +9,7 @@ Is the item pauseable? Will show pause button. Default: false
 **Signature:**
 
 ```typescript
-enablePause: boolean;
+get enablePause(): boolean;
+
+set enablePause(enablePause: boolean);
 ```

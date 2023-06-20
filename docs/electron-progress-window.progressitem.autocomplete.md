@@ -9,5 +9,7 @@ Automatically complete if value greater than or equals to maxValue. Default: tru
 **Signature:**
 
 ```typescript
-autoComplete: boolean;
+get autoComplete(): boolean;
+
+set autoComplete(autoComplete: boolean);
 ```
