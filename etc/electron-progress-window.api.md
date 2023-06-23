@@ -46,10 +46,10 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     set autoComplete(autoComplete: boolean);
     cancel(): void;
     cancelled: boolean;
-    get css(): ItemCss;
-    set css(css: ItemCss);
     // @internal (undocumented)
     get cssTransferable(): [ItemCssValue, string][];
+    get cssVars(): ItemCss;
+    set cssVars(cssVars: ItemCss);
     get detail(): string;
     set detail(detail: string);
     get enableCancel(): boolean;
@@ -106,7 +106,7 @@ export type ProgressItemEvents = {
 export const ProgressItemEventsEmitter: TypedEmitterProgressItemEvents;
 
 // @public
-export type ProgressItemOptions = Pick<ProgressItem, 'autoComplete' | 'css' | 'detail' | 'enableCancel' | 'enablePause' | 'error' | 'indeterminate' | 'maxValue' | 'removeOnComplete' | 'theme' | 'title' | 'value'>;
+export type ProgressItemOptions = Pick<ProgressItem, 'autoComplete' | 'cssVars' | 'detail' | 'enableCancel' | 'enablePause' | 'error' | 'indeterminate' | 'maxValue' | 'removeOnComplete' | 'theme' | 'title' | 'value'>;
 
 // @public (undocumented)
 export type ProgressItemTheme = 'stripes' | 'none';
@@ -116,7 +116,7 @@ export type ProgressItemTheme = 'stripes' | 'none';
 // @internal
 export type ProgressItemTransferable = Required<Omit<ProgressItemOptions, 'css'>> & Pick<ProgressItem, 'id' | 'paused' | 'cancelled'> & {
     completed: boolean;
-    css: TransferableItemCss;
+    cssVars: TransferableItemCss;
 };
 
 // Warning: (ae-incompatible-release-tags) The symbol "ProgressWindow" is marked as @public, but its signature references "EventEmitterAsTypedEmitterProgressWindowInstanceEvents" which is marked as @internal

@@ -25,7 +25,7 @@ export declare class ProgressItem extends ProgressItemEventsEmitter
 |  --- | --- | --- | --- |
 |  [autoComplete](./electron-progress-window.progressitem.autocomplete.md) |  | boolean | Automatically complete if value greater than or equals to maxValue. Default: true |
 |  [cancelled](./electron-progress-window.progressitem.cancelled.md) |  | boolean | Has this progress item been cancelled? |
-|  [css](./electron-progress-window.progressitem.css.md) |  | [ItemCss](./electron-progress-window.itemcss.md) | CSS variables |
+|  [cssVars](./electron-progress-window.progressitem.cssvars.md) |  | [ItemCss](./electron-progress-window.itemcss.md) | CSS variables |
 |  [detail](./electron-progress-window.progressitem.detail.md) |  | string | Detail field shows below the progress bar |
 |  [enableCancel](./electron-progress-window.progressitem.enablecancel.md) |  | boolean | Is the item cancellable? Will show cancel button. Default: true |
 |  [enablePause](./electron-progress-window.progressitem.enablepause.md) |  | boolean | Is the item pauseable? Will show pause button. Default: false |
