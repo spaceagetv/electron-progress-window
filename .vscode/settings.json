@@ -9,5 +9,10 @@
   "eslint.format.enable": true,
   "eslint.codeActionsOnSave.mode": "all",
   "typescript.preferences.importModuleSpecifier": "relative",
-  "files.associations": { "*.json": "jsonc" },
+  "files.associations": {
+    "*.json": "jsonc"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "vscode.css-language-features"
+  },
 }

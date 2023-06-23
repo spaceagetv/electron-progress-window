@@ -29,7 +29,7 @@ export interface ProgressWindowOptions {
   /** Options for the BrowserWindow instance */
   windowOptions?: Partial<Electron.BrowserWindowConstructorOptions>
   /** Default options for new ProgressItem */
-  itemDefaults?: ProgressItemOptions
+  itemDefaults?: Partial<ProgressItemOptions>
   /** @internal - Options for testing */
   testingFixtures?: {
     bw?: typeof Electron.BrowserWindow
@@ -296,7 +296,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    * Use the returned item to update the progress, or change the title or detail.
    */
   static addItem(
-    options = {} as ProgressItemOptions | ProgressItem
+    options = {} as Partial<ProgressItemOptions> | ProgressItem
   ): Promise<ProgressItem> {
     return this.instance.addItem(options)
   }
@@ -342,7 +342,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
   /**
    * Default values for new ProgressItems added to this ProgressWindow instance.
    */
-  itemDefaults: ProgressItemOptions
+  itemDefaults: Partial<ProgressItemOptions>
 
   /**
    * The current ProgressItems in this ProgressWindow instance.
@@ -478,7 +478,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    * Add a new progress bar to the window
    * @public
    */
-  async addItem(options = {} as ProgressItemOptions | ProgressItem) {
+  async addItem(options = {} as Partial<ProgressItemOptions> | ProgressItem) {
     // logger.debug('ProgressWindow.addItem()', options)
     // istanbul ignore next
     if (!this.browserWindow) {

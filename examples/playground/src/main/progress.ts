@@ -41,6 +41,16 @@ ipcMain.on(
       enableCancel,
     }
   ) => {
+    // console.log({
+    //   time,
+    //   indeterminate,
+    //   persist,
+    //   description,
+    //   title,
+    //   descriptionText,
+    //   enablePause,
+    //   enableCancel,
+    // })
     title =
       title ||
       `${time} seconds` +

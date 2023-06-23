@@ -88,19 +88,19 @@ function updateContentSize() {
   ipcRenderer.send('progress-update-content-size', { width, height })
 }
 
-const pauseSvg = `
+const PAUSE_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
   <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
 </svg>
 `
 
-const resumeSvg = `
+const RESUME_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
   <path d="M8 5v14l11-7z"/>
 </svg>
 `
 
-const cancelSvg = `
+const CANCEL_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
   <path d="M19 5.41L17.59 4 12 9.59 6.41 4 5 5.41 10.59 11 5 16.59 6.41 18 12 12.41 17.59 18 19 16.59 13.41 11z"/>
 </svg>
@@ -112,11 +112,13 @@ class ProgressWidget {
   cancelElement: HTMLSpanElement
   pauseElement: HTMLSpanElement
   titleElement: HTMLDivElement
-  progressElement: HTMLProgressElement
+  progressElement: HTMLDivElement
+  progressIndicator: HTMLDivElement
   detailElement: HTMLDivElement
   item = {} as ProgressItemTransferable
 
   constructor(item: ProgressItemTransferable) {
+    // console.log('ProgressWidget constructor', item)
     this.id = item.id
     this.item = item
     this.element = document.createElement('div')
@@ -124,37 +126,23 @@ class ProgressWidget {
     this.element.id = item.id
     this.element.innerHTML = `
       <div class="progress-item-actions">
-        ${
-          item.enablePause
-            ? '<span class="progress-item-pause" data-item-id=' +
-              this.id +
-              '>' +
-              pauseSvg +
-              '</span>'
-            : ''
-        }
-        ${
-          item.enableCancel
-            ? '<span class="progress-item-cancel" data-item-id=' +
-              this.id +
-              '>' +
-              cancelSvg +
-              '</span>'
-            : ''
-        }
+        <span class="progress-item-pause" data-item-id=${this.id}>${PAUSE_SVG}</span>
+        <span class="progress-item-cancel" data-item-id=${this.id}>${CANCEL_SVG}</span>
       </div>
       <div class="progress-item-title">${item.title}</div>
-      <progress class="progress-item-progress"></progress>
+      <div class="progress-item-progress">
+        <div class="progress-item-indicator">
+          <span></span>
+        </div>
+      </div>
       <div class="progress-item-detail">${item.detail}</div>
     `
-    this.element.classList.toggle('paused', item.paused)
     this.progressElement = this.element.querySelector(
       '.progress-item-progress'
-    ) as HTMLProgressElement
-    if (!item.indeterminate) {
-      this.progressElement.value = item.value
-      this.progressElement.max = item.maxValue
-    }
+    ) as HTMLDivElement
+    this.progressIndicator = this.element.querySelector(
+      '.progress-item-indicator'
+    ) as HTMLDivElement
     this.cancelElement = this.element.querySelector(
       '.progress-item-cancel'
     ) as HTMLSpanElement
@@ -168,31 +156,47 @@ class ProgressWidget {
       '.progress-item-detail'
     ) as HTMLDivElement
     // logger.log('ProgressWidget created', this)
+    this.update(item)
   }
 
-  update(item: ProgressItemTransferable) {
+  update(item: ProgressItemTransferable, force = false) {
     const oldItem = this.item
     this.item = item
-    // compare old and new item
-    if (!item.indeterminate && oldItem.value !== item.value) {
-      this.progressElement.value = item.value
-      this.progressElement.max = item.maxValue
-    } else if (item.indeterminate !== oldItem.indeterminate) {
-      this.progressElement.removeAttribute('value')
-      this.progressElement.removeAttribute('max')
+    this.element.classList.toggle('auto-complete', item.autoComplete)
+    this.element.classList.toggle('cancelled', item.cancelled)
+    this.element.classList.toggle('completed', item.completed)
+    this.element.classList.toggle('enable-cancel', item.enableCancel)
+    this.element.classList.toggle('enable-pause', item.enablePause)
+    this.element.classList.toggle('error', item.error)
+    this.element.classList.toggle('paused', item.paused)
+    this.element.classList.toggle('indeterminate', item.indeterminate)
+    this.element.classList.toggle('remove-on-complete', item.removeOnComplete)
+    this.element.classList.toggle('stripes', item.theme === 'stripes')
+
+    item.css.forEach(([prop, val]) => {
+      this.element.style.setProperty(prop, val)
+    })
+
+    if (oldItem.value !== item.value && !force) {
+      this.element.style.setProperty(
+        '--progress-value',
+        (item.value / item.maxValue) * 100 + '%'
+      )
     }
-    if (oldItem.title !== item.title) {
+
+    if (oldItem.title !== item.title || force) {
       this.titleElement.innerText = item.title
     }
-    if (oldItem.detail !== item.detail) {
+
+    if (oldItem.detail !== item.detail || force) {
       this.detailElement.innerText = item.detail
     }
-    if (item.enablePause && oldItem.paused !== item.paused) {
-      this.element.classList.toggle('paused', item.paused)
+
+    if (oldItem.paused !== item.paused || force) {
       if (item.paused) {
-        this.pauseElement.innerHTML = resumeSvg
+        this.pauseElement.innerHTML = RESUME_SVG
       } else {
-        this.pauseElement.innerHTML = pauseSvg
+        this.pauseElement.innerHTML = PAUSE_SVG
       }
     }
   }
