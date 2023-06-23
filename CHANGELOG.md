@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/spaceagetv/electron-progress-window/compare/v1.3.0...v1.3.1) (2023-06-23)
+
+
+### Bug Fixes
+
+* no —page-background by default ([e932f8a](https://github.com/spaceagetv/electron-progress-window/commit/e932f8af0040fb36857f14b5a27718c3c39fc1a8))
+
 # [1.3.0](https://github.com/spaceagetv/electron-progress-window/compare/v1.2.1...v1.3.0) (2023-06-23)
 
 
