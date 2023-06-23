@@ -40,6 +40,10 @@ export type ProgressItemOptions = Pick<
 export const itemCssMap = {
   /** Font-size property. Default 15px */
   fontSize: '--font-size',
+  /** Font-family property. Default: system-ui, sans-serif */
+  fontFamily: '--font-family',
+  /** Text color */
+  textColor: '--text-color',
   /** Height of the progress bar. Default: 6px */
   progressHeight: '--progress-height',
   /** Padding around the progress bar. Shows progressBackground. Default: 2px */
