@@ -4,6 +4,8 @@
 
 ## ProgressItem.detail property
 
+Detail field shows below the progress bar
+
 **Signature:**
 
 ```typescript

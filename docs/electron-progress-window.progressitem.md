@@ -25,16 +25,19 @@ export declare class ProgressItem extends ProgressItemEventsEmitter
 |  --- | --- | --- | --- |
 |  [autoComplete](./electron-progress-window.progressitem.autocomplete.md) |  | boolean | Automatically complete if value greater than or equals to maxValue. Default: true |
 |  [cancelled](./electron-progress-window.progressitem.cancelled.md) |  | boolean | Has this progress item been cancelled? |
-|  [detail](./electron-progress-window.progressitem.detail.md) |  | string |  |
+|  [css](./electron-progress-window.progressitem.css.md) |  | [ItemCss](./electron-progress-window.itemcss.md) | CSS variables |
+|  [detail](./electron-progress-window.progressitem.detail.md) |  | string | Detail field shows below the progress bar |
 |  [enableCancel](./electron-progress-window.progressitem.enablecancel.md) |  | boolean | Is the item cancellable? Will show cancel button. Default: true |
 |  [enablePause](./electron-progress-window.progressitem.enablepause.md) |  | boolean | Is the item pauseable? Will show pause button. Default: false |
+|  [error](./electron-progress-window.progressitem.error.md) |  | boolean | Add an "error" class to the div.progress-item element |
 |  [id](./electron-progress-window.progressitem.id.md) | <code>readonly</code> | string | Unique ID for the progress bar item - start with alpha for HTML id - |
-|  [indeterminate](./electron-progress-window.progressitem.indeterminate.md) |  | boolean | Is the item indeterminate? |
+|  [indeterminate](./electron-progress-window.progressitem.indeterminate.md) |  | boolean | Indeterminate? |
 |  [maxValue](./electron-progress-window.progressitem.maxvalue.md) |  | number | Maximum value |
 |  [paused](./electron-progress-window.progressitem.paused.md) |  | boolean | Is this progress item paused? |
 |  [removed](./electron-progress-window.progressitem.removed.md) |  | boolean | Has the item been removed? |
 |  [removeOnComplete](./electron-progress-window.progressitem.removeoncomplete.md) |  | boolean | Remove immediately when item is completed? Or wait for window behavior. |
-|  [title](./electron-progress-window.progressitem.title.md) |  | string | Get/set the title |
+|  [theme](./electron-progress-window.progressitem.theme.md) |  | [ProgressItemTheme](./electron-progress-window.progressitemtheme.md) |  |
+|  [title](./electron-progress-window.progressitem.title.md) |  | string | Title appears above the progress bar |
 |  [value](./electron-progress-window.progressitem.value.md) |  | number | Get/set the current progress value |
 
 ## Methods

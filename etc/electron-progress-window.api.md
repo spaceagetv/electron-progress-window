@@ -12,22 +12,52 @@ import TypedEmitter from 'typed-emitter';
 // @internal (undocumented)
 export const EventEmitterAsTypedEmitterProgressWindowInstanceEvents: TypedEmitterProgressWindowInstanceEvents;
 
+// @public (undocumented)
+export type ItemCss = Partial<Record<ItemCssProperty, string>>;
+
+// @public (undocumented)
+export const itemCssMap: {
+    readonly fontSize: "--font-size";
+    readonly progressHeight: "--progress-height";
+    readonly progressPadding: "--progress-padding";
+    readonly progressBackground: "--progress-background";
+    readonly progressForeground: "--progress-foreground";
+    readonly itemBackground: "--item-background";
+    readonly itemBorderRadius: "--item-border-radius";
+    readonly pausedBackground: "--paused-background";
+    readonly errorBackground: "--error-background";
+    readonly errorTextColor: "--error-text-color";
+    readonly errorProgressBackground: "--error-progress-background";
+    readonly errorProgressForeground: "--error-progress-foreground";
+};
+
+// @public (undocumented)
+export type ItemCssProperty = keyof typeof itemCssMap;
+
+// @public (undocumented)
+export type ItemCssValue = (typeof itemCssMap)[ItemCssProperty];
+
 // Warning: (ae-incompatible-release-tags) The symbol "ProgressItem" is marked as @public, but its signature references "ProgressItemEventsEmitter" which is marked as @internal
 //
 // @public
 export class ProgressItem extends ProgressItemEventsEmitter {
-    constructor(options?: Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>);
+    constructor(options?: Partial<ProgressItemOptions>);
     get autoComplete(): boolean;
     set autoComplete(autoComplete: boolean);
     cancel(): void;
     cancelled: boolean;
-    // (undocumented)
+    get css(): ItemCss;
+    set css(css: ItemCss);
+    // @internal (undocumented)
+    get cssTransferable(): [ItemCssValue, string][];
     get detail(): string;
     set detail(detail: string);
     get enableCancel(): boolean;
     set enableCancel(enableCancel: boolean);
     get enablePause(): boolean;
     set enablePause(enablePause: boolean);
+    get error(): boolean;
+    set error(error: boolean);
     readonly id: string;
     get indeterminate(): boolean;
     set indeterminate(indeterminate: boolean);
@@ -46,7 +76,10 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     set removeOnComplete(removeOnComplete: boolean);
     resume(): void;
     setCompleted(): void;
-    setProgress(value: number, otherOptions?: Omit<Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>, "value">): void;
+    setProgress(value: number, otherOptions?: Partial<Omit<ProgressItemOptions, "value">>): void;
+    // (undocumented)
+    get theme(): ProgressItemTheme;
+    set theme(theme: ProgressItemTheme);
     get title(): string;
     set title(title: string);
     togglePause(): void;
@@ -73,20 +106,26 @@ export type ProgressItemEvents = {
 export const ProgressItemEventsEmitter: TypedEmitterProgressItemEvents;
 
 // @public
-export type ProgressItemOptions = Partial<Pick<ProgressItem, 'title' | 'detail' | 'indeterminate' | 'value' | 'maxValue' | 'enableCancel' | 'enablePause' | 'autoComplete' | 'removeOnComplete'>>;
+export type ProgressItemOptions = Pick<ProgressItem, 'autoComplete' | 'css' | 'detail' | 'enableCancel' | 'enablePause' | 'error' | 'indeterminate' | 'maxValue' | 'removeOnComplete' | 'theme' | 'title' | 'value'>;
+
+// @public (undocumented)
+export type ProgressItemTheme = 'stripes' | 'none';
 
 // Warning: (ae-internal-missing-underscore) The name "ProgressItemTransferable" should be prefixed with an underscore because the declaration is marked as @internal
 //
 // @internal
-export type ProgressItemTransferable = ProgressItemOptions & Pick<ProgressItem, 'id' | 'paused'>;
+export type ProgressItemTransferable = Required<Omit<ProgressItemOptions, 'css'>> & Pick<ProgressItem, 'id' | 'paused' | 'cancelled'> & {
+    completed: boolean;
+    css: TransferableItemCss;
+};
 
 // Warning: (ae-incompatible-release-tags) The symbol "ProgressWindow" is marked as @public, but its signature references "EventEmitterAsTypedEmitterProgressWindowInstanceEvents" which is marked as @internal
 //
 // @public
 export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInstanceEvents {
     constructor(options?: ProgressWindowOptions);
-    static addItem(options?: ProgressItem | Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>): Promise<ProgressItem>;
-    addItem(options?: ProgressItem | Partial<Pick<ProgressItem, "detail" | "value" | "title" | "indeterminate" | "maxValue" | "enableCancel" | "enablePause" | "autoComplete" | "removeOnComplete">>): Promise<ProgressItem>;
+    static addItem(options?: ProgressItem | Partial<ProgressItemOptions>): Promise<ProgressItem>;
+    addItem(options?: ProgressItem | Partial<ProgressItemOptions>): Promise<ProgressItem>;
     browserWindow: BrowserWindow | null;
     cancelAll(): void;
     static close(): void;
@@ -101,7 +140,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     static get instance(): ProgressWindow;
     // @internal (undocumented)
     static _instance: ProgressWindow | null;
-    itemDefaults: ProgressItemOptions;
+    itemDefaults: Partial<ProgressItemOptions>;
     static get options(): ProgressWindowOptions;
     options: ProgressWindowOptions;
     // @internal (undocumented)
@@ -135,7 +174,7 @@ export interface ProgressWindowOptions {
     closeOnComplete?: boolean;
     css?: string;
     focusWhenAddingItem?: boolean;
-    itemDefaults?: ProgressItemOptions;
+    itemDefaults?: Partial<ProgressItemOptions>;
     // @internal
     testingFixtures?: {
         bw?: typeof Electron.BrowserWindow;
@@ -154,6 +193,9 @@ export type ProgressWindowStaticEvents = {
     created: (progressWindow: ProgressWindow) => void;
     destroyed: (progressWindow: ProgressWindow) => void;
 };
+
+// @public (undocumented)
+export type TransferableItemCss = [ItemCssValue, string][];
 
 // Warning: (ae-internal-missing-underscore) The name "TypedEmitterProgressItemEvents" should be prefixed with an underscore because the declaration is marked as @internal
 //

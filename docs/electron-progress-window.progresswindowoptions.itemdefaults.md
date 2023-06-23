@@ -9,5 +9,5 @@ Default options for new ProgressItem
 **Signature:**
 
 ```typescript
-itemDefaults?: ProgressItemOptions;
+itemDefaults?: Partial<ProgressItemOptions>;
 ```

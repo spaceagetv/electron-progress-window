@@ -21,7 +21,7 @@ export interface ProgressWindowOptions
 |  [closeOnComplete?](./electron-progress-window.progresswindowoptions.closeoncomplete.md) |  | boolean | _(Optional)_ Close window automatically when all items complete. Default: true |
 |  [css?](./electron-progress-window.progresswindowoptions.css.md) |  | string | _(Optional)_ Additional CSS for the window |
 |  [focusWhenAddingItem?](./electron-progress-window.progresswindowoptions.focuswhenaddingitem.md) |  | boolean | _(Optional)_ Focus the window when adding a new item. Default: true |
-|  [itemDefaults?](./electron-progress-window.progresswindowoptions.itemdefaults.md) |  | [ProgressItemOptions](./electron-progress-window.progressitemoptions.md) | _(Optional)_ Default options for new ProgressItem |
+|  [itemDefaults?](./electron-progress-window.progresswindowoptions.itemdefaults.md) |  | Partial&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt; | _(Optional)_ Default options for new ProgressItem |
 |  [variableHeight?](./electron-progress-window.progresswindowoptions.variableheight.md) |  | boolean | _(Optional)_ Expand height of window as needed? Default: true. Scroll otherwise. |
 |  [variableWidth?](./electron-progress-window.progresswindowoptions.variablewidth.md) |  | boolean | _(Optional)_ Expand width of window as needed? Default: false |
 |  [windowOptions?](./electron-progress-window.progresswindowoptions.windowoptions.md) |  | Partial&lt;Electron.BrowserWindowConstructorOptions&gt; | _(Optional)_ Options for the BrowserWindow instance |

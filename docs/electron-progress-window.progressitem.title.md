@@ -4,7 +4,7 @@
 
 ## ProgressItem.title property
 
-Get/set the title
+Title appears above the progress bar
 
 **Signature:**
 

@@ -17,13 +17,24 @@
 |  --- | --- |
 |  [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | Options for creating/configuring a ProgressWindow |
 
+## Variables
+
+|  Variable | Description |
+|  --- | --- |
+|  [itemCssMap](./electron-progress-window.itemcssmap.md) |  |
+
 ## Type Aliases
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [ItemCss](./electron-progress-window.itemcss.md) |  |
+|  [ItemCssProperty](./electron-progress-window.itemcssproperty.md) |  |
+|  [ItemCssValue](./electron-progress-window.itemcssvalue.md) |  |
 |  [ProgressItemEvents](./electron-progress-window.progressitemevents.md) | Events emitted by a ProgressItem instance |
 |  [ProgressItemOptions](./electron-progress-window.progressitemoptions.md) | Options for creating a new progress item |
+|  [ProgressItemTheme](./electron-progress-window.progressitemtheme.md) |  |
 |  [ProgressWindowInstanceEvents](./electron-progress-window.progresswindowinstanceevents.md) | Events emitted by ProgressWindow instances |
 |  [ProgressWindowOptionsFunction](./electron-progress-window.progresswindowoptionsfunction.md) | Use a function that returns ProgressWindowOptions to allow for dynamic options. |
 |  [ProgressWindowStaticEvents](./electron-progress-window.progresswindowstaticevents.md) | Events emitted by ProgressWindow.emitter |
+|  [TransferableItemCss](./electron-progress-window.transferableitemcss.md) |  |
 

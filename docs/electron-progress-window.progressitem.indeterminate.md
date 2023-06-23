@@ -4,7 +4,7 @@
 
 ## ProgressItem.indeterminate property
 
-Is the item indeterminate?
+Indeterminate?
 
 **Signature:**
 

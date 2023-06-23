@@ -9,5 +9,5 @@ Default values for new ProgressItems added to this ProgressWindow instance.
 **Signature:**
 
 ```typescript
-itemDefaults: ProgressItemOptions;
+itemDefaults: Partial<ProgressItemOptions>;
 ```
