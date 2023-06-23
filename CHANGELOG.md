@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/spaceagetv/electron-progress-window/compare/v1.3.1...v1.3.2) (2023-06-23)
+
+
+### Bug Fixes
+
+* missing cssVars ([77c96e3](https://github.com/spaceagetv/electron-progress-window/commit/77c96e314408c677431d99c05a0ebf1529bc6767))
+
 ## [1.3.1](https://github.com/spaceagetv/electron-progress-window/compare/v1.3.0...v1.3.1) (2023-06-23)
 
 
