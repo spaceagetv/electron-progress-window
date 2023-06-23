@@ -455,6 +455,57 @@ describe('ProgressWindow', () => {
     expect(progressWindow.browserWindow.getSize()).to.deep.equal([400, 123])
   })
 
+  it('should keep window centered on old position when adding/removing items', async () => {
+    ProgressWindow.configure({
+      windowOptions: { width: 400, height: 50 },
+    })
+    const progressWindow = await ProgressWindow.create()
+    await progressWindow.whenReady()
+    expect(progressWindow.browserWindow).to.be.ok
+    if (!progressWindow.browserWindow) throw new Error('no browserWindow')
+    // add a single item
+    await ProgressWindow.addItem()
+    // wait a tick for event emitters to fire
+    await pause(0)
+
+    // center the window on the display
+    const screen = progressWindow.options.testingFixtures?.scr
+    if (!screen) throw new Error('no screen')
+    const display = screen.getAllDisplays()[0]
+    const displayBounds = display.bounds
+    const windowBounds = progressWindow.browserWindow.getBounds()
+    const x = displayBounds.x + displayBounds.width / 2 - windowBounds.width / 2
+    const y =
+      displayBounds.y + displayBounds.height / 2 - windowBounds.height / 2
+    progressWindow.browserWindow.setPosition(x, y)
+
+    // get the current bounds
+    const bounds1 = { ...progressWindow.browserWindow.getBounds() }
+    expect(bounds1).to.be.ok
+    expect(bounds1).to.deep.equal({
+      x: 760,
+      y: 489,
+      width: 400,
+      height: 60 + 20 + 22,
+    })
+
+    // add a second item
+    await ProgressWindow.addItem()
+    // wait a tick for event emitters to fire
+    await pause(0)
+    // get the current bounds
+    const bounds2 = { ...progressWindow.browserWindow.getBounds() }
+    expect(bounds2).to.be.ok
+    expect(bounds2.y < bounds1.y, 'top of window should have moved up').to.be
+      .true
+    expect(bounds2).to.deep.equal({
+      x: 760,
+      y: 437,
+      width: 400,
+      height: 60 * 2 + 20 + 22,
+    })
+  })
+
   it('should set item values in various ways', async () => {
     ProgressWindow.configure({
       itemDefaults: {

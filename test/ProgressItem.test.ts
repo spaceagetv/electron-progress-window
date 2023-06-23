@@ -53,6 +53,61 @@ describe('ProgressItem', () => {
       expect(updateSpy.calledOnce).to.be.true
     })
 
+    it('should emit a "update" event on assignment of "title"', () => {
+      const updateSpy = sinon.spy()
+
+      const progressItem = new ProgressItem()
+      progressItem.on('update', updateSpy)
+
+      progressItem.title = 'test'
+
+      expect(updateSpy.calledOnce).to.be.true
+      expect(progressItem.title).to.equal('test')
+    })
+
+    it('should emit a "update" event on assignment of "detail"', () => {
+      const updateSpy = sinon.spy()
+
+      const progressItem = new ProgressItem()
+      progressItem.on('update', updateSpy)
+
+      progressItem.detail = 'test'
+
+      expect(updateSpy.calledOnce).to.be.true
+      expect(progressItem.detail).to.equal('test')
+    })
+
+    it('should emit a "update" event on assignment of "css"', () => {
+      const updateSpy = sinon.spy()
+
+      const progressItem = new ProgressItem()
+      progressItem.on('update', updateSpy)
+
+      progressItem.css = {
+        errorBackground: 'red',
+      }
+
+      expect(updateSpy.calledOnce).to.be.true
+      expect(progressItem.css).to.deep.equal({
+        errorBackground: 'red',
+      })
+      expect(progressItem.cssTransferable).to.deep.equal([
+        ['--error-background', 'red'],
+      ])
+    })
+
+    it('should emit a "update" event on assignment of "theme"', () => {
+      const updateSpy = sinon.spy()
+
+      const progressItem = new ProgressItem()
+      progressItem.on('update', updateSpy)
+
+      progressItem.theme = 'none'
+
+      expect(updateSpy.calledOnce).to.be.true
+      expect(progressItem.theme).to.equal('none')
+    })
+
     it('should emit a "update" event on assignment of "indeterminate"', () => {
       const updateSpy = sinon.spy()
 
@@ -62,6 +117,106 @@ describe('ProgressItem', () => {
       progressItem.indeterminate = true
 
       expect(updateSpy.calledOnce).to.be.true
+    })
+
+    it('should emit a "update" event on assignment of "enableCancel"', () => {
+      const updateSpy = sinon.spy()
+
+      const progressItem = new ProgressItem()
+      progressItem.on('update', updateSpy)
+
+      progressItem.enableCancel = false
+
+      expect(updateSpy.calledOnce).to.be.true
+      expect(progressItem.enableCancel).to.be.false
+    })
+
+    it('should emit a "update" event on assignment of "enablePause"', () => {
+      const updateSpy = sinon.spy()
+
+      const progressItem = new ProgressItem()
+      progressItem.on('update', updateSpy)
+
+      progressItem.enablePause = true
+
+      expect(updateSpy.calledOnce).to.be.true
+      expect(progressItem.enablePause).to.be.true
+    })
+
+    it('should emit a "update" event on assignment of "error"', () => {
+      const updateSpy = sinon.spy()
+
+      const progressItem = new ProgressItem()
+      progressItem.on('update', updateSpy)
+
+      progressItem.error = true
+
+      expect(updateSpy.calledOnce).to.be.true
+      expect(progressItem.error).to.be.true
+    })
+
+    it('should emit a "update" event on assignment of "autoComplete"', () => {
+      const updateSpy = sinon.spy()
+
+      const progressItem = new ProgressItem()
+      progressItem.on('update', updateSpy)
+
+      progressItem.autoComplete = false
+
+      expect(updateSpy.calledOnce).to.be.true
+      expect(progressItem.autoComplete).to.be.false
+    })
+
+    it('should emit a "update" event on assignment of "removeOnComplete"', () => {
+      const updateSpy = sinon.spy()
+
+      const progressItem = new ProgressItem()
+      progressItem.on('update', updateSpy)
+
+      progressItem.removeOnComplete = false
+
+      expect(updateSpy.calledOnce).to.be.true
+      expect(progressItem.removeOnComplete).to.be.false
+    })
+
+    it('should NOT emit a "update" event on assignment of current options', () => {
+      const updateSpy = sinon.spy()
+
+      const progressItem = new ProgressItem({
+        value: 0.1,
+        maxValue: 0.1,
+        title: 'test',
+        detail: 'test',
+        css: {
+          errorBackground: 'red',
+        },
+        theme: 'none',
+        indeterminate: true,
+        enableCancel: false,
+        enablePause: true,
+        error: true,
+        autoComplete: false,
+        removeOnComplete: false,
+      })
+
+      progressItem.on('update', updateSpy)
+
+      progressItem.value = 0.1
+      progressItem.maxValue = 0.1
+      progressItem.title = 'test'
+      progressItem.detail = 'test'
+      progressItem.css = {
+        errorBackground: 'red',
+      }
+      progressItem.theme = 'none'
+      progressItem.indeterminate = true
+      progressItem.enableCancel = false
+      progressItem.enablePause = true
+      progressItem.error = true
+      progressItem.autoComplete = false
+      progressItem.removeOnComplete = false
+
+      expect(updateSpy.called).to.be.false
     })
 
     // pause event

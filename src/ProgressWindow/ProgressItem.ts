@@ -199,10 +199,12 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     this.update({ css })
   }
 
+  /** @internal */
   get cssTransferable() {
     const css = this._privates.css
     return Object.entries(css)
       .map(([key, value]) => {
+        // istanbul ignore if
         if (!itemCssMap[key as ItemCssProperty]) return
         const transferableKey = itemCssMap[key as ItemCssProperty]
         return [transferableKey, value] as const
@@ -305,7 +307,14 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     if (this.removed) {
       return
     }
-    if (isEqual(this._privates, options)) {
+    const hasChanged = Object.entries(options).some(
+      ([key, val]: [
+        keyof ProgressItemOptions,
+        ProgressItemOptions[keyof ProgressItemOptions]
+      ]) => !isEqual(this._privates[key], val)
+    )
+    // if none of the options have changed, return
+    if (!hasChanged) {
       return
     }
     this._privates = { ...this._privates, ...options }

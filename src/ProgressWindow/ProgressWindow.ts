@@ -180,7 +180,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     variableWidth: false,
     closeOnComplete: true,
     focusWhenAddingItem: true,
-    animateResize: true,
+    animateResize: false,
     windowOptions: {
       width: 300,
       height: 60,
@@ -353,6 +353,8 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     [id: string]: ProgressItem
   } = {}
 
+  private lastContentDimensions = { width: 0, height: 0 }
+
   /** @internal */
   private _ready: Promise<ProgressWindow>
 
@@ -401,6 +403,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     // create the window
     this.browserWindow = new bwFunction(this.options.windowOptions)
     // prevent the window from navigating away from the initial URL
+    // istanbul ignore next
     this.browserWindow.webContents.on('will-navigate', (event) => {
       event.preventDefault()
     })
@@ -428,6 +431,9 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
 
     // devtools
     // this.browserWindow.webContents.openDevTools()
+
+    // we're going to get x/y here too... but we'll just ignore them
+    this.lastContentDimensions = this.browserWindow.getContentBounds()
 
     this.browserWindow.on('close', () => {
       if (this.options.cancelOnClose) {
@@ -626,8 +632,13 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     }
   }
 
-  /** Update the window size based on the content size */
-  private updateContentSize(dimensions: { width: number; height: number }) {
+  /**
+   * Update the window size based on the content size
+   * received through ipc('progress-update-content-size) from the renderer
+   *
+   * @internal
+   */
+  private updateContentSize(newDimensions: { width: number; height: number }) {
     // istanbul ignore next
     if (!this.browserWindow) {
       throw new Error(
@@ -639,6 +650,22 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
       // we shouldn't be resizing the window
       return
     }
+
+    // round the new dimensions to the nearest integer
+    newDimensions.width = Math.round(newDimensions.width)
+    newDimensions.height = Math.round(newDimensions.height)
+
+    // if only one dimension is variable and it hasn't changed, don't resize
+    // istanbul ignore next
+    if (
+      (!this.options.variableWidth &&
+        newDimensions.height === this.lastContentDimensions.height) ||
+      (!this.options.variableHeight &&
+        newDimensions.width === this.lastContentDimensions.width)
+    ) {
+      return
+    }
+
     // find the display that the window is currently on
     const display = this._screenInstance.getDisplayMatching(
       this.browserWindow.getBounds()
@@ -651,26 +678,32 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
       y: displayY,
     } = display.workArea
     // get the bounds of the Progress window
+    const { width: oldWidth, height: oldHeight } = this.lastContentDimensions
+
     const {
-      width: oldWidth,
-      height: oldHeight,
       x: windowOldX,
       y: windowOldY,
-    } = this.browserWindow.getContentBounds()
+      width: windowOldWidth,
+      height: windowOldHeight,
+    } = this.browserWindow.getBounds()
 
     // get the height of the title bar
     const titleBarHeight =
-      this.browserWindow.getNormalBounds().height - oldHeight
+      this.browserWindow.getNormalBounds().height -
+      this.browserWindow.getContentBounds().height
 
     // calculate the new window size
-    const width = this.options.variableWidth
-      ? Math.min(dimensions.width, displayWidth)
-      : oldWidth
+    const contentWidth = this.options.variableWidth
+      ? Math.min(newDimensions.width, displayWidth)
+      : windowOldWidth
     const height = this.options.variableHeight
-      ? Math.min(dimensions.height, displayHeight)
-      : oldHeight
-    const widthDiff = width - oldWidth
+      ? Math.min(newDimensions.height, displayHeight - titleBarHeight)
+      : windowOldHeight
+
+    const widthDiff = contentWidth - oldWidth
     const heightDiff = height - oldHeight
+
+    // istanbul ignore next
     if (widthDiff === 0 && heightDiff === 0) {
       // no change in size
       return
@@ -679,7 +712,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     // make sure window isn't overlapping edge of display
     const x = Math.min(
       Math.max(windowOldX - widthDiff / 2, displayX),
-      displayX + displayWidth - width
+      displayX + displayWidth - contentWidth
     )
     const y = Math.min(
       Math.max(windowOldY - heightDiff / 2, displayY),
@@ -688,11 +721,12 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
 
     const bounds = {
       x: Math.round(x),
-      y: Math.round(y + titleBarHeight),
-      width: Math.round(width),
+      y: Math.round(y),
+      width: Math.round(contentWidth),
       height: Math.round(height),
     }
     this.browserWindow.setContentBounds(bounds, this.options.animateResize)
+    this.lastContentDimensions = bounds
   }
 
   /** Close the window if all items are completed */
