@@ -14,32 +14,73 @@ import TypedEmitter from 'typed-emitter'
 //   silly: console.debug,
 // }
 
+export type ProgressItemTheme = 'stripes' | 'none'
+
 /**
  * Options for creating a new progress item
  * @see ProgressItem
  * @public
  */
-export type ProgressItemOptions = Partial<
-  Pick<
-    ProgressItem,
-    | 'title'
-    | 'detail'
-    | 'indeterminate'
-    | 'value'
-    | 'maxValue'
-    | 'enableCancel'
-    | 'enablePause'
-    | 'autoComplete'
-    | 'removeOnComplete'
-  >
+export type ProgressItemOptions = Pick<
+  ProgressItem,
+  | 'autoComplete'
+  | 'css'
+  | 'detail'
+  | 'enableCancel'
+  | 'enablePause'
+  | 'error'
+  | 'indeterminate'
+  | 'maxValue'
+  | 'removeOnComplete'
+  | 'theme'
+  | 'title'
+  | 'value'
 >
+
+export const itemCssMap = {
+  /** Font-size property. Default 15px */
+  fontSize: '--font-size',
+  /** Height of the progress bar. Default: 6px */
+  progressHeight: '--progress-height',
+  /** Padding around the progress bar. Shows progressBackground. Default: 2px */
+  progressPadding: '--progress-padding',
+  /** Background of the progress bar. Default: #ffffff6c */
+  progressBackground: '--progress-background',
+  /** Foreground of the progress bar. This is actually the "background" property on a div. Default: #1f65fd */
+  progressForeground: '--progress-foreground',
+  /** Background of the item's containing div. */
+  itemBackground: '--item-background',
+  /** Border radius of the item's containing div. Default: 4px */
+  itemBorderRadius: '--item-border-radius',
+  /** Background color of the progress bar when paused. Default: #a3a3a338 */
+  pausedBackground: '--paused-background',
+  /** Background the item's containing div when error is true. Default: #b54545 */
+  errorBackground: '--error-background',
+  /** Text color of the containing div when error is true. Default: #ffffff */
+  errorTextColor: '--error-text-color',
+  /** Background of the progress bar when error is true. Default: #ffffff6c */
+  errorProgressBackground: '--error-progress-background',
+  /** Foreground of the progress bar when error is true. Default: #670000 */
+  errorProgressForeground: '--error-progress-foreground',
+} as const
+
+export type ItemCssProperty = keyof typeof itemCssMap
+export type ItemCssValue = (typeof itemCssMap)[ItemCssProperty]
+export type ItemCss = Partial<Record<ItemCssProperty, string>>
+export type TransferableItemCss = [ItemCssValue, string][]
 
 /**
  * Transferable version of ProgressItem - used for IPC
  * @internal
  */
-export type ProgressItemTransferable = ProgressItemOptions &
-  Pick<ProgressItem, 'id' | 'paused'>
+export type ProgressItemTransferable = Required<
+  Omit<ProgressItemOptions, 'css'>
+> &
+  Pick<ProgressItem, 'id' | 'paused' | 'cancelled'> & {
+    /** Is the item finished? */
+    completed: boolean
+    css: TransferableItemCss
+  }
 
 /**
  * Events emitted by a ProgressItem instance
@@ -89,11 +130,14 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   _privates: ProgressItemOptions = {
     title: '',
     detail: '',
+    css: {},
+    theme: 'stripes',
     indeterminate: false,
     value: 0,
     maxValue: 100,
     enableCancel: true,
     enablePause: false,
+    error: false,
     autoComplete: true,
     removeOnComplete: true,
   }
@@ -113,9 +157,10 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   /** Has the item been removed? */
   removed = false
 
-  constructor(options = {} as ProgressItemOptions) {
+  constructor(options = {} as Partial<ProgressItemOptions>) {
     super()
     merge(this._privates, options)
+    // console.log('ProgressItem constructor', this._privates)
   }
 
   /** Get/set the current progress value */
@@ -127,7 +172,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     this.update({ value })
   }
 
-  /** Get/set the title */
+  /** Title appears above the progress bar */
   get title() {
     return this._privates.title
   }
@@ -136,6 +181,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     this.update({ title })
   }
 
+  /** Detail field shows below the progress bar */
   get detail() {
     return this._privates.detail
   }
@@ -144,13 +190,43 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     this.update({ detail })
   }
 
-  /** Is the item indeterminate? */
+  /** CSS variables */
+  get css() {
+    return this._privates.css
+  }
+
+  set css(css: ItemCss) {
+    this.update({ css })
+  }
+
+  /** @internal */
+  get cssTransferable() {
+    const css = this._privates.css
+    return Object.entries(css)
+      .map(([key, value]) => {
+        // istanbul ignore if
+        if (!itemCssMap[key as ItemCssProperty]) return
+        const transferableKey = itemCssMap[key as ItemCssProperty]
+        return [transferableKey, value] as const
+      })
+      .filter(Boolean) as [ItemCssValue, string][]
+  }
+
+  /** Indeterminate? */
   get indeterminate(): boolean {
     return this._privates.indeterminate
   }
 
   set indeterminate(indeterminate: boolean) {
     this.update({ indeterminate })
+  }
+
+  get theme(): ProgressItemTheme {
+    return this._privates.theme
+  }
+
+  set theme(theme: ProgressItemTheme) {
+    this.update({ theme })
   }
 
   /** Maximum value */
@@ -169,6 +245,15 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   set enableCancel(enableCancel: boolean) {
     this.update({ enableCancel })
+  }
+
+  /** Add an "error" class to the div.progress-item element */
+  get error(): boolean {
+    return this._privates.error
+  }
+
+  set error(error: boolean) {
+    this.update({ error })
   }
 
   /** Is the item pauseable? Will show pause button. Default: false */
@@ -206,7 +291,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
    */
   setProgress(
     value: number,
-    otherOptions = {} as Omit<ProgressItemOptions, 'value'>
+    otherOptions = {} as Partial<Omit<ProgressItemOptions, 'value'>>
   ) {
     if (this.indeterminate) return
     this.update({ value, ...otherOptions })
@@ -222,7 +307,14 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     if (this.removed) {
       return
     }
-    if (isEqual(this._privates, options)) {
+    const hasChanged = Object.entries(options).some(
+      ([key, val]: [
+        keyof ProgressItemOptions,
+        ProgressItemOptions[keyof ProgressItemOptions]
+      ]) => !isEqual(this._privates[key], val)
+    )
+    // if none of the options have changed, return
+    if (!hasChanged) {
       return
     }
     this._privates = { ...this._privates, ...options }
@@ -318,20 +410,24 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   }
 
   /** Get a transferable object for IPC - @internal */
-  transferable() {
+  transferable(): ProgressItemTransferable {
     return {
-      id: this.id,
-      title: this.title,
-      detail: this.detail,
-      indeterminate: this.indeterminate,
       autoComplete: this.autoComplete,
-      value: this.value,
-      maxValue: this.maxValue,
+      cancelled: this.cancelled,
+      completed: this.isCompleted(),
+      css: this.cssTransferable,
+      detail: this.detail,
       enableCancel: this.enableCancel,
       enablePause: this.enablePause,
-      completed: this._completed,
-      removeOnComplete: this.removeOnComplete,
+      error: this.error,
+      id: this.id,
+      indeterminate: this.indeterminate,
+      maxValue: this.maxValue,
       paused: this.paused,
-    } as ProgressItemTransferable
+      removeOnComplete: this.removeOnComplete,
+      title: this.title,
+      theme: this.theme,
+      value: this.value,
+    }
   }
 }
