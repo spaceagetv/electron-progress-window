@@ -83,12 +83,12 @@ describe('ProgressItem', () => {
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
-      progressItem.css = {
+      progressItem.cssVars = {
         errorBackground: 'red',
       }
 
       expect(updateSpy.calledOnce).to.be.true
-      expect(progressItem.css).to.deep.equal({
+      expect(progressItem.cssVars).to.deep.equal({
         errorBackground: 'red',
       })
       expect(progressItem.cssTransferable).to.deep.equal([
@@ -187,7 +187,7 @@ describe('ProgressItem', () => {
         maxValue: 0.1,
         title: 'test',
         detail: 'test',
-        css: {
+        cssVars: {
           errorBackground: 'red',
         },
         theme: 'none',
@@ -205,7 +205,7 @@ describe('ProgressItem', () => {
       progressItem.maxValue = 0.1
       progressItem.title = 'test'
       progressItem.detail = 'test'
-      progressItem.css = {
+      progressItem.cssVars = {
         errorBackground: 'red',
       }
       progressItem.theme = 'none'

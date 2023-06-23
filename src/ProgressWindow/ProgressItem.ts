@@ -24,7 +24,7 @@ export type ProgressItemTheme = 'stripes' | 'none'
 export type ProgressItemOptions = Pick<
   ProgressItem,
   | 'autoComplete'
-  | 'css'
+  | 'cssVars'
   | 'detail'
   | 'enableCancel'
   | 'enablePause'
@@ -79,7 +79,7 @@ export type ProgressItemTransferable = Required<
   Pick<ProgressItem, 'id' | 'paused' | 'cancelled'> & {
     /** Is the item finished? */
     completed: boolean
-    css: TransferableItemCss
+    cssVars: TransferableItemCss
   }
 
 /**
@@ -130,7 +130,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   _privates: ProgressItemOptions = {
     title: '',
     detail: '',
-    css: {},
+    cssVars: {},
     theme: 'stripes',
     indeterminate: false,
     value: 0,
@@ -191,17 +191,17 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   }
 
   /** CSS variables */
-  get css() {
-    return this._privates.css
+  get cssVars() {
+    return this._privates.cssVars
   }
 
-  set css(css: ItemCss) {
-    this.update({ css })
+  set cssVars(cssVars: ItemCss) {
+    this.update({ cssVars })
   }
 
   /** @internal */
   get cssTransferable() {
-    const css = this._privates.css
+    const css = this._privates.cssVars
     return Object.entries(css)
       .map(([key, value]) => {
         // istanbul ignore if
@@ -415,7 +415,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
       autoComplete: this.autoComplete,
       cancelled: this.cancelled,
       completed: this.isCompleted(),
-      css: this.cssTransferable,
+      cssVars: this.cssTransferable,
       detail: this.detail,
       enableCancel: this.enableCancel,
       enablePause: this.enablePause,

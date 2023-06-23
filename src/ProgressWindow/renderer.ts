@@ -173,7 +173,7 @@ class ProgressWidget {
     this.element.classList.toggle('remove-on-complete', item.removeOnComplete)
     this.element.classList.toggle('stripes', item.theme === 'stripes')
 
-    item.css.forEach(([prop, val]) => {
+    item.cssVars.forEach(([prop, val]) => {
       this.element.style.setProperty(prop, val)
     })
 
