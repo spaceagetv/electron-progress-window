@@ -18,6 +18,8 @@ export type ItemCss = Partial<Record<ItemCssProperty, string>>;
 // @public (undocumented)
 export const itemCssMap: {
     readonly fontSize: "--font-size";
+    readonly fontFamily: "--font-family";
+    readonly textColor: "--text-color";
     readonly progressHeight: "--progress-height";
     readonly progressPadding: "--progress-padding";
     readonly progressBackground: "--progress-background";
