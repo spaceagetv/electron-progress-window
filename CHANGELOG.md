@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/spaceagetv/electron-progress-window/compare/v1.3.2...v1.3.3) (2023-06-26)
+
+
+### Bug Fixes
+
+* window resizing ([123b281](https://github.com/spaceagetv/electron-progress-window/commit/123b2816abd512a916430a27e4c9b91081a741b3))
+
 ## [1.3.2](https://github.com/spaceagetv/electron-progress-window/compare/v1.3.1...v1.3.2) (2023-06-23)
 
 
