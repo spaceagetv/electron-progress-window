@@ -12,6 +12,23 @@ chai.use(sinonChai)
 describe('ProgressWindow', () => {
   before(() => {
     ProgressWindow.emitter.on('created', async (progressWindow) => {
+      const screen = progressWindow.options.testingFixtures?.scr
+      if (!screen) throw new Error('screen not found')
+      const browserWindow = progressWindow.browserWindow
+      if (!browserWindow) throw new Error('browserWindow not found')
+
+      // center the window on the screen
+      const screenBounds = screen.getPrimaryDisplay().workArea
+      const windowBounds = browserWindow.getBounds()
+      browserWindow.setBounds({
+        x: Math.round(
+          screenBounds.x + (screenBounds.width - windowBounds.width) / 2
+        ),
+        y: Math.round(
+          screenBounds.y + (screenBounds.height - windowBounds.height) / 2
+        ),
+      })
+
       // emulate the preload script sending ipc 'progress-update-content-size'
       // when items are added or removed
       const setContentSize = async () => {
@@ -500,10 +517,19 @@ describe('ProgressWindow', () => {
       .true
     expect(bounds2).to.deep.equal({
       x: 760,
-      y: 437,
+      y: 459,
       width: 400,
       height: 60 * 2 + 20 + 22,
     })
+
+    // the amount that the top bounds2 moved up compared to bounds1
+    const topOffset = bounds1.y - bounds2.y
+
+    // the amount that the bottom bounds2 moved down compared to bounds1
+    const bottomOffset = bounds2.height + bounds2.y - bounds1.height - bounds1.y
+
+    // the top and bottom should have moved the same amount
+    expect(topOffset).to.equal(bottomOffset)
   })
 
   it('should set item values in various ways', async () => {

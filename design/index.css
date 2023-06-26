@@ -61,11 +61,11 @@ body {
 }
 
 .progress-item-actions svg:hover {
-  background-color: #eeeeee;
+  background-color: #eeeeee55;
 }
 
 .progress-item-actions svg:active {
-  background-color: #dddddd;
+  background-color: #dddddd88;
 }
 
 .progress-item-title {
