@@ -187,6 +187,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
       backgroundColor: '#fff',
       fullscreenable: false,
       maximizable: false,
+      resizable: false,
       show: false,
       acceptFirstMouse: true,
     },
@@ -685,7 +686,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
       y: windowOldY,
       width: windowOldWidth,
       height: windowOldHeight,
-    } = this.browserWindow.getBounds()
+    } = this.browserWindow.getContentBounds()
 
     // get the height of the title bar
     const titleBarHeight =
@@ -696,12 +697,13 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     const contentWidth = this.options.variableWidth
       ? Math.min(newDimensions.width, displayWidth)
       : windowOldWidth
-    const height = this.options.variableHeight
+    const contentHeight = this.options.variableHeight
       ? Math.min(newDimensions.height, displayHeight - titleBarHeight)
       : windowOldHeight
 
+    // negative if smaller, positive if larger
     const widthDiff = contentWidth - oldWidth
-    const heightDiff = height - oldHeight
+    const heightDiff = contentHeight - oldHeight
 
     // istanbul ignore next
     if (widthDiff === 0 && heightDiff === 0) {
@@ -709,21 +711,24 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
       return
     }
 
+    const proposedX = windowOldX - widthDiff / 2
+    const proposedY = windowOldY - heightDiff / 2
+
     // make sure window isn't overlapping edge of display
     const x = Math.min(
-      Math.max(windowOldX - widthDiff / 2, displayX),
+      Math.max(proposedX, displayX),
       displayX + displayWidth - contentWidth
     )
     const y = Math.min(
-      Math.max(windowOldY - heightDiff / 2, displayY),
-      displayY + displayHeight - height
+      Math.max(proposedY, displayY),
+      displayY + displayHeight - contentHeight
     )
 
     const bounds = {
       x: Math.round(x),
       y: Math.round(y),
       width: Math.round(contentWidth),
-      height: Math.round(height),
+      height: Math.round(contentHeight),
     }
     this.browserWindow.setContentBounds(bounds, this.options.animateResize)
     this.lastContentDimensions = bounds
