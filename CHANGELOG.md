@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/spaceagetv/electron-progress-window/compare/v1.3.3...v1.4.0) (2023-07-02)
+
+
+### Features
+
+* new option: delayClosing ([493f4ba](https://github.com/spaceagetv/electron-progress-window/commit/493f4ba401d233e42b08c55f45b1adb83b1a2d32))
+
 ## [1.3.3](https://github.com/spaceagetv/electron-progress-window/compare/v1.3.2...v1.3.3) (2023-06-26)
 
 
