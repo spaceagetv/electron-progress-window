@@ -85,9 +85,11 @@ setTimeout(() => {
 |  [cancelAll()](./electron-progress-window.progresswindow.cancelall.md) |  | Cancel all items + trigger the 'cancelled' event on each item. Items will be removed after they are cancelled. |
 |  [close()](./electron-progress-window.progresswindow.close.md) |  | Close the window |
 |  [close()](./electron-progress-window.progresswindow.close.md) | <code>static</code> | Close the default ProgressWindow instance (if open). |
+|  [closeIfEmpty()](./electron-progress-window.progresswindow.closeifempty.md) |  | Close (destroy) the window if there are no items. |
 |  [configure(options)](./electron-progress-window.progresswindow.configure.md) | <code>static</code> | Configure new ProgressWindow instances with these options. |
 |  [create()](./electron-progress-window.progresswindow.create.md) | <code>static</code> | Asynchronously create the ProgressWindow instance |
 |  [destroy()](./electron-progress-window.progresswindow.destroy.md) | <code>static</code> | Destroy the ProgressWindow instance. |
+|  [hideThenCloseIfEmpty()](./electron-progress-window.progresswindow.hidethencloseifempty.md) |  | Hide the window. Then, after a delay, close it if there are no items. |
 |  [removeAll()](./electron-progress-window.progresswindow.removeall.md) |  | Remove all items (without cancelling them) |
 |  [removeItem(id)](./electron-progress-window.progresswindow.removeitem.md) |  | Remove an item from the window |
 |  [whenReady()](./electron-progress-window.progresswindow.whenready.md) |  | A promise that resolves when the window is ready to use. |

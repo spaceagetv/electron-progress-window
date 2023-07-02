@@ -132,6 +132,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     cancelAll(): void;
     static close(): void;
     close(): void;
+    closeIfEmpty(): void;
     static configure(options: ProgressWindowOptions | ProgressWindowOptionsFunction): void;
     static create(): Promise<ProgressWindow>;
     static readonly defaults: ProgressWindowOptions;
@@ -139,6 +140,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     static destroy(): void;
     // @eventProperty
     static readonly emitter: TypedEmitter<ProgressWindowStaticEvents>;
+    hideThenCloseIfEmpty(): Promise<void>;
     static get instance(): ProgressWindow;
     // @internal (undocumented)
     static _instance: ProgressWindow | null;
@@ -175,6 +177,7 @@ export interface ProgressWindowOptions {
     cancelOnClose?: boolean;
     closeOnComplete?: boolean;
     css?: string;
+    delayClosing?: boolean | number;
     focusWhenAddingItem?: boolean;
     itemDefaults?: Partial<ProgressItemOptions>;
     // @internal

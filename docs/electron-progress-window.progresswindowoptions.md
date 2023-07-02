@@ -20,6 +20,7 @@ export interface ProgressWindowOptions
 |  [cancelOnClose?](./electron-progress-window.progresswindowoptions.cancelonclose.md) |  | boolean | _(Optional)_ Send 'cancelled' for all current items when closing the window. Default: false |
 |  [closeOnComplete?](./electron-progress-window.progresswindowoptions.closeoncomplete.md) |  | boolean | _(Optional)_ Close window automatically when all items complete. Default: true |
 |  [css?](./electron-progress-window.progresswindowoptions.css.md) |  | string | _(Optional)_ Additional CSS for the window |
+|  [delayClosing?](./electron-progress-window.progresswindowoptions.delayclosing.md) |  | boolean \| number | _(Optional)_ Hide the window for a moment before closing. Window will pop up faster if a subsequent item is added before delay is finished. True/false or number of milliseconds. Defaults to true, which delays for 3000ms. |
 |  [focusWhenAddingItem?](./electron-progress-window.progresswindowoptions.focuswhenaddingitem.md) |  | boolean | _(Optional)_ Focus the window when adding a new item. Default: true |
 |  [itemDefaults?](./electron-progress-window.progresswindowoptions.itemdefaults.md) |  | Partial&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt; | _(Optional)_ Default options for new ProgressItem |
 |  [variableHeight?](./electron-progress-window.progresswindowoptions.variableheight.md) |  | boolean | _(Optional)_ Expand height of window as needed? Default: true. Scroll otherwise. |
