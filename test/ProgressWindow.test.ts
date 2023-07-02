@@ -5,6 +5,7 @@ import { MockBrowserWindow, MockScreen } from 'electron-mocks'
 import { ProgressItem, ProgressWindow } from '../src/ProgressWindow'
 import { withTimeout } from './withTimeout'
 import { pause } from './pause'
+import sinon from 'sinon'
 
 chai.use(chaiAsPromised)
 chai.use(sinonChai)
@@ -244,6 +245,9 @@ describe('ProgressWindow', () => {
 
   it('ProgressWindow should go away when last item is removed', async function () {
     // this.timeout(10000)
+    ProgressWindow.configure({
+      delayClosing: false,
+    })
     const item1 = await ProgressWindow.addItem({
       maxValue: 100,
       autoComplete: true,
@@ -296,17 +300,21 @@ describe('ProgressWindow', () => {
     await expect(removePromise).to.be.fulfilled
     expect(item1.cancelled).to.be.true
     expect(item1.removed).to.be.true
-    expect(ProgressWindow._instance).to.be.null
+    expect(ProgressWindow._instance?.browserWindow?.isVisible()).to.be.false
   })
 
   it('should remove an item', async () => {
+    ProgressWindow.configure({
+      delayClosing: false,
+    })
     const item1 = await ProgressWindow.addItem()
     expect(item1).to.be.ok
     item1.remove()
     // let event emitters fire
-    await pause(0)
+    await pause(40)
     expect(item1.removed).to.be.true
     expect(ProgressWindow._instance).to.be.null
+    expect(ProgressWindow._instance?.browserWindow).not.to.be.ok
   })
 
   it('should pause an item', async () => {
@@ -382,6 +390,112 @@ describe('ProgressWindow', () => {
     ProgressWindow.close()
     await expect(cancelPromise).to.eventually.be.fulfilled
     await expect(removePromise).to.eventually.be.fulfilled
+  })
+
+  it('should reuse existing window if delayClosing is true', async () => {
+    ProgressWindow.configure({
+      delayClosing: true, // should wait 3000ms before closing
+    })
+    const progressWindow = await ProgressWindow.create()
+    expect(progressWindow).to.be.an.instanceof(ProgressWindow)
+
+    expect(ProgressWindow._instance).to.be.ok
+    if (!ProgressWindow._instance)
+      throw new Error('ProgressWindow._instance is null')
+    expect(ProgressWindow._instance).to.equal(progressWindow)
+
+    const itemAddedSpy = sinon.spy()
+    progressWindow.on('itemAdded', itemAddedSpy)
+
+    const item1 = await progressWindow.addItem({ title: 'item1' })
+    expect(item1).to.be.ok
+
+    expect(itemAddedSpy).to.be.calledOnce
+
+    const itemRemovedSpy = sinon.spy()
+    item1.on('remove', itemRemovedSpy)
+
+    const windowHideSpy = sinon.spy()
+    if (!progressWindow.browserWindow) throw new Error('browserWindow is null')
+    progressWindow.browserWindow.on('hide', windowHideSpy)
+
+    const windowClosedSpy = sinon.spy()
+    progressWindow.browserWindow.on('closed', windowClosedSpy)
+
+    item1.setCompleted()
+
+    // let event emitters fire
+    await pause(50)
+
+    expect(itemRemovedSpy).to.be.calledOnce
+    expect(windowHideSpy).to.have.been.called
+    expect(windowClosedSpy).to.not.have.been.called
+    expect(itemAddedSpy).to.be.calledOnce
+
+    expect(ProgressWindow._instance).to.be.ok
+    expect(ProgressWindow._instance).to.equal(progressWindow)
+    expect(progressWindow.browserWindow).to.be.ok
+    expect(progressWindow.browserWindow.isVisible()).to.be.false
+
+    const item2 = await progressWindow.addItem({ title: 'item2' })
+    expect(item2).to.be.ok
+    expect(itemAddedSpy).to.be.calledTwice
+
+    // let event emitters fire
+    await pause(50)
+    expect(ProgressWindow._instance).to.be.ok
+    expect(ProgressWindow._instance?.browserWindow).to.be.ok
+    expect(ProgressWindow._instance?.browserWindow?.isVisible()).to.be.true
+  })
+
+  it('should destroy window after delayClosing delay', async () => {
+    ProgressWindow.configure({
+      delayClosing: 500, // 500ms before closing
+    })
+    const progressWindow = await ProgressWindow.create()
+
+    expect(ProgressWindow._instance).to.be.ok
+    if (!ProgressWindow._instance)
+      throw new Error('ProgressWindow._instance is null')
+    expect(ProgressWindow._instance).to.equal(progressWindow)
+
+    const itemAddedSpy = sinon.spy()
+    progressWindow.on('itemAdded', itemAddedSpy)
+
+    const item1 = await progressWindow.addItem({ title: 'item1' })
+    expect(item1).to.be.ok
+
+    expect(itemAddedSpy).to.be.calledOnce
+
+    const itemRemovedSpy = sinon.spy()
+    item1.on('remove', itemRemovedSpy)
+
+    const windowHideSpy = sinon.spy()
+    if (!progressWindow.browserWindow) throw new Error('browserWindow is null')
+    progressWindow.browserWindow.on('hide', windowHideSpy)
+
+    const windowClosedSpy = sinon.spy()
+    progressWindow.browserWindow.on('closed', windowClosedSpy)
+
+    item1.setCompleted()
+
+    // let event emitters fire
+    await pause(50)
+
+    expect(itemRemovedSpy).to.be.calledOnce
+    expect(windowHideSpy).to.have.been.called
+    expect(windowClosedSpy).to.not.have.been.called
+    expect(itemAddedSpy).to.be.calledOnce
+
+    expect(ProgressWindow._instance).to.be.ok
+    expect(ProgressWindow._instance).to.equal(progressWindow)
+    expect(progressWindow.browserWindow).to.be.ok
+    expect(progressWindow.browserWindow.isVisible()).to.be.false
+
+    // wait for window to close
+    await pause(600)
+    expect(ProgressWindow._instance).to.be.null
+    expect(windowClosedSpy).to.have.been.calledOnce
   })
 
   it('configure() should throw if instance already exists', async () => {

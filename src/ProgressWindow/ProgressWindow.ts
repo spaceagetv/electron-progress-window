@@ -18,6 +18,13 @@ export interface ProgressWindowOptions {
   variableWidth?: boolean
   /** Close window automatically when all items complete. Default: true */
   closeOnComplete?: boolean
+  /**
+   * Hide the window for a moment before closing.
+   * Window will pop up faster if a subsequent item is added before delay is finished.
+   * True/false or number of milliseconds.
+   * Defaults to true, which delays for 3000ms.
+   */
+  delayClosing?: boolean | number
   /** Send 'cancelled' for all current items when closing the window. Default: false */
   cancelOnClose?: boolean
   /** Focus the window when adding a new item. Default: true */
@@ -179,6 +186,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     variableHeight: true,
     variableWidth: false,
     closeOnComplete: true,
+    delayClosing: true,
     focusWhenAddingItem: true,
     animateResize: false,
     windowOptions: {
@@ -409,7 +417,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
       event.preventDefault()
     })
     this._ready = new Promise((resolve) => {
-      this.browserWindow.on('ready-to-show', () => {
+      this.browserWindow.once('ready-to-show', () => {
         this.browserWindow?.show()
         this.emit('ready')
         resolve(this)
@@ -522,6 +530,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     )
     this.emit('itemAdded', item)
     this.setWindowProgress()
+    this.browserWindow.show()
     if (this.options.focusWhenAddingItem) {
       this.browserWindow.focus()
     }
@@ -746,8 +755,48 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     if (this.options.closeOnComplete) {
       const items = Object.values(this.progressItems)
       if (items.every((item) => item.isCompleted())) {
-        this.close()
+        if (this.options.delayClosing) {
+          this.hideThenCloseIfEmpty()
+        } else {
+          this.close()
+        }
       }
+    }
+  }
+
+  /** Hide the window. Then, after a delay, close it if there are no items. */
+  async hideThenCloseIfEmpty() {
+    let delayMs = 3000 // default delay
+    if (typeof this.options.delayClosing === 'number') {
+      delayMs = this.options.delayClosing
+    }
+    // istanbul ignore if
+    if (
+      typeof this.options.delayClosing === 'boolean' &&
+      this.options.delayClosing === false
+    ) {
+      delayMs = 0
+    }
+
+    // istanbul ignore next
+    if (!this.browserWindow) {
+      return
+    }
+    this.browserWindow.hide()
+    if (delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
+    this.closeIfEmpty()
+  }
+
+  /** Close (destroy) the window if there are no items. */
+  closeIfEmpty() {
+    // istanbul ignore next
+    if (!this.browserWindow) {
+      return
+    }
+    if (Object.keys(this.progressItems).length === 0) {
+      this.browserWindow.destroy()
     }
   }
 
