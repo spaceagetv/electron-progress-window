@@ -609,6 +609,14 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
       )
     }
     const items = Object.values(this.progressItems)
+
+    // if all items are complete, hide the system progress bar
+    const allComplete = items.every((item) => item.isCompleted())
+    if (allComplete) {
+      this.browserWindow.setProgressBar(-1)
+      return
+    }
+
     // if any item is indeterminate, set the progress bar to indeterminate
     const indeterminate = items.some((item) => item.isIndeterminate())
     if (indeterminate) {
@@ -624,13 +632,6 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     const values = items.map(
       (item) => Math.min(item.value, item.maxValue) / item.maxValue
     )
-    // if all items are complete, hide the system progress bar
-    const allComplete = items.every((item) => item.isCompleted())
-
-    if (allComplete) {
-      this.browserWindow.setProgressBar(-1)
-      return
-    }
 
     // get the average
     const average = values.reduce((a, b) => a + b, 0) / values.length
