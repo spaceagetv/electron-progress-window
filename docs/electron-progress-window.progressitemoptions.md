@@ -9,7 +9,7 @@ Options for creating a new progress item
 **Signature:**
 
 ```typescript
-export type ProgressItemOptions = Pick<ProgressItem, 'autoComplete' | 'cssVars' | 'detail' | 'enableCancel' | 'enablePause' | 'error' | 'indeterminate' | 'maxValue' | 'removeOnComplete' | 'theme' | 'title' | 'value'>;
+export type ProgressItemOptions = Pick<ProgressItem, 'autoComplete' | 'cssVars' | 'detail' | 'enableCancel' | 'enablePause' | 'error' | 'indeterminate' | 'maxValue' | 'removeOnComplete' | 'theme' | 'title' | 'value' | 'initiallyVisible' | 'delayIndeterminateMs' | 'showWhenEstimateExceedsMs'>;
 ```
 **References:** [ProgressItem](./electron-progress-window.progressitem.md)
 

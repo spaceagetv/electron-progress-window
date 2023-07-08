@@ -4,7 +4,7 @@
 
 ## ProgressItem.setProgress() method
 
-Set progress value and optionally update other properties
+Set progress value and optionally update other properties. If indeterminate, this will do nothing. If value is greater than or equal to maxValue, this will complete the item. Default maxValue is 100, but it may have been changed.
 
 **Signature:**
 

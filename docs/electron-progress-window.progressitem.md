@@ -26,16 +26,19 @@ export declare class ProgressItem extends ProgressItemEventsEmitter
 |  [autoComplete](./electron-progress-window.progressitem.autocomplete.md) |  | boolean | Automatically complete if value greater than or equals to maxValue. Default: true |
 |  [cancelled](./electron-progress-window.progressitem.cancelled.md) |  | boolean | Has this progress item been cancelled? |
 |  [cssVars](./electron-progress-window.progressitem.cssvars.md) |  | [ItemCss](./electron-progress-window.itemcss.md) | CSS variables |
+|  [delayIndeterminateMs](./electron-progress-window.progressitem.delayindeterminatems.md) | <code>readonly</code> | number | <p>Delay showing the indeterminate progress bar until this many milliseconds have passed. This is useful to avoid showing the progress bar for items that complete quickly. Ignored for determinate items.</p><p>Default: 0 (show immediately)</p> |
 |  [detail](./electron-progress-window.progressitem.detail.md) |  | string | Detail field shows below the progress bar |
 |  [enableCancel](./electron-progress-window.progressitem.enablecancel.md) |  | boolean | Is the item cancellable? Will show cancel button. Default: true |
 |  [enablePause](./electron-progress-window.progressitem.enablepause.md) |  | boolean | Is the item pauseable? Will show pause button. Default: false |
 |  [error](./electron-progress-window.progressitem.error.md) |  | boolean | Add an "error" class to the div.progress-item element |
 |  [id](./electron-progress-window.progressitem.id.md) | <code>readonly</code> | string | Unique ID for the progress bar item - start with alpha for HTML id - |
 |  [indeterminate](./electron-progress-window.progressitem.indeterminate.md) |  | boolean | Indeterminate? |
+|  [initiallyVisible](./electron-progress-window.progressitem.initiallyvisible.md) | <code>readonly</code> | boolean | <p>Should this item be shown initially? If false, it will be hidden until you call show().</p><p>Default: true</p> |
 |  [maxValue](./electron-progress-window.progressitem.maxvalue.md) |  | number | Maximum value |
 |  [paused](./electron-progress-window.progressitem.paused.md) |  | boolean | Is this progress item paused? |
 |  [removed](./electron-progress-window.progressitem.removed.md) |  | boolean | Has the item been removed? |
 |  [removeOnComplete](./electron-progress-window.progressitem.removeoncomplete.md) |  | boolean | Remove immediately when item is completed? Or wait for window behavior. |
+|  [showWhenEstimateExceedsMs](./electron-progress-window.progressitem.showwhenestimateexceedsms.md) | <code>readonly</code> | number | <p>Show the progress bar when the estimated time to completion exceeds this many milliseconds. If the estimated time is less than this, the progress bar will be hidden. This is useful to hide items that complete quickly. Note that the estimate cannot be calculated until a second progress value is set (after the initial item has been created). We cannot estimate indeterminate items, so this will be ignored for those.</p><p>Default: 0 (show immediately)</p> |
 |  [theme](./electron-progress-window.progressitem.theme.md) |  | [ProgressItemTheme](./electron-progress-window.progressitemtheme.md) |  |
 |  [title](./electron-progress-window.progressitem.title.md) |  | string | Title appears above the progress bar |
 |  [value](./electron-progress-window.progressitem.value.md) |  | number | Get/set the current progress value |
@@ -45,14 +48,18 @@ export declare class ProgressItem extends ProgressItemEventsEmitter
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [cancel()](./electron-progress-window.progressitem.cancel.md) |  | Cancel the ProgressItem |
+|  [getEstimatedTotalTime()](./electron-progress-window.progressitem.getestimatedtotaltime.md) |  |  |
+|  [hide()](./electron-progress-window.progressitem.hide.md) |  | Hide the ProgressItem |
 |  [isCompleted()](./electron-progress-window.progressitem.iscompleted.md) |  | Is this item completed? |
 |  [isIndeterminate()](./electron-progress-window.progressitem.isindeterminate.md) |  | Is this item indeterminate? |
 |  [isInProgress()](./electron-progress-window.progressitem.isinprogress.md) |  | Is this item in progress? |
+|  [isVisible()](./electron-progress-window.progressitem.isvisible.md) |  | Is this item visible? |
 |  [pause(shouldPause)](./electron-progress-window.progressitem.pause.md) |  | Pause/resume the ProgressItem |
 |  [remove()](./electron-progress-window.progressitem.remove.md) |  | Remove the ProgressItem from the ProgressWindow |
 |  [resume()](./electron-progress-window.progressitem.resume.md) |  | Resume if paused |
 |  [setCompleted()](./electron-progress-window.progressitem.setcompleted.md) |  | Set the progress item to completed. Automatically sets value to maxValue. If removeOnComplete is true, the item will be removed. |
-|  [setProgress(value, otherOptions)](./electron-progress-window.progressitem.setprogress.md) |  | Set progress value and optionally update other properties |
+|  [setProgress(value, otherOptions)](./electron-progress-window.progressitem.setprogress.md) |  | Set progress value and optionally update other properties. If indeterminate, this will do nothing. If value is greater than or equal to maxValue, this will complete the item. Default maxValue is 100, but it may have been changed. |
+|  [show()](./electron-progress-window.progressitem.show.md) |  | Show the ProgressItem |
 |  [togglePause()](./electron-progress-window.progressitem.togglepause.md) |  | Toggle pause state |
 |  [update(options)](./electron-progress-window.progressitem.update.md) |  | Update one or more values simultaneously |
 

@@ -52,6 +52,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     get cssTransferable(): [ItemCssValue, string][];
     get cssVars(): ItemCss;
     set cssVars(cssVars: ItemCss);
+    get delayIndeterminateMs(): number;
     get detail(): string;
     set detail(detail: string);
     get enableCancel(): boolean;
@@ -60,12 +61,17 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     set enablePause(enablePause: boolean);
     get error(): boolean;
     set error(error: boolean);
+    // (undocumented)
+    getEstimatedTotalTime(): number | undefined;
+    hide(): void;
     readonly id: string;
     get indeterminate(): boolean;
     set indeterminate(indeterminate: boolean);
+    get initiallyVisible(): boolean;
     isCompleted(): boolean;
     isIndeterminate(): boolean;
     isInProgress(): boolean;
+    isVisible(): boolean;
     get maxValue(): number;
     set maxValue(maxValue: number);
     pause(shouldPause?: boolean): void;
@@ -79,6 +85,8 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     resume(): void;
     setCompleted(): void;
     setProgress(value: number, otherOptions?: Partial<Omit<ProgressItemOptions, "value">>): void;
+    show(): void;
+    get showWhenEstimateExceedsMs(): number;
     // (undocumented)
     get theme(): ProgressItemTheme;
     set theme(theme: ProgressItemTheme);
@@ -100,6 +108,8 @@ export type ProgressItemEvents = {
     'will-cancel': (event: Event) => void;
     cancelled: () => void;
     pause: (isPaused: boolean) => void;
+    hide: () => void;
+    show: () => void;
 };
 
 // Warning: (ae-internal-missing-underscore) The name "ProgressItemEventsEmitter" should be prefixed with an underscore because the declaration is marked as @internal
@@ -108,7 +118,7 @@ export type ProgressItemEvents = {
 export const ProgressItemEventsEmitter: TypedEmitterProgressItemEvents;
 
 // @public
-export type ProgressItemOptions = Pick<ProgressItem, 'autoComplete' | 'cssVars' | 'detail' | 'enableCancel' | 'enablePause' | 'error' | 'indeterminate' | 'maxValue' | 'removeOnComplete' | 'theme' | 'title' | 'value'>;
+export type ProgressItemOptions = Pick<ProgressItem, 'autoComplete' | 'cssVars' | 'detail' | 'enableCancel' | 'enablePause' | 'error' | 'indeterminate' | 'maxValue' | 'removeOnComplete' | 'theme' | 'title' | 'value' | 'initiallyVisible' | 'delayIndeterminateMs' | 'showWhenEstimateExceedsMs'>;
 
 // @public (undocumented)
 export type ProgressItemTheme = 'stripes' | 'none';
@@ -116,9 +126,10 @@ export type ProgressItemTheme = 'stripes' | 'none';
 // Warning: (ae-internal-missing-underscore) The name "ProgressItemTransferable" should be prefixed with an underscore because the declaration is marked as @internal
 //
 // @internal
-export type ProgressItemTransferable = Required<Omit<ProgressItemOptions, 'css'>> & Pick<ProgressItem, 'id' | 'paused' | 'cancelled'> & {
+export type ProgressItemTransferable = Required<Omit<ProgressItemOptions, 'css' | 'initiallyVisible' | 'delayIndeterminateMs' | 'showWhenEstimateExceedsMs'>> & Pick<ProgressItem, 'id' | 'paused' | 'cancelled'> & {
     completed: boolean;
     cssVars: TransferableItemCss;
+    visible: boolean;
 };
 
 // Warning: (ae-incompatible-release-tags) The symbol "ProgressWindow" is marked as @public, but its signature references "EventEmitterAsTypedEmitterProgressWindowInstanceEvents" which is marked as @internal
@@ -177,7 +188,7 @@ export interface ProgressWindowOptions {
     cancelOnClose?: boolean;
     closeOnComplete?: boolean;
     css?: string;
-    delayClosing?: boolean | number;
+    delayBeforeDestroying?: boolean | number;
     focusWhenAddingItem?: boolean;
     itemDefaults?: Partial<ProgressItemOptions>;
     // @internal
