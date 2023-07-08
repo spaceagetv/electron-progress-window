@@ -6,6 +6,7 @@ import chai, { expect } from 'chai'
 import { ProgressItem } from '../src/index'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
+import { pause } from './pause'
 
 chai.use(sinonChai)
 
@@ -300,6 +301,230 @@ describe('ProgressItem', () => {
       progressItem.setProgress(100)
 
       expect(completeSpy).to.have.been.calledOnce
+    })
+
+    describe('show/hide', () => {
+      it('should emit "show" when initiallyVisible is true', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem()
+        progressItem.on('show', showSpy)
+
+        // wait for events to fire
+        await pause(20)
+
+        expect(showSpy).to.have.been.calledOnce
+        expect(progressItem.isVisible()).to.be.true
+      })
+
+      it('should not emit "show" immediately if initiallyVisible is false', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem({
+          initiallyVisible: false,
+        })
+        progressItem.on('show', showSpy)
+
+        // wait for events to fire
+        await pause(1)
+
+        expect(showSpy).to.not.have.been.called
+        expect(progressItem.isVisible()).to.be.false
+      })
+
+      it('should emit "show" when show() is called', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem({
+          initiallyVisible: false,
+        })
+        progressItem.on('show', showSpy)
+
+        await pause(1)
+
+        expect(progressItem.isVisible()).to.be.false
+        expect(showSpy).to.not.have.been.called
+
+        progressItem.show()
+
+        // wait for events to fire
+        await pause(1)
+
+        expect(progressItem.isVisible()).to.be.true
+        expect(showSpy).to.have.been.calledOnce
+      })
+
+      it('should emit "hide" when hide() is called', async () => {
+        const hideSpy = sinon.spy()
+        const progressItem = new ProgressItem()
+        progressItem.on('hide', hideSpy)
+
+        await pause(10)
+
+        expect(progressItem.isVisible()).to.be.true
+        expect(hideSpy).to.not.have.been.called
+
+        progressItem.hide()
+
+        // wait for events to fire
+        await pause(1)
+
+        expect(hideSpy).to.have.been.calledOnce
+        expect(progressItem.isVisible()).to.be.false
+      })
+
+      it('should emit "show" after a delay when delayIndeterminateMs has value', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem({
+          indeterminate: true,
+          delayIndeterminateMs: 100,
+        })
+        progressItem.on('show', showSpy)
+
+        // wait for events to fire
+        await pause(1)
+
+        expect(progressItem.isVisible()).to.be.false
+        expect(showSpy).to.not.have.been.called
+
+        // wait for delayIndeterminateMs
+        await pause(150)
+
+        expect(progressItem.isVisible()).to.be.true
+        expect(showSpy).to.have.been.calledOnce
+      })
+
+      it('should emit "show" immediately when delayIndeterminateMs is 0', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem({
+          indeterminate: true,
+          delayIndeterminateMs: 0,
+        })
+        progressItem.on('show', showSpy)
+
+        // wait for events to fire
+        await pause(1)
+
+        expect(progressItem.isVisible()).to.be.true
+        expect(showSpy).to.have.been.calledOnce
+      })
+
+      it('should emit "show" immediately when delayIndeterminateMs is negative', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem({
+          indeterminate: true,
+          delayIndeterminateMs: -100,
+        })
+        progressItem.on('show', showSpy)
+
+        // wait for events to fire
+        await pause(20)
+
+        expect(progressItem.isVisible()).to.be.true
+        expect(showSpy).to.have.been.calledOnce
+      })
+
+      it('should emit "show" immediately when delayIndeterminateMs is null', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem({
+          indeterminate: true,
+          delayIndeterminateMs: null,
+        })
+        progressItem.on('show', showSpy)
+
+        // wait for events to fire
+        await pause(20)
+
+        expect(progressItem.isVisible()).to.be.true
+        expect(showSpy).to.have.been.calledOnce
+      })
+
+      it('should emit "show" after a delay when showWhenEstimateExceedsMs has value', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem({
+          showWhenEstimateExceedsMs: 200,
+        })
+        progressItem.on('show', showSpy)
+
+        // wait for events to fire
+        await pause(1)
+
+        expect(progressItem.isVisible()).to.be.false
+        expect(showSpy).to.not.have.been.called
+        expect(progressItem.getEstimatedTotalTime()).to.be.undefined
+
+        // wait for showWhenEstimateExceedsMs
+        await pause(100)
+        progressItem.setProgress(49)
+        expect(progressItem.getEstimatedTotalTime()).to.be.greaterThan(200)
+        await pause(1)
+
+        expect(showSpy).to.have.been.calledOnce
+        expect(progressItem.isVisible()).to.be.true
+      })
+
+      it('should not emit "show" when estimated time exceeds showWhenEstimateExceedsMs', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem({
+          showWhenEstimateExceedsMs: 2000,
+        })
+        progressItem.on('show', showSpy)
+
+        // wait for events to fire
+        await pause(1)
+
+        expect(progressItem.isVisible()).to.be.false
+        expect(showSpy).to.not.have.been.called
+        expect(progressItem.getEstimatedTotalTime()).to.be.undefined
+
+        // wait for showWhenEstimateExceedsMs
+        await pause(100)
+        progressItem.setProgress(49)
+        expect(progressItem.getEstimatedTotalTime()).to.be.lessThan(2000)
+        await pause(1)
+
+        expect(showSpy).to.not.have.been.called
+        expect(progressItem.isVisible()).to.be.false
+      })
+
+      it('should emit "show" immediately when showWhenEstimateExceedsMs is 0', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem({
+          showWhenEstimateExceedsMs: 0,
+        })
+        progressItem.on('show', showSpy)
+
+        // wait for events to fire
+        await pause(10)
+
+        expect(progressItem.isVisible()).to.be.true
+        expect(showSpy).to.have.been.calledOnce
+      })
+
+      it('should emit "show" immediately when showWhenEstimateExceedsMs is negative', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem({
+          showWhenEstimateExceedsMs: -100,
+        })
+        progressItem.on('show', showSpy)
+
+        // wait for events to fire
+        await pause(10)
+
+        expect(progressItem.isVisible()).to.be.true
+        expect(showSpy).to.have.been.calledOnce
+      })
+
+      it('should emit "show" immediately when showWhenEstimateExceedsMs is null', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem({
+          showWhenEstimateExceedsMs: null,
+        })
+        progressItem.on('show', showSpy)
+
+        // wait for events to fire
+        await pause(10)
+
+        expect(progressItem.isVisible()).to.be.true
+        expect(showSpy).to.have.been.calledOnce
+      })
     })
   })
 })

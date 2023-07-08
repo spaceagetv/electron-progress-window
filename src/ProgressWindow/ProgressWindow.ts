@@ -24,7 +24,7 @@ export interface ProgressWindowOptions {
    * True/false or number of milliseconds.
    * Defaults to true, which delays for 3000ms.
    */
-  delayClosing?: boolean | number
+  delayBeforeDestroying?: boolean | number
   /** Send 'cancelled' for all current items when closing the window. Default: false */
   cancelOnClose?: boolean
   /** Focus the window when adding a new item. Default: true */
@@ -186,7 +186,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     variableHeight: true,
     variableWidth: false,
     closeOnComplete: true,
-    delayClosing: true,
+    delayBeforeDestroying: true,
     focusWhenAddingItem: true,
     animateResize: false,
     windowOptions: {
@@ -382,6 +382,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     super()
     const overrides = {
       windowOptions: {
+        show: false,
         webPreferences: {
           nodeIntegration: true,
           contextIsolation: false,
@@ -418,7 +419,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     })
     this._ready = new Promise((resolve) => {
       this.browserWindow.once('ready-to-show', () => {
-        this.browserWindow?.show()
+        // this.browserWindow?.show()
         this.emit('ready')
         resolve(this)
       })
@@ -524,16 +525,32 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
       this.emit('itemCancelled', item)
     })
     this.progressItems[item.id] = item
-    this.browserWindow.webContents.send(
-      'progress-item-add',
-      item.transferable()
-    )
+    item.on('show', () => {
+      this.browserWindow.webContents.send(
+        'progress-item-add',
+        item.transferable()
+      )
+      this.setWindowProgress()
+      if (
+        this.options.focusWhenAddingItem ||
+        Object.keys(this.progressItems).length === 1
+      ) {
+        this.browserWindow.show()
+      } else {
+        this.browserWindow.showInactive()
+      }
+    })
+    item.on('hide', () => {
+      this.browserWindow.webContents.send(
+        'progress-item-remove',
+        item.transferable()
+      )
+      this.setWindowProgress()
+      this.maybeCloseWindow()
+    })
+
     this.emit('itemAdded', item)
-    this.setWindowProgress()
-    this.browserWindow.show()
-    if (this.options.focusWhenAddingItem) {
-      this.browserWindow.focus()
-    }
+
     return item
   }
 
@@ -609,6 +626,14 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
       )
     }
     const items = Object.values(this.progressItems)
+
+    // if all items are complete, hide the system progress bar
+    const allComplete = items.every((item) => item.isCompleted())
+    if (allComplete) {
+      this.browserWindow.setProgressBar(-1)
+      return
+    }
+
     // if any item is indeterminate, set the progress bar to indeterminate
     const indeterminate = items.some((item) => item.isIndeterminate())
     if (indeterminate) {
@@ -624,13 +649,6 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     const values = items.map(
       (item) => Math.min(item.value, item.maxValue) / item.maxValue
     )
-    // if all items are complete, hide the system progress bar
-    const allComplete = items.every((item) => item.isCompleted())
-
-    if (allComplete) {
-      this.browserWindow.setProgressBar(-1)
-      return
-    }
 
     // get the average
     const average = values.reduce((a, b) => a + b, 0) / values.length
@@ -755,7 +773,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     if (this.options.closeOnComplete) {
       const items = Object.values(this.progressItems)
       if (items.every((item) => item.isCompleted())) {
-        if (this.options.delayClosing) {
+        if (this.options.delayBeforeDestroying) {
           this.hideThenCloseIfEmpty()
         } else {
           this.close()
@@ -767,13 +785,13 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
   /** Hide the window. Then, after a delay, close it if there are no items. */
   async hideThenCloseIfEmpty() {
     let delayMs = 3000 // default delay
-    if (typeof this.options.delayClosing === 'number') {
-      delayMs = this.options.delayClosing
+    if (typeof this.options.delayBeforeDestroying === 'number') {
+      delayMs = this.options.delayBeforeDestroying
     }
     // istanbul ignore if
     if (
-      typeof this.options.delayClosing === 'boolean' &&
-      this.options.delayClosing === false
+      typeof this.options.delayBeforeDestroying === 'boolean' &&
+      this.options.delayBeforeDestroying === false
     ) {
       delayMs = 0
     }

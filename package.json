@@ -23,9 +23,9 @@
     "test": "mocha -r ts-node/register 'test/**/*.test.ts'",
     "test:coverage": "nyc mocha -r ts-node/register 'test/**/*.test.ts'",
     "post-build": "node post-build.js",
-    "extract-api": "api-extractor run --local",
-    "generate-docs": "api-documenter markdown --input-folder temp --output-folder docs",
-    "docs": "npm run extract-api && npm run generate-docs"
+    "docs:extract": "api-extractor run --local",
+    "docs:generate": "api-documenter markdown --input-folder temp --output-folder docs",
+    "docs": "npm run docs:extract && npm run docs:generate"
   },
   "keywords": [
     "electron",
