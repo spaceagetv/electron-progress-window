@@ -1,3 +1,15 @@
+# [1.5.0](https://github.com/spaceagetv/electron-progress-window/compare/v1.4.0...v1.5.0) (2023-07-08)
+
+
+### Bug Fixes
+
+* remove app progressBar when indeterminite are finished ([1774d43](https://github.com/spaceagetv/electron-progress-window/commit/1774d4321ae568898aad65699f4498079a4383a0))
+
+
+### Features
+
+* delayIndeterminate & showWhenEstimatedTimeExceeds ([446ebe1](https://github.com/spaceagetv/electron-progress-window/commit/446ebe10c74130c37cda3469dca3c11807b0445f))
+
 # [1.4.0](https://github.com/spaceagetv/electron-progress-window/compare/v1.3.3...v1.4.0) (2023-07-02)
 
 
