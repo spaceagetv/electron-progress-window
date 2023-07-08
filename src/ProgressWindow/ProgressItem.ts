@@ -35,6 +35,9 @@ export type ProgressItemOptions = Pick<
   | 'theme'
   | 'title'
   | 'value'
+  | 'initiallyVisible'
+  | 'delayIndeterminateMs'
+  | 'showWhenEstimateExceedsMs'
 >
 
 export const itemCssMap = {
@@ -78,12 +81,21 @@ export type TransferableItemCss = [ItemCssValue, string][]
  * @internal
  */
 export type ProgressItemTransferable = Required<
-  Omit<ProgressItemOptions, 'css'>
+  Omit<
+    ProgressItemOptions,
+    | 'css'
+    | 'initiallyVisible'
+    | 'delayIndeterminateMs'
+    | 'showWhenEstimateExceedsMs'
+  >
 > &
   Pick<ProgressItem, 'id' | 'paused' | 'cancelled'> & {
     /** Is the item finished? */
     completed: boolean
+    /** CSS variable values */
     cssVars: TransferableItemCss
+    /** Is the item visible? */
+    visible: boolean
   }
 
 /**
@@ -98,6 +110,8 @@ export type ProgressItemTransferable = Required<
  * - `will-cancel` - Item will cancel. Call event.preventDefault() to stop it. listener: `(event: Event) => void`<br/>
  * - `cancelled` - Item was cancelled. listener: `() => void`<br/>
  * - `pause` - Item was paused. listener: `(isPaused: boolean) => void`<br/>
+ * - `hide` - Item is being hidden. listener: `() => void`<br/>
+ * - `show` - Item is being shown. listener: `() => void`<br/>
  *
  * @public
  */
@@ -114,6 +128,10 @@ export type ProgressItemEvents = {
   cancelled: () => void
   /** Item was paused - @public */
   pause: (isPaused: boolean) => void
+  /** Item is being hidden */
+  hide: () => void
+  /** Item is being shown */
+  show: () => void
 }
 
 /** @internal */
@@ -144,13 +162,20 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     error: false,
     autoComplete: true,
     removeOnComplete: true,
+    initiallyVisible: true,
+    delayIndeterminateMs: 0,
+    showWhenEstimateExceedsMs: 0,
   }
 
   /** Unique ID for the progress bar item - start with alpha for HTML id - @public @readonly */
   readonly id: string = 'p' + Math.random().toString(36).substring(2, 11)
 
-  /** Is the item completed? */
+  /** Is the item completed? @internal */
   private _completed = false
+
+  private _visible = false
+
+  private _startTime: number | null = null
 
   /** Is this progress item paused? */
   paused = false
@@ -164,7 +189,32 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   constructor(options = {} as Partial<ProgressItemOptions>) {
     super()
     merge(this._privates, options)
+    this._startTime = Date.now()
     // console.log('ProgressItem constructor', this._privates)
+    let shouldShow = false
+    if (this.isIndeterminate()) {
+      shouldShow = this.initiallyVisible && this.delayIndeterminateMs <= 0
+    } else {
+      shouldShow = this.initiallyVisible && this.showWhenEstimateExceedsMs <= 0
+    }
+
+    if (!shouldShow && this.isIndeterminate()) {
+      // if indeterminate and delayIndeterminateMs is set, show after delay
+      setTimeout(() => {
+        if (this.isInProgress()) {
+          this.show()
+        }
+      }, this._privates.delayIndeterminateMs)
+    }
+
+    // if not indeterminate and showWhenEstimateExceedsMs is set, we'll handle that during update()
+
+    if (shouldShow) {
+      // wait until next tick to fire event emitters
+      setImmediate(() => {
+        this.show()
+      })
+    }
   }
 
   /** Get/set the current progress value */
@@ -288,7 +338,44 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   }
 
   /**
-   * Set progress value and optionally update other properties
+   * Should this item be shown initially?
+   * If false, it will be hidden until you call show().
+   *
+   * Default: true
+   */
+  get initiallyVisible(): boolean {
+    return this._privates.initiallyVisible
+  }
+
+  /**
+   * Delay showing the indeterminate progress bar until this many milliseconds have passed.
+   * This is useful to avoid showing the progress bar for items that complete quickly. Ignored
+   * for determinate items.
+   *
+   * Default: 0 (show immediately)
+   */
+  get delayIndeterminateMs(): number {
+    return this._privates.delayIndeterminateMs || 0
+  }
+
+  /**
+   * Show the progress bar when the estimated time to completion exceeds this many milliseconds.
+   * If the estimated time is less than this, the progress bar will be hidden. This is useful
+   * to hide items that complete quickly. Note that the estimate cannot be calculated until
+   * a second progress value is set (after the initial item has been created). We cannot estimate
+   * indeterminate items, so this will be ignored for those.
+   *
+   * Default: 0 (show immediately)
+   */
+  get showWhenEstimateExceedsMs(): number {
+    return this._privates.showWhenEstimateExceedsMs || 0
+  }
+
+  /**
+   * Set progress value and optionally update other properties.
+   * If indeterminate, this will do nothing.
+   * If value is greater than or equal to maxValue, this will complete the item.
+   * Default maxValue is 100, but it may have been changed.
    * @param value - progress value
    * @param otherOptions - other options to update
    * @returns void
@@ -299,6 +386,15 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   ) {
     if (this.indeterminate) return
     this.update({ value, ...otherOptions })
+  }
+
+  getEstimatedTotalTime(): number | undefined {
+    if (this.indeterminate) return
+    if (this.value === 0) return
+    if (this.value >= this.maxValue) return
+    const elapsed = Date.now() - this._startTime
+    const estimatedTotalTime = (elapsed / this.value) * this.maxValue
+    return estimatedTotalTime
   }
 
   /**
@@ -323,6 +419,13 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     }
     this._privates = { ...this._privates, ...options }
     this.emit('update')
+    // if we're not visible and the estimated time remaining is greater than the threshold, show
+    if (
+      !this.isVisible() &&
+      this.getEstimatedTotalTime() > this.showWhenEstimateExceedsMs
+    ) {
+      this.show()
+    }
     if (
       !this.isCompleted() &&
       this.autoComplete &&
@@ -364,6 +467,11 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   /** Is this item indeterminate? */
   isIndeterminate() {
     return this.indeterminate
+  }
+
+  /** Is this item visible? */
+  isVisible() {
+    return !this.removed && !!this._visible
   }
 
   /** Remove the ProgressItem from the ProgressWindow */
@@ -413,6 +521,27 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     this.pause(!this.paused)
   }
 
+  /** Show the ProgressItem */
+  show() {
+    // logger.debug('ProgressItem.show()')
+    // istanbul ignore if
+    if (this._visible === true) {
+      return
+    }
+    this._visible = true
+    this.emit('show')
+  }
+
+  /** Hide the ProgressItem */
+  hide() {
+    // logger.debug('ProgressItem.hide()')
+    if (this._visible === false) {
+      return
+    }
+    this._visible = false
+    this.emit('hide')
+  }
+
   /** Get a transferable object for IPC - @internal */
   transferable(): ProgressItemTransferable {
     return {
@@ -432,6 +561,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
       title: this.title,
       theme: this.theme,
       value: this.value,
+      visible: this._visible,
     }
   }
 }

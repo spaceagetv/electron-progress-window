@@ -202,6 +202,15 @@ describe('ProgressWindow', () => {
     expect(ProgressWindow._instance).to.be.null
   })
 
+  it('window should be hidden when no item has been added', async () => {
+    const progressWindow = await ProgressWindow.create()
+    expect(progressWindow).to.be.an.instanceof(ProgressWindow)
+    const browserWindow = progressWindow.browserWindow
+    if (!browserWindow) return
+    await pause(0)
+    expect(browserWindow.isVisible()).to.be.false
+  })
+
   it('should create ProgressWindow instance with addItem()', async () => {
     ProgressWindow.addItem()
     expect(ProgressWindow._instance).to.be.ok
@@ -226,6 +235,22 @@ describe('ProgressWindow', () => {
     expect(progressItems.length).to.equal(1)
   })
 
+  it('window should be visible after item is added', async () => {
+    const progressWindow = await ProgressWindow.create()
+    expect(progressWindow).to.be.an.instanceof(ProgressWindow)
+    const browserWindow = progressWindow.browserWindow
+    if (!browserWindow) return
+    expect(browserWindow.isVisible()).to.be.false
+
+    const item1 = await ProgressWindow.addItem()
+    expect(item1).to.be.ok
+
+    // let event emitters fire
+    await pause(20)
+
+    expect(browserWindow.isVisible()).to.be.true
+  })
+
   it('should set the progress of an item', async () => {
     const item1 = await ProgressWindow.addItem()
     expect(item1).to.be.ok
@@ -240,13 +265,13 @@ describe('ProgressWindow', () => {
     expect(browserWindow).to.be.ok
     if (!browserWindow) return
     expect(browserWindow.setProgressBar).to.have.been.calledTwice
-    // expect(browserWindow.setProgressBar).to.have.been.calledWith(0.5)
+    expect(browserWindow.setProgressBar).to.have.been.calledWith(0.5)
   })
 
   it('ProgressWindow should go away when last item is removed', async function () {
     // this.timeout(10000)
     ProgressWindow.configure({
-      delayClosing: false,
+      delayBeforeDestroying: false,
     })
     const item1 = await ProgressWindow.addItem({
       maxValue: 100,
@@ -305,7 +330,7 @@ describe('ProgressWindow', () => {
 
   it('should remove an item', async () => {
     ProgressWindow.configure({
-      delayClosing: false,
+      delayBeforeDestroying: false,
     })
     const item1 = await ProgressWindow.addItem()
     expect(item1).to.be.ok
@@ -338,17 +363,24 @@ describe('ProgressWindow', () => {
 
   it('indeterminate progress should call correctly', async () => {
     const item1 = await ProgressWindow.addItem({ indeterminate: true })
+    const showSpy = sinon.spy()
+    item1.on('show', showSpy)
+
     expect(item1).to.be.ok
     expect(item1.value).to.equal(0)
     expect(item1.indeterminate).to.be.true
     item1.setProgress(50)
     // let event emitters fire
-    await pause(0)
+    await pause(20)
+
+    expect(showSpy).to.have.been.calledOnce
+
     expect(item1.isIndeterminate()).to.be.true
     expect(item1.value).to.equal(0)
     const browserWindow = ProgressWindow.instance.browserWindow
     expect(browserWindow).to.be.ok
     if (!browserWindow) return
+    expect(browserWindow.setProgressBar).calledOnce
     expect(browserWindow.setProgressBar).calledWith(2)
     item1.setCompleted()
     // let event emitters fire
@@ -394,7 +426,7 @@ describe('ProgressWindow', () => {
 
   it('should reuse existing window if delayClosing is true', async () => {
     ProgressWindow.configure({
-      delayClosing: true, // should wait 3000ms before closing
+      delayBeforeDestroying: true, // should wait 3000ms before closing
     })
     const progressWindow = await ProgressWindow.create()
     expect(progressWindow).to.be.an.instanceof(ProgressWindow)
@@ -450,7 +482,7 @@ describe('ProgressWindow', () => {
 
   it('should destroy window after delayClosing delay', async () => {
     ProgressWindow.configure({
-      delayClosing: 500, // 500ms before closing
+      delayBeforeDestroying: 500, // 500ms before closing
     })
     const progressWindow = await ProgressWindow.create()
 
@@ -776,5 +808,140 @@ describe('ProgressWindow', () => {
       'cancelled event never fired'
     )
     expect(item1.cancelled).to.be.false
+  })
+
+  describe('Delayed items', () => {
+    it('should not show window until time estimate is exceeded', async () => {
+      const progressWindow = new ProgressWindow()
+      const progressItem = await progressWindow.addItem({
+        title: 'Hello World',
+        showWhenEstimateExceedsMs: 100,
+      })
+      expect(progressItem).to.be.ok
+      expect(progressItem.isInProgress()).to.be.true
+      expect(progressItem.isIndeterminate()).to.be.false
+      expect(progressItem.isCompleted()).to.be.false
+      expect(progressItem.value).to.equal(0)
+      expect(progressItem.maxValue).to.equal(100)
+      expect(progressItem.title).to.equal('Hello World')
+
+      expect(progressWindow.browserWindow).to.be.ok
+      if (!progressWindow.browserWindow) throw new Error('no browserWindow')
+      expect(progressWindow.browserWindow.isVisible()).to.be.false
+
+      await pause(50)
+      const updatePromise = new Promise<void>((resolve) => {
+        progressItem.on('update', () => resolve())
+      })
+      progressItem.value = 20
+      await withTimeout(updatePromise, 1000, 'update event never fired')
+
+      expect(progressWindow.browserWindow.isVisible()).to.be.true
+    })
+
+    it('should not show window until time estimate is exceeded (with multiple items)', async () => {
+      const progressWindow = new ProgressWindow()
+      const progressItem1 = await progressWindow.addItem({
+        title: 'Hello World',
+        showWhenEstimateExceedsMs: 100,
+      })
+      const progressItem2 = await progressWindow.addItem({
+        title: 'Hello World 2',
+        showWhenEstimateExceedsMs: 100,
+      })
+      expect(progressItem1).to.be.ok
+      expect(progressItem1.isInProgress()).to.be.true
+      expect(progressItem1.isIndeterminate()).to.be.false
+      expect(progressItem1.isCompleted()).to.be.false
+      expect(progressItem1.value).to.equal(0)
+      expect(progressItem1.maxValue).to.equal(100)
+      expect(progressItem1.title).to.equal('Hello World')
+
+      expect(progressItem2).to.be.ok
+      expect(progressItem2.isInProgress()).to.be.true
+      expect(progressItem2.isIndeterminate()).to.be.false
+      expect(progressItem2.isCompleted()).to.be.false
+      expect(progressItem2.value).to.equal(0)
+      expect(progressItem2.maxValue).to.equal(100)
+      expect(progressItem2.title).to.equal('Hello World 2')
+
+      expect(progressWindow.browserWindow).to.be.ok
+      if (!progressWindow.browserWindow) throw new Error('no browserWindow')
+      expect(progressWindow.browserWindow.isVisible()).to.be.false
+
+      await pause(50)
+      const updatePromise = new Promise<void>((resolve) => {
+        progressItem1.on('update', () => resolve())
+      })
+      progressItem1.value = 20
+      await withTimeout(updatePromise, 1000, 'update event never fired')
+
+      expect(progressWindow.browserWindow.isVisible()).to.be.true
+    })
+
+    it('should not add items to the window until time estimate is exceeded', async () => {
+      const progressWindow = new ProgressWindow()
+      const progressItem1 = await progressWindow.addItem({
+        title: 'Hello World',
+        showWhenEstimateExceedsMs: 100,
+      })
+      expect(progressItem1).to.be.ok
+
+      expect(progressWindow.browserWindow).to.be.ok
+      if (!progressWindow.browserWindow) throw new Error('no browserWindow')
+      expect(progressWindow.browserWindow.isVisible()).to.be.false
+      expect(progressWindow.browserWindow.webContents.send).not.to.have.been
+        .called
+
+      await pause(50)
+
+      const updatePromise1 = new Promise<void>((resolve) => {
+        progressItem1.on('update', () => resolve())
+      })
+      progressItem1.value = 10
+      await withTimeout(updatePromise1, 1000, 'update event never fired')
+
+      expect(progressWindow.browserWindow.isVisible()).to.be.true
+      expect(progressWindow.browserWindow.webContents.send).to.have.been
+        .calledTwice
+      expect(
+        progressWindow.browserWindow.webContents.send
+      ).to.have.been.calledWith('progress-item-add')
+      expect(
+        progressWindow.browserWindow.webContents.send
+      ).to.have.been.calledWith('progress-item-update')
+    })
+
+    it('should not show window until indeterminate with delayIndeterminate shows', async () => {
+      const progressWindow = new ProgressWindow()
+      const progressItem = await progressWindow.addItem({
+        title: 'Hello World',
+        delayIndeterminateMs: 50,
+        indeterminate: true,
+      })
+      expect(progressItem).to.be.ok
+      expect(progressItem.isInProgress()).to.be.true
+      expect(progressItem.isIndeterminate()).to.be.true
+      expect(progressItem.isCompleted()).to.be.false
+      expect(progressItem.isVisible()).to.be.false
+      expect(progressItem.value).to.equal(0)
+      expect(progressItem.title).to.equal('Hello World')
+
+      expect(progressWindow.browserWindow).to.be.ok
+      if (!progressWindow.browserWindow) throw new Error('no browserWindow')
+      expect(progressWindow.browserWindow.isVisible()).to.be.false
+      expect(progressWindow.browserWindow.webContents.send).not.to.have.been
+        .called
+
+      await pause(60)
+
+      expect(progressItem.isVisible()).to.be.true
+      expect(progressWindow.browserWindow.isVisible()).to.be.true
+      expect(progressWindow.browserWindow.webContents.send).to.have.been
+        .calledOnce
+      expect(
+        progressWindow.browserWindow.webContents.send
+      ).to.have.been.calledWith('progress-item-add')
+    })
   })
 })
