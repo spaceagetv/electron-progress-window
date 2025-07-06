@@ -1,6 +1,6 @@
 {
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   },
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
   "editor.formatOnPaste": true,
@@ -15,4 +15,8 @@
   "[css]": {
     "editor.defaultFormatter": "vscode.css-language-features"
   },
+  "cSpell.words": [
+    "fullscreenable",
+    "maximizable"
+  ],
 }
