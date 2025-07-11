@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/spaceagetv/electron-progress-window/compare/v1.5.0...v1.5.1) (2025-07-11)
+
+
+### Bug Fixes
+
+* ensure delays are observed ([1704992](https://github.com/spaceagetv/electron-progress-window/commit/1704992fff9a17ff5473bf6340da6f2da2279441))
+
 # [1.5.0](https://github.com/spaceagetv/electron-progress-window/compare/v1.4.0...v1.5.0) (2023-07-08)
 
 
