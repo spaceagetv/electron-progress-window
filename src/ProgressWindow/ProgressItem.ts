@@ -188,29 +188,40 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   constructor(options = {} as Partial<ProgressItemOptions>) {
     super()
-    merge(this._privates, options)
+    merge(this._privates, {
+      ...options,
+      delayIndeterminateMs: Math.max(0, options.delayIndeterminateMs || 0),
+      showWhenEstimateExceedsMs: Math.max(
+        0,
+        options.showWhenEstimateExceedsMs || 0
+      ),
+    })
+
     this._startTime = Date.now()
-    // console.log('ProgressItem constructor', this._privates)
+    this.handleVisibility()
+  }
+
+  /**
+   * Handle visibility logic for the progress item.
+   * Determines whether the item should be shown immediately or after a delay.
+   */
+  private handleVisibility() {
     let shouldShow = false
+
     if (this.isIndeterminate()) {
       shouldShow = this.initiallyVisible && this.delayIndeterminateMs <= 0
+      if (!shouldShow && this.delayIndeterminateMs > 0) {
+        setTimeout(() => {
+          if (this.isInProgress()) {
+            this.show()
+          }
+        }, this.delayIndeterminateMs)
+      }
     } else {
       shouldShow = this.initiallyVisible && this.showWhenEstimateExceedsMs <= 0
     }
 
-    if (!shouldShow && this.isIndeterminate()) {
-      // if indeterminate and delayIndeterminateMs is set, show after delay
-      setTimeout(() => {
-        if (this.isInProgress()) {
-          this.show()
-        }
-      }, this._privates.delayIndeterminateMs)
-    }
-
-    // if not indeterminate and showWhenEstimateExceedsMs is set, we'll handle that during update()
-
     if (shouldShow) {
-      // wait until next tick to fire event emitters
       setImmediate(() => {
         this.show()
       })
