@@ -2,10 +2,22 @@ import { BrowserWindow, screen } from 'electron'
 import { EventEmitter } from 'events'
 import path from 'path'
 import fs from 'fs'
+import os from 'os'
+import crypto from 'crypto'
 import { merge } from 'lodash'
 import TypedEmitter from 'typed-emitter'
 
 import { ProgressItemOptions, ProgressItem } from './ProgressItem'
+
+/**
+ * The preload script content is embedded at build time by post-build.js.
+ * This is read from file during development but embedded as a string in production.
+ * @internal
+ */
+const preloadScriptContent = fs.readFileSync(
+  path.resolve(__dirname, 'preload.js'),
+  'utf8'
+)
 
 /**
  * Options for creating/configuring a ProgressWindow
@@ -159,6 +171,28 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
   static _optionsFunction: ProgressWindowOptionsFunction | null = null
   /** @internal */
   static _instance: ProgressWindow | null = null
+  /** @internal - Path to the preload script file */
+  private static _preloadPath: string | null = null
+
+  /**
+   * Get or create the path to the preload script.
+   * The preload script is written to a temp file on first access.
+   * @internal
+   */
+  private static getPreloadPath(): string {
+    if (!this._preloadPath) {
+      // Create a unique temp file for the preload script
+      const hash = crypto.createHash('md5').update(preloadScriptContent).digest('hex').slice(0, 8)
+      const tempDir = os.tmpdir()
+      this._preloadPath = path.join(tempDir, `electron-progress-window-preload-${hash}.js`)
+
+      // Write the preload script if it doesn't exist
+      if (!fs.existsSync(this._preloadPath)) {
+        fs.writeFileSync(this._preloadPath, preloadScriptContent, 'utf8')
+      }
+    }
+    return this._preloadPath
+  }
 
   /**
    * Static event emitter for ProgressWindow events.
@@ -380,12 +414,20 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    */
   constructor(options = {} as ProgressWindowOptions) {
     super()
+    // Check if we're using mocks for testing
+    const isUsingMocks = options.testingFixtures?.bw !== undefined
+
     const overrides = {
       windowOptions: {
         show: false,
         webPreferences: {
-          nodeIntegration: true,
-          contextIsolation: false,
+          // Security: Use context isolation to prevent renderer from accessing Node.js
+          nodeIntegration: false,
+          contextIsolation: true,
+          sandbox: true,
+          // The preload script exposes only the necessary IPC methods via contextBridge
+          // Skip preload when using mocks for testing
+          ...(isUsingMocks ? {} : { preload: ProgressWindow.getPreloadPath() }),
           navigateOnDragDrop: false,
         },
       },
