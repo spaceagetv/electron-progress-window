@@ -88,16 +88,11 @@ esmScriptContent = esmScriptContent.replace(
   `const htmlContent = \`${escapeForTemplate(htmlContentWithScript)}\`;`
 )
 
-// Replace the preloadScriptContent fs.readFileSync with the embedded content
-const preloadRegex = /const preloadScriptContent = [^;]+;/
-cjsScriptContent = cjsScriptContent.replace(
-  preloadRegex,
-  `const preloadScriptContent = \`${escapeForTemplate(preloadJsContent)}\`;`
-)
-esmScriptContent = esmScriptContent.replace(
-  preloadRegex,
-  `const preloadScriptContent = \`${escapeForTemplate(preloadJsContent)}\`;`
-)
+// Replace the entire getPreloadScriptContent function with one that returns the embedded content
+const preloadFunctionRegex = /function getPreloadScriptContent\(\)[^{]*\{[^}]+\}/
+const embeddedPreloadFunction = `function getPreloadScriptContent() { return \`${escapeForTemplate(preloadJsContent)}\`; }`
+cjsScriptContent = cjsScriptContent.replace(preloadFunctionRegex, embeddedPreloadFunction)
+esmScriptContent = esmScriptContent.replace(preloadFunctionRegex, embeddedPreloadFunction)
 
 // Write the modified ProgressWindow.js files
 fs.writeFileSync(cjsScriptPath, cjsScriptContent)

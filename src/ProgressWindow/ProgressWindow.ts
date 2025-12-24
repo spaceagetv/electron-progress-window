@@ -1,4 +1,4 @@
-import { BrowserWindow, screen } from 'electron'
+import { BrowserWindow, screen, type BrowserWindowConstructorOptions } from 'electron'
 import { EventEmitter } from 'events'
 import path from 'path'
 import fs from 'fs'
@@ -10,14 +10,19 @@ import TypedEmitter from 'typed-emitter'
 import { ProgressItemOptions, ProgressItem } from './ProgressItem'
 
 /**
- * The preload script content is embedded at build time by post-build.js.
- * This is read from file during development but embedded as a string in production.
+ * Get the preload script content.
+ * This is embedded at build time by post-build.js.
+ * During development, it reads from the compiled preload.js file.
  * @internal
  */
-const preloadScriptContent = fs.readFileSync(
-  path.resolve(__dirname, 'preload.js'),
-  'utf8'
-)
+function getPreloadScriptContent(): string {
+  // This line is replaced at build time with the embedded content:
+  const preloadScriptContent = fs.readFileSync(
+    path.resolve(__dirname, 'preload.js'),
+    'utf8'
+  )
+  return preloadScriptContent
+}
 
 /**
  * Options for creating/configuring a ProgressWindow
@@ -46,13 +51,15 @@ export interface ProgressWindowOptions {
   /** Additional CSS for the window */
   css?: string
   /** Options for the BrowserWindow instance */
-  windowOptions?: Partial<Electron.BrowserWindowConstructorOptions>
+  windowOptions?: Partial<BrowserWindowConstructorOptions>
   /** Default options for new ProgressItem */
   itemDefaults?: Partial<ProgressItemOptions>
   /** @internal - Options for testing */
   testingFixtures?: {
-    bw?: typeof Electron.BrowserWindow
-    scr?: Electron.Screen
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    bw?: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    scr?: any
   }
 }
 
@@ -181,14 +188,15 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    */
   private static getPreloadPath(): string {
     if (!this._preloadPath) {
+      const content = getPreloadScriptContent()
       // Create a unique temp file for the preload script
-      const hash = crypto.createHash('md5').update(preloadScriptContent).digest('hex').slice(0, 8)
+      const hash = crypto.createHash('md5').update(content).digest('hex').slice(0, 8)
       const tempDir = os.tmpdir()
       this._preloadPath = path.join(tempDir, `electron-progress-window-preload-${hash}.js`)
 
       // Write the preload script if it doesn't exist
       if (!fs.existsSync(this._preloadPath)) {
-        fs.writeFileSync(this._preloadPath, preloadScriptContent, 'utf8')
+        fs.writeFileSync(this._preloadPath, content, 'utf8')
       }
     }
     return this._preloadPath
@@ -380,7 +388,8 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
   options: ProgressWindowOptions
 
   /** @internal - used for testing */
-  _screenInstance: typeof Electron.screen
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  _screenInstance: any
 
   /**
    * Default values for new ProgressItems added to this ProgressWindow instance.
@@ -414,8 +423,10 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    */
   constructor(options = {} as ProgressWindowOptions) {
     super()
-    // Check if we're using mocks for testing
-    const isUsingMocks = options.testingFixtures?.bw !== undefined
+    // Check if we're using mocks for testing (check both constructor options and static config)
+    const isUsingMocks =
+      options.testingFixtures?.bw !== undefined ||
+      ProgressWindow.options.testingFixtures?.bw !== undefined
 
     const overrides = {
       windowOptions: {
