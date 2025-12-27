@@ -343,7 +343,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     this.emit('paused', value)
   }
 
-  /** Automatically mark as completed when value >= maxValue. Default: true */
+  /** Automatically mark as completed when value reaches maxValue. Default: true */
   get completeAutomatically(): boolean {
     return this.#options.completeAutomatically
   }

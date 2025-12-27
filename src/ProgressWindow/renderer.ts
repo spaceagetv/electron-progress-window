@@ -181,7 +181,10 @@ class ProgressWidget {
   update(item: ProgressItemTransferable, force = false) {
     const oldItem = this.item
     this.item = item
-    this.element.classList.toggle('complete-automatically', item.completeAutomatically)
+    this.element.classList.toggle(
+      'complete-automatically',
+      item.completeAutomatically
+    )
     this.element.classList.toggle('cancelled', item.cancelled)
     this.element.classList.toggle('completed', item.completed)
     this.element.classList.toggle('cancellable', item.cancellable)
