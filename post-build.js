@@ -2,7 +2,8 @@
  * After building the project:
  * 1. Insert the renderer script into the HTML file
  * 2. Embed the HTML content into ProgressWindow.js
- * 3. Clean up intermediate files (renderer.js only - preload.js stays)
+ * 3. Embed the preload script content into ProgressWindow.js
+ * 4. Clean up intermediate files
  */
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -33,8 +34,23 @@ const rendererJsDefinitionsPathEsm = path.resolve(
   'ProgressWindow/renderer.d.ts'
 )
 
+// Preload script paths
+const preloadJsPathCjs = path.resolve(cjsPath, 'ProgressWindow/preload.js')
+const preloadJsDefinitionsPathCjs = path.resolve(
+  cjsPath,
+  'ProgressWindow/preload.d.ts'
+)
+const preloadJsPathEsm = path.resolve(esmPath, 'ProgressWindow/preload.js')
+const preloadJsDefinitionsPathEsm = path.resolve(
+  esmPath,
+  'ProgressWindow/preload.d.ts'
+)
+
 // Read the renderer script (use ESM version for both)
 const rendererJSEsmContent = fs.readFileSync(rendererJsPathEsm, 'utf-8')
+
+// Read the preload script (use CJS version since it runs in Node context)
+const preloadJsContent = fs.readFileSync(preloadJsPathCjs, 'utf-8')
 
 // Insert renderer script into HTML
 const htmlContent = fs.readFileSync(origHtmlFilePath, 'utf-8')
@@ -72,6 +88,17 @@ esmScriptContent = esmScriptContent.replace(
   `const htmlContent = \`${escapeForTemplate(htmlContentWithScript)}\`;`
 )
 
+// Replace the getPreloadContent function to return embedded content
+const preloadFunctionRegex = /function getPreloadContent\(\)[^{]*\{[\s\S]*?return preloadContent;\s*\}/
+const embeddedPreloadFunction = `function getPreloadContent() {
+  if (!preloadContent) {
+    preloadContent = \`${escapeForTemplate(preloadJsContent)}\`;
+  }
+  return preloadContent;
+}`
+cjsScriptContent = cjsScriptContent.replace(preloadFunctionRegex, embeddedPreloadFunction)
+esmScriptContent = esmScriptContent.replace(preloadFunctionRegex, embeddedPreloadFunction)
+
 // Write the modified ProgressWindow.js files
 fs.writeFileSync(cjsScriptPath, cjsScriptContent)
 fs.writeFileSync(esmScriptPath, esmScriptContent)
@@ -97,4 +124,14 @@ safeUnlink(rendererJsPathEsm + '.map')
 safeUnlink(rendererJsDefinitionsPathEsm)
 safeUnlink(rendererJsDefinitionsPathEsm + '.map')
 
-console.log('Post-build: Embedded renderer script and HTML successfully.')
+// Remove the preload.js files (no longer needed, content embedded in ProgressWindow.js)
+safeUnlink(preloadJsPathCjs)
+safeUnlink(preloadJsPathCjs + '.map')
+safeUnlink(preloadJsDefinitionsPathCjs)
+safeUnlink(preloadJsDefinitionsPathCjs + '.map')
+safeUnlink(preloadJsPathEsm)
+safeUnlink(preloadJsPathEsm + '.map')
+safeUnlink(preloadJsDefinitionsPathEsm)
+safeUnlink(preloadJsDefinitionsPathEsm + '.map')
+
+console.log('Post-build: Embedded renderer and preload scripts successfully.')

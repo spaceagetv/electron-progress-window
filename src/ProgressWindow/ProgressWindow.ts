@@ -6,6 +6,8 @@ import {
 import { EventEmitter } from 'events'
 import path from 'path'
 import fs from 'fs'
+import os from 'os'
+import crypto from 'crypto'
 
 import {
   ProgressItemOptions,
@@ -14,12 +16,52 @@ import {
 } from './ProgressItem'
 import { deepMerge } from './utils'
 
+/** Cached preload script content and path */
+let preloadContent: string | null = null
+let preloadPath: string | null = null
+
 /**
- * Path to the preload script.
- * This file is built alongside ProgressWindow.js during compilation.
+ * Get the preload script content.
+ * This line is replaced at build time by post-build.js with embedded content.
  * @internal
  */
-const PRELOAD_PATH = path.resolve(__dirname, 'preload.js')
+function getPreloadContent(): string {
+  if (!preloadContent) {
+    // This fs.readFileSync is replaced at build time with embedded content
+    preloadContent = fs.readFileSync(
+      path.resolve(__dirname, 'preload.js'),
+      'utf8'
+    )
+  }
+  return preloadContent
+}
+
+/**
+ * Get the path to the preload script.
+ * Writes to temp on first call, returns cached path thereafter.
+ * @internal
+ */
+function getPreloadPath(): string {
+  if (!preloadPath) {
+    const content = getPreloadContent()
+    // Use content hash for deterministic filename
+    const hash = crypto
+      .createHash('md5')
+      .update(content)
+      .digest('hex')
+      .slice(0, 8)
+    preloadPath = path.join(
+      os.tmpdir(),
+      `electron-progress-window-preload-${hash}.js`
+    )
+
+    // Only write if file doesn't exist
+    if (!fs.existsSync(preloadPath)) {
+      fs.writeFileSync(preloadPath, content, 'utf8')
+    }
+  }
+  return preloadPath
+}
 
 /**
  * Options for creating/configuring a ProgressWindow
@@ -412,7 +454,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
           sandbox: true,
           // The preload script exposes only the necessary IPC methods via contextBridge
           // Skip preload when using mocks for testing
-          ...(isUsingMocks ? {} : { preload: PRELOAD_PATH }),
+          ...(isUsingMocks ? {} : { preload: getPreloadPath() }),
           navigateOnDragDrop: false,
         },
       },
