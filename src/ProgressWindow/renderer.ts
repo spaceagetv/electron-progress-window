@@ -48,15 +48,17 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 
   // Set up IPC listeners via the exposed API
-  window.progressWindowAPI.onItemAdd((progressItem: ProgressItemTransferable) => {
-    const widget = new ProgressWidget(progressItem)
-    progressItems.push(widget)
-    const list = document.getElementById('progress-items')
-    if (list) {
-      list.appendChild(widget.element)
+  window.progressWindowAPI.onItemAdd(
+    (progressItem: ProgressItemTransferable) => {
+      const widget = new ProgressWidget(progressItem)
+      progressItems.push(widget)
+      const list = document.getElementById('progress-items')
+      if (list) {
+        list.appendChild(widget.element)
+      }
+      updateContentSize()
     }
-    updateContentSize()
-  })
+  )
 
   window.progressWindowAPI.onItemRemove((progressItemId: string) => {
     const widget = getProgressWidget(progressItemId)
@@ -67,13 +69,15 @@ document.addEventListener('DOMContentLoaded', () => {
     updateContentSize()
   })
 
-  window.progressWindowAPI.onItemUpdate((progressItem: ProgressItemTransferable) => {
-    const widget = getProgressWidget(progressItem.id)
-    if (widget) {
-      widget.update(progressItem)
+  window.progressWindowAPI.onItemUpdate(
+    (progressItem: ProgressItemTransferable) => {
+      const widget = getProgressWidget(progressItem.id)
+      if (widget) {
+        widget.update(progressItem)
+      }
+      updateContentSize()
     }
-    updateContentSize()
-  })
+  )
 })
 
 function getProgressWidget(id: string) {

@@ -1,4 +1,8 @@
-import { BrowserWindow, screen, type BrowserWindowConstructorOptions } from 'electron'
+import {
+  BrowserWindow,
+  screen,
+  type BrowserWindowConstructorOptions,
+} from 'electron'
 import { EventEmitter } from 'events'
 import path from 'path'
 import fs from 'fs'
@@ -190,9 +194,16 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     if (!this._preloadPath) {
       const content = getPreloadScriptContent()
       // Create a unique temp file for the preload script
-      const hash = crypto.createHash('md5').update(content).digest('hex').slice(0, 8)
+      const hash = crypto
+        .createHash('md5')
+        .update(content)
+        .digest('hex')
+        .slice(0, 8)
       const tempDir = os.tmpdir()
-      this._preloadPath = path.join(tempDir, `electron-progress-window-preload-${hash}.js`)
+      this._preloadPath = path.join(
+        tempDir,
+        `electron-progress-window-preload-${hash}.js`
+      )
 
       // Write the preload script if it doesn't exist
       if (!fs.existsSync(this._preloadPath)) {
