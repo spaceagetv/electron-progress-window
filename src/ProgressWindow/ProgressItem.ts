@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events'
-import { isEqual, merge } from 'lodash'
-import TypedEmitter from 'typed-emitter'
+import { deepEqual, deepMerge } from './utils'
 
 export type ProgressItemTheme = 'stripes' | 'none'
 
@@ -122,13 +121,25 @@ export type ProgressItemEvents = {
   show: () => void
 }
 
-/** @internal */
-export type TypedEmitterProgressItemEvents =
-  new () => TypedEmitter<ProgressItemEvents>
+/**
+ * Typed EventEmitter interface for ProgressItem events.
+ * Provides type-safe on/emit/off methods.
+ * @internal
+ */
+export interface TypedEventEmitter<T> {
+  on<K extends keyof T>(event: K, listener: T[K]): this
+  once<K extends keyof T>(event: K, listener: T[K]): this
+  off<K extends keyof T>(event: K, listener: T[K]): this
+  emit<K extends keyof T>(
+    event: K,
+    ...args: T[K] extends (...args: infer A) => unknown ? A : never
+  ): boolean
+  removeAllListeners<K extends keyof T>(event?: K): this
+}
 
 /** @internal */
 export const ProgressItemEventsEmitter =
-  EventEmitter as TypedEmitterProgressItemEvents
+  EventEmitter as new () => TypedEventEmitter<ProgressItemEvents>
 
 /**
  * A progress bar item within a ProgressWindow. There shouldn't be much need to call this directly.
@@ -176,7 +187,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   constructor(options = {} as Partial<ProgressItemOptions>) {
     super()
-    merge(this._privates, {
+    deepMerge(this._privates, {
       ...options,
       delayIndeterminateMs: Math.max(0, options.delayIndeterminateMs || 0),
       showWhenEstimateExceedsMs: Math.max(
@@ -409,7 +420,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
       ([key, val]: [
         keyof ProgressItemOptions,
         ProgressItemOptions[keyof ProgressItemOptions]
-      ]) => !isEqual(this._privates[key], val)
+      ]) => !deepEqual(this._privates[key], val)
     )
     // if none of the options have changed, return
     if (!hasChanged) {

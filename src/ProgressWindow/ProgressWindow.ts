@@ -8,10 +8,13 @@ import path from 'path'
 import fs from 'fs'
 import os from 'os'
 import crypto from 'crypto'
-import { merge } from 'lodash'
-import TypedEmitter from 'typed-emitter'
 
-import { ProgressItemOptions, ProgressItem } from './ProgressItem'
+import {
+  ProgressItemOptions,
+  ProgressItem,
+  TypedEventEmitter,
+} from './ProgressItem'
+import { deepMerge } from './utils'
 
 /**
  * Get the preload script content.
@@ -123,12 +126,8 @@ export type ProgressWindowInstanceEvents = {
 }
 
 /** @internal */
-export type TypedEmitterProgressWindowInstanceEvents =
-  new () => TypedEmitter<ProgressWindowInstanceEvents>
-
-/** @internal */
-export const EventEmitterAsTypedEmitterProgressWindowInstanceEvents =
-  EventEmitter as TypedEmitterProgressWindowInstanceEvents
+export const ProgressWindowInstanceEventsEmitter =
+  EventEmitter as new () => TypedEventEmitter<ProgressWindowInstanceEvents>
 
 /**
  * An Electron Window that displays progress items.
@@ -175,7 +174,7 @@ export const EventEmitterAsTypedEmitterProgressWindowInstanceEvents =
  * // once the last item is complete, the window will close
  * ```
  */
-export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInstanceEvents {
+export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
   /** @internal */
   static _options: ProgressWindowOptions = {}
   /** @internal */
@@ -226,7 +225,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    * @eventProperty
    */
   static readonly emitter =
-    new EventEmitter() as TypedEmitter<ProgressWindowStaticEvents>
+    new EventEmitter() as TypedEventEmitter<ProgressWindowStaticEvents>
 
   /**
    * Readonly convenience to see default options for new ProgressWindows.
@@ -301,7 +300,7 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
       this._optionsFunction = options
     } else {
       // otherwise, merge the options
-      merge(this._options, options)
+      deepMerge(this._options, options)
     }
   }
 
@@ -313,7 +312,11 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    */
   static get options(): ProgressWindowOptions {
     if (this._optionsFunction) {
-      return merge({}, this._options, this._optionsFunction())
+      return deepMerge(
+        {},
+        this._options,
+        this._optionsFunction()
+      ) as ProgressWindowOptions
     }
     return this._options
   }
@@ -454,13 +457,13 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
         },
       },
     } as ProgressWindowOptions
-    this.options = merge(
+    this.options = deepMerge(
       {},
       this.defaults,
       ProgressWindow.options,
       options,
       overrides
-    )
+    ) as ProgressWindowOptions
 
     // Are we using BrowserWindow or a mock?
     const bwFunction = this.options.testingFixtures.bw
@@ -559,7 +562,11 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     if (options instanceof ProgressItem) {
       item = options
     } else {
-      options = merge({}, this.itemDefaults, options)
+      options = deepMerge(
+        {},
+        this.itemDefaults,
+        options
+      ) as Partial<ProgressItemOptions>
       item = new ProgressItem(options)
     }
     item.on('update', () => {

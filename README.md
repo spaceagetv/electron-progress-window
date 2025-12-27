@@ -5,7 +5,7 @@ Display multiple progress bars in an Electron window.
 ## Advantages
 
 * Full Typescript support, including event types
-* Minimal dependencies (lodash, typed-emitter)
+* Zero runtime dependencies
 * Full [documentation](docs/electron-progress-window.md)
 * [Example](examples) playground to try it out in an Electron app 
 * Progress bars are displayed in a single window (or multiple windows if you prefer)
