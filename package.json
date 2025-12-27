@@ -4,7 +4,7 @@
   "description": "Display single or multiple progress bars in an Electron app",
   "repository": {
     "type": "git",
-    "url": "https://github.com/spaceagetv/electron-progress-window.git"
+    "url": "git+https://github.com/spaceagetv/electron-progress-window.git"
   },
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
