@@ -22,7 +22,7 @@ let preloadPath: string | null = null
 
 /**
  * Get the preload script content.
- * This line is replaced at build time by post-build.js with embedded content.
+ * This function is replaced at build time by post-build.js with embedded content.
  * @internal
  */
 function getPreloadContent(): string {
