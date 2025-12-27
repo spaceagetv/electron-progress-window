@@ -91,30 +91,30 @@ function getPreloadPath(): string {
  * @public
  */
 export interface ProgressWindowOptions {
-  /** Expand height of window as needed? Default: true. Scroll otherwise. */
-  variableHeight?: boolean
-  /** Expand width of window as needed? Default: false */
-  variableWidth?: boolean
+  /** Automatically adjust window height as items are added/removed. Default: true */
+  autoHeight?: boolean
+  /** Automatically adjust window width as needed. Default: false */
+  autoWidth?: boolean
   /** Close window automatically when all items complete. Default: true */
   closeOnComplete?: boolean
   /**
-   * Hide the window for a moment before closing.
-   * Window will pop up faster if a subsequent item is added before delay is finished.
-   * True/false or number of milliseconds.
-   * Defaults to true, which delays for 3000ms.
+   * Delay (in ms) before closing the window after all items complete.
+   * This allows the window to reappear quickly if a new item is added.
+   * Set to `true` for default 3000ms, `false` to close immediately, or a number for custom delay.
+   * Default: true (3000ms)
    */
-  delayBeforeDestroying?: boolean | number
+  hideDelay?: boolean | number
   /** Send 'cancelled' for all current items when closing the window. Default: false */
   cancelOnClose?: boolean
   /** Focus the window when adding a new item. Default: true */
-  focusWhenAddingItem?: boolean
-  /** Animate when varying the height/width the BrowserWindow (on Mac) */
+  focusOnAdd?: boolean
+  /** Animate window resize (macOS only). Default: false */
   animateResize?: boolean
-  /** Additional CSS for the window */
+  /** Additional CSS to inject into the window */
   css?: string
-  /** Options for the BrowserWindow instance */
+  /** Options passed to Electron's BrowserWindow constructor */
   windowOptions?: Partial<BrowserWindowConstructorOptions>
-  /** Default options for new ProgressItem */
+  /** Default options for new ProgressItem instances */
   itemDefaults?: Partial<ProgressItemOptions>
   /** @internal - Options for testing */
   testingFixtures?: {
@@ -201,10 +201,10 @@ export const ProgressWindowInstanceEventsEmitter =
  * ```ts
  * // configure the default instance
  * ProgressWindow.configure({
- *  variableHeight: true,
- *  variableWidth: false,
+ *  autoHeight: true,
+ *  autoWidth: false,
  *  closeOnComplete: true,
- *  focusWhenAddingItem: true,
+ *  focusOnAdd: true,
  *  windowOptions: { // these are Electron BrowserWindow options
  *   width: 300,
  *   height: 60,
@@ -219,10 +219,12 @@ export const ProgressWindowInstanceEventsEmitter =
  * })
  *
  * setTimeout(() => {
- *  item1.setProgress(50, { detail: '50% complete' })
+ *  item1.value = 50
+ *  item1.detail = '50% complete'
  * }, 200)
  * setTimeout(() => {
- *  item1.setProgress(100, { detail: '100% complete' })
+ *  item1.value = 100
+ *  item1.detail = '100% complete'
  * }, 400)
  *
  * // once the item is complete, it will be removed from the window
@@ -231,25 +233,35 @@ export const ProgressWindowInstanceEventsEmitter =
  */
 export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
   /** @internal */
-  static _options: ProgressWindowOptions = {}
+  static #options: ProgressWindowOptions = {}
   /** @internal */
-  static _optionsFunction: ProgressWindowOptionsFunction | null = null
+  static #optionsFunction: ProgressWindowOptionsFunction | null = null
   /** @internal */
-  static _instance: ProgressWindow | null = null
+  static #instance: ProgressWindow | null = null
 
   /**
-   * Static event emitter for ProgressWindow events.
+   * Static event emitter for ProgressWindow class-level events.
+   * Use this to listen for window creation/destruction across all instances.
    *
    * @remarks
+   * This emitter fires events at the class level, not instance level.
+   * For instance-level events (ready, itemAdded, etc.), use the instance directly.
    *
    * Events:<br/>
-   * - `created` - New ProgressWindows has been created. listener: `(progressWindow: ProgressWindow) => void`<br/>
-   * - `destroyed` - ProgressWindow has been destroyed. listener: `(progressWindow: ProgressWindow) => void`<br/>
+   * - `created` - A new ProgressWindow has been created. listener: `(progressWindow: ProgressWindow) => void`<br/>
+   * - `destroyed` - A ProgressWindow has been destroyed. listener: `(progressWindow: ProgressWindow) => void`<br/>
+   *
+   * @example
+   * ```ts
+   * ProgressWindow.staticEvents.on('created', (win) => {
+   *   console.log('New window created')
+   * })
+   * ```
    *
    * @see ProgressWindowStaticEvents
    * @eventProperty
    */
-  static readonly emitter =
+  static readonly staticEvents =
     new EventEmitter() as TypedEventEmitter<ProgressWindowStaticEvents>
 
   /**
@@ -260,11 +272,11 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
    * @public
    */
   static readonly defaults: ProgressWindowOptions = {
-    variableHeight: true,
-    variableWidth: false,
+    autoHeight: true,
+    autoWidth: false,
     closeOnComplete: true,
-    delayBeforeDestroying: true,
-    focusWhenAddingItem: true,
+    hideDelay: true,
+    focusOnAdd: true,
     animateResize: false,
     windowOptions: {
       width: 300,
@@ -293,15 +305,15 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
    * @example
    * ```ts
    * ProgressWindow.configure({
-   *  variableHeight: true,
-   *  variableWidth: false,
+   *  autoHeight: true,
+   *  autoWidth: false,
    *  closeOnComplete: true,
    *  itemDefaults: {
-   *    closeOnComplete: false,
+   *    autoRemove: false,
    *  },
    *  windowOptions: { // these are Electron BrowserWindow options
    *    width: 300,
-   *    height: 60, // variableHeight means this will expand as items are added
+   *    height: 60, // autoHeight means this will expand as items are added
    *    backgroundColor: '#0f0',
    *  },
    *  css: `
@@ -315,17 +327,17 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
   static configure(
     options: ProgressWindowOptions | ProgressWindowOptionsFunction
   ) {
-    if (this._instance) {
+    if (this.#instance) {
       throw new Error(
         'ProgressWindow.configure() must be set before the first ProgressWindow is created'
       )
     }
     if (typeof options === 'function') {
       // if there are functions involved, overwrite the options
-      this._optionsFunction = options
+      this.#optionsFunction = options
     } else {
       // otherwise, merge the options
-      deepMerge(this._options, options)
+      deepMerge(this.#options, options)
     }
   }
 
@@ -336,27 +348,27 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
    * @public
    */
   static get options(): ProgressWindowOptions {
-    if (this._optionsFunction) {
+    if (this.#optionsFunction) {
       return deepMerge(
         {},
-        this._options,
-        this._optionsFunction()
+        this.#options,
+        this.#optionsFunction()
       ) as ProgressWindowOptions
     }
-    return this._options
+    return this.#options
   }
 
   /**
    * Get/create the default ProgressWindow instance.
    */
   static get instance() {
-    if (!this._instance) {
-      this._instance = new ProgressWindow(this.options)
-      this._instance.on('windowClosed', () => {
+    if (!this.#instance) {
+      this.#instance = new ProgressWindow(this.options)
+      this.#instance.on('windowClosed', () => {
         this.destroy()
       })
     }
-    return this._instance
+    return this.#instance
   }
 
   /**
@@ -371,10 +383,10 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
    * Destroy the ProgressWindow instance.
    */
   static destroy() {
-    if (this._instance) {
+    if (this.#instance) {
       this.instance.close()
-      this.emitter.emit('destroyed', this._instance)
-      this._instance = null
+      this.staticEvents.emit('destroyed', this.#instance)
+      this.#instance = null
     }
   }
 
@@ -391,20 +403,35 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     return this.instance.addItem(options)
   }
 
-  // static updateItem(item: ProgressItem) {
-  //   return this.instance.updateItem(item)
-  // }
-
-  // static removeItem(id: string) {
-  //   return this.instance.removeItem(id)
-  // }
-
   /**
    * Close the default ProgressWindow instance (if open).
    */
   static close(): void {
-    if (!this._instance) return
+    if (!this.#instance) return
     return this.instance.close()
+  }
+
+  /**
+   * Reset all configuration to defaults.
+   * Useful for testing. Must be called after destroy().
+   * @internal
+   */
+  static resetConfiguration(): void {
+    if (this.#instance) {
+      throw new Error(
+        'ProgressWindow.resetConfiguration() must be called after destroy()'
+      )
+    }
+    this.#options = {}
+    this.#optionsFunction = null
+  }
+
+  /**
+   * Check if there's currently an active instance.
+   * @returns true if there's an active instance
+   */
+  static get hasInstance(): boolean {
+    return this.#instance !== null
   }
 
   /**
@@ -428,7 +455,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
 
   /** @internal - used for testing */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _screenInstance: any
+  #screenInstance: any
 
   /**
    * Default values for new ProgressItems added to this ProgressWindow instance.
@@ -444,10 +471,10 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     [id: string]: ProgressItem
   } = {}
 
-  private lastContentDimensions = { width: 0, height: 0 }
+  #lastContentDimensions = { width: 0, height: 0 }
 
   /** @internal */
-  private _ready: Promise<ProgressWindow>
+  #ready: Promise<ProgressWindow>
 
   /**
    * If you want to work with a single window, you won't need to call this directly.
@@ -493,7 +520,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     // Are we using BrowserWindow or a mock?
     const bwFunction = this.options.testingFixtures.bw
     // Are we using screen or a mock?
-    this._screenInstance = this.options.testingFixtures.scr
+    this.#screenInstance = this.options.testingFixtures.scr
     this.itemDefaults = this.options.itemDefaults
 
     // create the window
@@ -503,7 +530,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     this.browserWindow.webContents.on('will-navigate', (event) => {
       event.preventDefault()
     })
-    this._ready = new Promise((resolve) => {
+    this.#ready = new Promise((resolve) => {
       this.browserWindow.once('ready-to-show', () => {
         this.emit('ready')
         resolve(this)
@@ -525,7 +552,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     )
 
     // we're going to get x/y here too... but we'll just ignore them
-    this.lastContentDimensions = this.browserWindow.getContentBounds()
+    this.#lastContentDimensions = this.browserWindow.getContentBounds()
 
     this.browserWindow.on('close', () => {
       if (this.options.cancelOnClose) {
@@ -543,7 +570,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     this.browserWindow.webContents.ipc.on(
       'progress-update-content-size',
       (_event, dimensions: { width: number; height: number }) => {
-        this.updateContentSize(dimensions)
+        this.#updateContentSize(dimensions)
       }
     )
     // istanbul ignore next
@@ -557,10 +584,11 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     this.browserWindow.webContents.ipc.on(
       'progress-item-pause',
       (_event, itemId: string) => {
-        this.progressItems[itemId].togglePause()
+        const item = this.progressItems[itemId]
+        item.paused = !item.paused
       }
     )
-    ProgressWindow.emitter.emit('created', this)
+    ProgressWindow.staticEvents.emit('created', this)
   }
 
   /**
@@ -568,7 +596,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
    * @returns a promise which resolves to progressWindow instance when ready
    */
   async whenReady(): Promise<ProgressWindow> {
-    await this._ready
+    await this.#ready
     return this
   }
 
@@ -595,13 +623,13 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       item = new ProgressItem(options)
     }
     item.on('update', () => {
-      this.updateItem(item)
+      this.#updateItem(item)
     })
     item.on('complete', () => {
-      this.updateItem(item)
+      this.#updateItem(item)
     })
-    item.on('pause', () => {
-      this.updateItem(item)
+    item.on('paused', () => {
+      this.#updateItem(item)
     })
     item.on('remove', () => {
       this.removeItem(item.id)
@@ -615,9 +643,9 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
         'progress-item-add',
         item.transferable()
       )
-      this.setWindowProgress()
+      this.#setWindowProgress()
       if (
-        this.options.focusWhenAddingItem ||
+        this.options.focusOnAdd ||
         Object.keys(this.progressItems).length === 1
       ) {
         this.browserWindow.show()
@@ -630,8 +658,8 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
         'progress-item-remove',
         item.transferable()
       )
-      this.setWindowProgress()
-      this.maybeCloseWindow()
+      this.#setWindowProgress()
+      this.#maybeCloseWindow()
     })
 
     this.emit('itemAdded', item)
@@ -644,7 +672,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
    * Don't call this directly. There are other methods for updating items.
    * @internal
    */
-  private async updateItem(item: ProgressItem) {
+  async #updateItem(item: ProgressItem) {
     // istanbul ignore next
     if (!this.browserWindow) {
       throw new Error(
@@ -657,8 +685,8 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       item.transferable()
     )
     this.emit('itemUpdated', item)
-    this.setWindowProgress()
-    this.maybeCloseWindow()
+    this.#setWindowProgress()
+    this.#maybeCloseWindow()
     return item
   }
 
@@ -680,8 +708,8 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     await this.whenReady()
     this.browserWindow?.webContents.send('progress-item-remove', id)
     this.emit('itemRemoved', id)
-    this.setWindowProgress()
-    this.maybeCloseWindow()
+    this.#setWindowProgress()
+    this.#maybeCloseWindow()
   }
 
   /**
@@ -700,7 +728,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
   }
 
   /** Set the system progress bar via the BrowserWindow instance */
-  private setWindowProgress() {
+  #setWindowProgress() {
     if (!this.browserWindow) {
       throw new Error(
         'ProgressWindow.setWindowProgress() called before window was created'
@@ -709,15 +737,15 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     const items = Object.values(this.progressItems)
 
     // if all items are complete, hide the system progress bar
-    const allComplete = items.every((item) => item.isCompleted())
+    const allComplete = items.every((item) => item.completed)
     if (allComplete) {
       this.browserWindow.setProgressBar(-1)
       return
     }
 
     // if any item is indeterminate, set the progress bar to indeterminate
-    const indeterminate = items.some((item) => item.isIndeterminate())
-    if (indeterminate) {
+    const hasIndeterminate = items.some((item) => item.indeterminate)
+    if (hasIndeterminate) {
       // istanbul ignore next
       if (process.platform === 'win32') {
         this.browserWindow.setProgressBar(2, { mode: 'indeterminate' })
@@ -747,14 +775,14 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
    *
    * @internal
    */
-  private updateContentSize(newDimensions: { width: number; height: number }) {
+  #updateContentSize(newDimensions: { width: number; height: number }) {
     // istanbul ignore next
     if (!this.browserWindow) {
       throw new Error(
         'ProgressWindow.updateContentSize() called without browserWindow instance'
       )
     }
-    if (!this.options.variableHeight && !this.options.variableWidth) {
+    if (!this.options.autoHeight && !this.options.autoWidth) {
       // we shouldn't be resizing the window
       return
     }
@@ -766,16 +794,16 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     // if only one dimension is variable and it hasn't changed, don't resize
     // istanbul ignore next
     if (
-      (!this.options.variableWidth &&
-        newDimensions.height === this.lastContentDimensions.height) ||
-      (!this.options.variableHeight &&
-        newDimensions.width === this.lastContentDimensions.width)
+      (!this.options.autoWidth &&
+        newDimensions.height === this.#lastContentDimensions.height) ||
+      (!this.options.autoHeight &&
+        newDimensions.width === this.#lastContentDimensions.width)
     ) {
       return
     }
 
     // find the display that the window is currently on
-    const display = this._screenInstance.getDisplayMatching(
+    const display = this.#screenInstance.getDisplayMatching(
       this.browserWindow.getBounds()
     )
     // get the display's work area
@@ -786,7 +814,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       y: displayY,
     } = display.workArea
     // get the bounds of the Progress window
-    const { width: oldWidth, height: oldHeight } = this.lastContentDimensions
+    const { width: oldWidth, height: oldHeight } = this.#lastContentDimensions
 
     const {
       x: windowOldX,
@@ -801,10 +829,10 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       this.browserWindow.getContentBounds().height
 
     // calculate the new window size
-    const contentWidth = this.options.variableWidth
+    const contentWidth = this.options.autoWidth
       ? Math.min(newDimensions.width, displayWidth)
       : windowOldWidth
-    const contentHeight = this.options.variableHeight
+    const contentHeight = this.options.autoHeight
       ? Math.min(newDimensions.height, displayHeight - titleBarHeight)
       : windowOldHeight
 
@@ -838,11 +866,11 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       height: Math.round(contentHeight),
     }
     this.browserWindow.setContentBounds(bounds, this.options.animateResize)
-    this.lastContentDimensions = bounds
+    this.#lastContentDimensions = bounds
   }
 
   /** Close the window if all items are completed */
-  private maybeCloseWindow() {
+  #maybeCloseWindow() {
     // istanbul ignore next
     if (!this.browserWindow) {
       throw new Error(
@@ -851,9 +879,9 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     }
     if (this.options.closeOnComplete) {
       const items = Object.values(this.progressItems)
-      if (items.every((item) => item.isCompleted())) {
-        if (this.options.delayBeforeDestroying) {
-          this.hideThenCloseIfEmpty()
+      if (items.every((item) => item.completed)) {
+        if (this.options.hideDelay) {
+          this.#hideThenCloseIfEmpty()
         } else {
           this.close()
         }
@@ -862,15 +890,15 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
   }
 
   /** Hide the window. Then, after a delay, close it if there are no items. */
-  async hideThenCloseIfEmpty() {
+  async #hideThenCloseIfEmpty() {
     let delayMs = 3000 // default delay
-    if (typeof this.options.delayBeforeDestroying === 'number') {
-      delayMs = this.options.delayBeforeDestroying
+    if (typeof this.options.hideDelay === 'number') {
+      delayMs = this.options.hideDelay
     }
     // istanbul ignore if
     if (
-      typeof this.options.delayBeforeDestroying === 'boolean' &&
-      this.options.delayBeforeDestroying === false
+      typeof this.options.hideDelay === 'boolean' &&
+      this.options.hideDelay === false
     ) {
       delayMs = 0
     }
@@ -883,11 +911,11 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     if (delayMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, delayMs))
     }
-    this.closeIfEmpty()
+    this.#closeIfEmpty()
   }
 
   /** Close (destroy) the window if there are no items. */
-  closeIfEmpty() {
+  #closeIfEmpty() {
     // istanbul ignore next
     if (!this.browserWindow) {
       return

@@ -39,7 +39,7 @@ const { ProgressWindow } = require('@spaceagetv/electron-progress-window')
 // Configure the settings for ProgressWindow
 ProgressWindow.configure({
   closeOnComplete: true,
-  focusWhenAddingItem: true,
+  focusOnAdd: true,
   windowOptions: { // these are Electron BrowserWindow options
     title: 'Progress',
     width: 300,
@@ -78,17 +78,18 @@ async function start() {
     detail: '0% complete',
     value: 0,
     maxValue: 100,
-    enablePause: true,
-    enableCancel: true,
+    pauseable: true,
+    cancellable: true,
   })
 
   const updateProgress = (progress) => {
-    progressItem.setProgress(progress, {detail: `${progress}% complete`})
+    progressItem.value = progress
+    progressItem.detail = `${progress}% complete`
   }
-  
+
   const { setPause, cancel } = await somethingThatTakesTime(updateProgress)
 
-  progressItem.on('pause', (isPaused) => {
+  progressItem.on('paused', (isPaused) => {
     setPause(isPaused)
   })
   progressItem.on('cancelled', () => {
