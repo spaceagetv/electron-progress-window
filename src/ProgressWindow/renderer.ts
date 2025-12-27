@@ -166,24 +166,30 @@ class ProgressWidget {
     this.titleElement = this.element.querySelector(
       '.progress-item-title'
     ) as HTMLDivElement
+    // Set title immediately to avoid extra DOM update
+    // Use textContent for security - prevents XSS
+    this.titleElement.textContent = item.title
     this.detailElement = this.element.querySelector(
       '.progress-item-detail'
     ) as HTMLDivElement
+    // Set detail immediately to avoid extra DOM update
+    // Use textContent for security - prevents XSS
+    this.detailElement.textContent = item.detail
     this.update(item, true)
   }
 
   update(item: ProgressItemTransferable, force = false) {
     const oldItem = this.item
     this.item = item
-    this.element.classList.toggle('auto-complete', item.autoComplete)
+    this.element.classList.toggle('complete-automatically', item.completeAutomatically)
     this.element.classList.toggle('cancelled', item.cancelled)
     this.element.classList.toggle('completed', item.completed)
-    this.element.classList.toggle('enable-cancel', item.enableCancel)
-    this.element.classList.toggle('enable-pause', item.enablePause)
+    this.element.classList.toggle('cancellable', item.cancellable)
+    this.element.classList.toggle('pauseable', item.pauseable)
     this.element.classList.toggle('error', item.error)
     this.element.classList.toggle('paused', item.paused)
     this.element.classList.toggle('indeterminate', item.indeterminate)
-    this.element.classList.toggle('remove-on-complete', item.removeOnComplete)
+    this.element.classList.toggle('auto-remove', item.autoRemove)
     this.element.classList.toggle('stripes', item.theme === 'stripes')
 
     item.cssVars.forEach(([prop, val]) => {

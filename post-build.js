@@ -67,11 +67,15 @@ const htmlContentWithScript = htmlContent.replace(
 const cjsScriptPath = path.resolve(cjsPath, 'ProgressWindow/ProgressWindow.js')
 const esmScriptPath = path.resolve(esmPath, 'ProgressWindow/ProgressWindow.js')
 
+/**
+ * Escape a string for safe embedding in a JavaScript template literal.
+ * Handles backslashes, backticks, and template placeholder sequences (${...}).
+ */
 function escapeForTemplate(str) {
   return str
-    .replace(/\\/g, '\\\\')
-    .replace(/`/g, '\\`')
-    .replace(/\$/g, '\\$')
+    .replace(/\\/g, '\\\\')  // Escape backslashes first
+    .replace(/`/g, '\\`')    // Escape backticks
+    .replace(/\$/g, '\\$')   // Escape $ to prevent ${...} template placeholders
 }
 
 let cjsScriptContent = fs.readFileSync(cjsScriptPath, 'utf-8')

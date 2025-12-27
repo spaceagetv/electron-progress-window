@@ -77,11 +77,11 @@ body {
   display: none;
 }
 
-.enable-cancel .progress-item-cancel {
+.cancellable .progress-item-cancel {
   display: inline-block;
 }
 
-.enable-pause .progress-item-pause {
+.pauseable .progress-item-pause {
   display: inline-block;
 }
 
