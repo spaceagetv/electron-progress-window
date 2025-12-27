@@ -6,8 +6,6 @@ import {
 import { EventEmitter } from 'events'
 import path from 'path'
 import fs from 'fs'
-import os from 'os'
-import crypto from 'crypto'
 
 import {
   ProgressItemOptions,
@@ -17,19 +15,11 @@ import {
 import { deepMerge } from './utils'
 
 /**
- * Get the preload script content.
- * This is embedded at build time by post-build.js.
- * During development, it reads from the compiled preload.js file.
+ * Path to the preload script.
+ * This file is built alongside ProgressWindow.js during compilation.
  * @internal
  */
-function getPreloadScriptContent(): string {
-  // This line is replaced at build time with the embedded content:
-  const preloadScriptContent = fs.readFileSync(
-    path.resolve(__dirname, 'preload.js'),
-    'utf8'
-  )
-  return preloadScriptContent
-}
+const PRELOAD_PATH = path.resolve(__dirname, 'preload.js')
 
 /**
  * Options for creating/configuring a ProgressWindow
@@ -181,36 +171,6 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
   static _optionsFunction: ProgressWindowOptionsFunction | null = null
   /** @internal */
   static _instance: ProgressWindow | null = null
-  /** @internal - Path to the preload script file */
-  private static _preloadPath: string | null = null
-
-  /**
-   * Get or create the path to the preload script.
-   * The preload script is written to a temp file on first access.
-   * @internal
-   */
-  private static getPreloadPath(): string {
-    if (!this._preloadPath) {
-      const content = getPreloadScriptContent()
-      // Create a unique temp file for the preload script
-      const hash = crypto
-        .createHash('md5')
-        .update(content)
-        .digest('hex')
-        .slice(0, 8)
-      const tempDir = os.tmpdir()
-      this._preloadPath = path.join(
-        tempDir,
-        `electron-progress-window-preload-${hash}.js`
-      )
-
-      // Write the preload script if it doesn't exist
-      if (!fs.existsSync(this._preloadPath)) {
-        fs.writeFileSync(this._preloadPath, content, 'utf8')
-      }
-    }
-    return this._preloadPath
-  }
 
   /**
    * Static event emitter for ProgressWindow events.
@@ -452,7 +412,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
           sandbox: true,
           // The preload script exposes only the necessary IPC methods via contextBridge
           // Skip preload when using mocks for testing
-          ...(isUsingMocks ? {} : { preload: ProgressWindow.getPreloadPath() }),
+          ...(isUsingMocks ? {} : { preload: PRELOAD_PATH }),
           navigateOnDragDrop: false,
         },
       },
