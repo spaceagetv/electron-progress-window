@@ -1,3 +1,51 @@
+# [2.0.0](https://github.com/spaceagetv/electron-progress-window/compare/v1.5.1...v2.0.0) (2025-12-27)
+
+
+### Bug Fixes
+
+* CSS variable mismatch and remove commented code ([4e653fa](https://github.com/spaceagetv/electron-progress-window/commit/4e653fa4907df2d063855ba7f09bd054453481cf))
+* improve type compatibility and test support for security fix ([ebc8635](https://github.com/spaceagetv/electron-progress-window/commit/ebc86352dcf0f25057958399e12976dff3d1b371))
+* prevent memory leak in preload IPC listeners ([de8e37a](https://github.com/spaceagetv/electron-progress-window/commit/de8e37af3675c89c3111667a3e68464c2f68433b))
+* resolve linter errors (prettier formatting, TSDoc escape) ([733ae90](https://github.com/spaceagetv/electron-progress-window/commit/733ae90bdf3cac9144d26370d98b65384799504f))
+* restore embedded preload for Webpack compatibility ([692f78c](https://github.com/spaceagetv/electron-progress-window/commit/692f78cd7dcda9bfd25fb2a7442b66e0a13fccb1))
+* update package.json and README for open source release ([b6b6a28](https://github.com/spaceagetv/electron-progress-window/commit/b6b6a28e5af0c5f011fe24c0fa2765f477178ae3))
+* use CancelableEvent for Node.js compatibility ([aa7ea55](https://github.com/spaceagetv/electron-progress-window/commit/aa7ea55e36a4c8b74089da1cc96980e9088f8135))
+
+
+### Features
+
+* remove all runtime dependencies ([8488664](https://github.com/spaceagetv/electron-progress-window/commit/8488664443f1f6af67163e57fdf365cb3e66cddf))
+
+
+### security
+
+* implement context isolation with preload script ([a059b7d](https://github.com/spaceagetv/electron-progress-window/commit/a059b7d8cc225f649c9e4424c5070391221f314c))
+
+
+### BREAKING CHANGES
+
+* The renderer now uses contextIsolation and sandbox mode.
+
+This is a major security improvement that follows Electron best practices:
+
+- Enable contextIsolation: true (default since Electron 12)
+- Disable nodeIntegration: false (default since Electron 5)
+- Enable sandbox: true for additional security
+- Create preload script that uses contextBridge to expose only necessary IPC methods
+- Update renderer to use the exposed progressWindowAPI instead of direct ipcRenderer access
+- Use textContent instead of innerHTML for title/detail to prevent XSS
+- Update post-build to embed preload script at build time
+
+The preload script exposes a minimal API:
+- cancelItem(itemId)
+- togglePauseItem(itemId)
+- updateContentSize(dimensions)
+- onItemAdd(callback)
+- onItemUpdate(callback)
+- onItemRemove(callback)
+
+This prevents malicious code in title/detail fields from accessing Node.js APIs.
+
 ## [1.5.1](https://github.com/spaceagetv/electron-progress-window/compare/v1.5.0...v1.5.1) (2025-07-11)
 
 
