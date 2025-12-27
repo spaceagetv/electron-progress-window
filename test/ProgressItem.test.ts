@@ -399,8 +399,8 @@ describe('ProgressItem', () => {
         })
         progressItem.on('show', showSpy)
 
-        // wait for events to fire
-        await pause(1)
+        // wait for setImmediate to fire
+        await pause(20)
 
         expect(progressItem.isVisible()).to.be.true
         expect(showSpy).to.have.been.calledOnce
