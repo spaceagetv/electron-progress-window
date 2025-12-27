@@ -9,6 +9,13 @@
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/cjs/index.d.ts"
+    }
+  },
   "files": [
     "dist/**/*"
   ],
@@ -29,15 +36,21 @@
   },
   "keywords": [
     "electron",
-    "mocks",
-    "testing",
-    "unit testing",
-    "stubbing",
-    "spies",
-    "sinon"
+    "progress",
+    "progress-bar",
+    "progressbar",
+    "window",
+    "dialog",
+    "typescript"
   ],
   "author": "Jeff Robbins",
   "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "peerDependencies": {
+    "electron": "*"
+  },
   "devDependencies": {
     "@microsoft/api-documenter": "^7.22.6",
     "@microsoft/api-extractor": "^7.35.0",
@@ -47,7 +60,6 @@
     "@semantic-release/npm": "^10.0.3",
     "@types/chai": "^4.3.5",
     "@types/chai-as-promised": "^7.1.5",
-    "@types/lodash": "^4.14.194",
     "@types/mocha": "^10.0.1",
     "@types/sinon": "^10.0.15",
     "@types/sinon-chai": "^3.2.9",
@@ -70,10 +82,9 @@
     "sinon": "^15.1.2",
     "sinon-chai": "^3.7.0",
     "ts-node": "^10.9.1",
-    "typed-emitter": "^2.1.0",
     "typescript": "^5.0.4"
   },
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   }
 }

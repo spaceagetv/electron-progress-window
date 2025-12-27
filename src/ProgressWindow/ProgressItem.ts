@@ -1,18 +1,29 @@
 import { EventEmitter } from 'events'
-import { isEqual, merge } from 'lodash'
-import TypedEmitter from 'typed-emitter'
-// import { logger } from '../logger'
+import { deepEqual, deepMerge } from './utils'
 
-// logger.setLevel(LogLevel.DEBUG)
+/**
+ * A simple cancelable event that works in both Node.js and browser environments.
+ * Unlike the DOM Event class, this is available in pure Node.js.
+ * @public
+ */
+export class CancelableEvent {
+  readonly type: string
+  private _defaultPrevented = false
 
-// const logger = {
-//   log: console.log,
-//   error: console.error,
-//   warn: console.warn,
-//   info: console.info,
-//   debug: console.debug,
-//   silly: console.debug,
-// }
+  constructor(type: string) {
+    this.type = type
+  }
+
+  /** Prevent the default action associated with this event */
+  preventDefault(): void {
+    this._defaultPrevented = true
+  }
+
+  /** Whether preventDefault() has been called */
+  get defaultPrevented(): boolean {
+    return this._defaultPrevented
+  }
+}
 
 export type ProgressItemTheme = 'stripes' | 'none'
 
@@ -23,15 +34,15 @@ export type ProgressItemTheme = 'stripes' | 'none'
  */
 export type ProgressItemOptions = Pick<
   ProgressItem,
-  | 'autoComplete'
+  | 'completeAutomatically'
   | 'cssVars'
   | 'detail'
-  | 'enableCancel'
-  | 'enablePause'
+  | 'cancellable'
+  | 'pauseable'
   | 'error'
   | 'indeterminate'
   | 'maxValue'
-  | 'removeOnComplete'
+  | 'autoRemove'
   | 'theme'
   | 'title'
   | 'value'
@@ -54,7 +65,7 @@ export const itemCssMap = {
   /** Background of the progress bar. Default: #ffffff6c */
   progressBackground: '--progress-background',
   /** Foreground of the progress bar. This is actually the "background" property on a div. Default: #1f65fd */
-  progressForeground: '--progress-foreground',
+  progressForeground: '--progress-foreground-color',
   /** Background of the item's containing div. */
   itemBackground: '--item-background',
   /** Border radius of the item's containing div. Default: 4px */
@@ -80,23 +91,25 @@ export type TransferableItemCss = [ItemCssValue, string][]
  * Transferable version of ProgressItem - used for IPC
  * @internal
  */
-export type ProgressItemTransferable = Required<
-  Omit<
-    ProgressItemOptions,
-    | 'css'
-    | 'initiallyVisible'
-    | 'delayIndeterminateMs'
-    | 'showWhenEstimateExceedsMs'
-  >
-> &
-  Pick<ProgressItem, 'id' | 'paused' | 'cancelled'> & {
-    /** Is the item finished? */
-    completed: boolean
-    /** CSS variable values */
-    cssVars: TransferableItemCss
-    /** Is the item visible? */
-    visible: boolean
-  }
+export type ProgressItemTransferable = {
+  id: string
+  title: string
+  detail: string
+  value: number
+  maxValue: number
+  indeterminate: boolean
+  theme: ProgressItemTheme
+  error: boolean
+  cancellable: boolean
+  pauseable: boolean
+  completeAutomatically: boolean
+  autoRemove: boolean
+  paused: boolean
+  cancelled: boolean
+  completed: boolean
+  visible: boolean
+  cssVars: TransferableItemCss
+}
 
 /**
  * Events emitted by a ProgressItem instance
@@ -107,9 +120,9 @@ export type ProgressItemTransferable = Required<
  * - `update` - Item was updated. listener: `() => void`<br/>
  * - `complete` - Item was completed. listener: `() => void`<br/>
  * - `remove` - Item was removed. listener: `() => void`<br/>
- * - `will-cancel` - Item will cancel. Call event.preventDefault() to stop it. listener: `(event: Event) => void`<br/>
+ * - `willCancel` - Item will cancel. Call event.preventDefault() to stop it. listener: `(event: CancelableEvent) => void`<br/>
  * - `cancelled` - Item was cancelled. listener: `() => void`<br/>
- * - `pause` - Item was paused. listener: `(isPaused: boolean) => void`<br/>
+ * - `paused` - Item pause state changed. listener: `(isPaused: boolean) => void`<br/>
  * - `hide` - Item is being hidden. listener: `() => void`<br/>
  * - `show` - Item is being shown. listener: `() => void`<br/>
  *
@@ -123,24 +136,36 @@ export type ProgressItemEvents = {
   /** Item was removed - @public */
   remove: () => void
   /** Item will cancel. Call event.preventDefault() to stop it. */
-  'will-cancel': (event: Event) => void
+  willCancel: (event: CancelableEvent) => void
   /** Item was cancelled - @public */
   cancelled: () => void
-  /** Item was paused - @public */
-  pause: (isPaused: boolean) => void
+  /** Item pause state changed - @public */
+  paused: (isPaused: boolean) => void
   /** Item is being hidden */
   hide: () => void
   /** Item is being shown */
   show: () => void
 }
 
-/** @internal */
-export type TypedEmitterProgressItemEvents =
-  new () => TypedEmitter<ProgressItemEvents>
+/**
+ * Typed EventEmitter interface for ProgressItem events.
+ * Provides type-safe on/emit/off methods.
+ * @internal
+ */
+export interface TypedEventEmitter<T> {
+  on<K extends keyof T>(event: K, listener: T[K]): this
+  once<K extends keyof T>(event: K, listener: T[K]): this
+  off<K extends keyof T>(event: K, listener: T[K]): this
+  emit<K extends keyof T>(
+    event: K,
+    ...args: T[K] extends (...args: infer A) => unknown ? A : never
+  ): boolean
+  removeAllListeners<K extends keyof T>(event?: K): this
+}
 
 /** @internal */
 export const ProgressItemEventsEmitter =
-  EventEmitter as TypedEmitterProgressItemEvents
+  EventEmitter as new () => TypedEventEmitter<ProgressItemEvents>
 
 /**
  * A progress bar item within a ProgressWindow. There shouldn't be much need to call this directly.
@@ -149,7 +174,7 @@ export const ProgressItemEventsEmitter =
  */
 export class ProgressItem extends ProgressItemEventsEmitter {
   /** Private properties for a progress bar item. @internal */
-  _privates: ProgressItemOptions = {
+  #options: ProgressItemOptions = {
     title: '',
     detail: '',
     cssVars: {},
@@ -157,11 +182,11 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     indeterminate: false,
     value: 0,
     maxValue: 100,
-    enableCancel: true,
-    enablePause: false,
+    cancellable: true,
+    pauseable: false,
     error: false,
-    autoComplete: true,
-    removeOnComplete: true,
+    completeAutomatically: true,
+    autoRemove: true,
     initiallyVisible: true,
     delayIndeterminateMs: 0,
     showWhenEstimateExceedsMs: 0,
@@ -171,14 +196,14 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   readonly id: string = 'p' + Math.random().toString(36).substring(2, 11)
 
   /** Is the item completed? @internal */
-  private _completed = false
+  #completed = false
 
-  private _visible = false
+  #visible = false
 
-  private _startTime: number | null = null
+  #startTime: number | null = null
 
-  /** Is this progress item paused? */
-  paused = false
+  /** Is this progress item paused? @internal */
+  #paused = false
 
   /** Has this progress item been cancelled? */
   cancelled = false
@@ -188,7 +213,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   constructor(options = {} as Partial<ProgressItemOptions>) {
     super()
-    merge(this._privates, {
+    deepMerge(this.#options, {
       ...options,
       delayIndeterminateMs: Math.max(0, options.delayIndeterminateMs || 0),
       showWhenEstimateExceedsMs: Math.max(
@@ -197,7 +222,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
       ),
     })
 
-    this._startTime = Date.now()
+    this.#startTime = Date.now()
     this.handleVisibility()
   }
 
@@ -208,11 +233,11 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   private handleVisibility() {
     let shouldShow = false
 
-    if (this.isIndeterminate()) {
+    if (this.indeterminate) {
       shouldShow = this.initiallyVisible && this.delayIndeterminateMs <= 0
       if (!shouldShow && this.delayIndeterminateMs > 0) {
         setTimeout(() => {
-          if (this.isInProgress()) {
+          if (this.inProgress) {
             this.show()
           }
         }, this.delayIndeterminateMs)
@@ -230,7 +255,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   /** Get/set the current progress value */
   get value() {
-    return this._privates.value
+    return this.#options.value
   }
 
   set value(value: number) {
@@ -239,7 +264,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   /** Title appears above the progress bar */
   get title() {
-    return this._privates.title
+    return this.#options.title
   }
 
   set title(title: string) {
@@ -248,7 +273,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   /** Detail field shows below the progress bar */
   get detail() {
-    return this._privates.detail
+    return this.#options.detail
   }
 
   set detail(detail: string) {
@@ -257,7 +282,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   /** CSS variables */
   get cssVars() {
-    return this._privates.cssVars
+    return this.#options.cssVars
   }
 
   set cssVars(cssVars: ItemCss) {
@@ -266,7 +291,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   /** @internal */
   get cssTransferable() {
-    const css = this._privates.cssVars
+    const css = this.#options.cssVars
     return Object.entries(css)
       .map(([key, value]) => {
         // istanbul ignore if
@@ -277,75 +302,87 @@ export class ProgressItem extends ProgressItemEventsEmitter {
       .filter(Boolean) as [ItemCssValue, string][]
   }
 
-  /** Indeterminate? */
+  /** Is this a indeterminate progress bar (no specific value)? */
   get indeterminate(): boolean {
-    return this._privates.indeterminate
+    return this.#options.indeterminate
   }
 
   set indeterminate(indeterminate: boolean) {
     this.update({ indeterminate })
   }
 
+  /** Visual theme for the progress bar */
   get theme(): ProgressItemTheme {
-    return this._privates.theme
+    return this.#options.theme
   }
 
   set theme(theme: ProgressItemTheme) {
     this.update({ theme })
   }
 
-  /** Maximum value */
+  /** Maximum value (default: 100) */
   get maxValue(): number {
-    return this._privates.maxValue
+    return this.#options.maxValue
   }
 
   set maxValue(maxValue: number) {
     this.update({ maxValue })
   }
 
-  /** Is the item cancellable? Will show cancel button. Default: true */
-  get enableCancel(): boolean {
-    return this._privates.enableCancel
+  /** Can this item be cancelled? Shows cancel button when true. Default: true */
+  get cancellable(): boolean {
+    return this.#options.cancellable
   }
 
-  set enableCancel(enableCancel: boolean) {
-    this.update({ enableCancel })
+  set cancellable(cancellable: boolean) {
+    this.update({ cancellable })
   }
 
   /** Add an "error" class to the div.progress-item element */
   get error(): boolean {
-    return this._privates.error
+    return this.#options.error
   }
 
   set error(error: boolean) {
     this.update({ error })
   }
 
-  /** Is the item pauseable? Will show pause button. Default: false */
-  get enablePause(): boolean {
-    return this._privates.enablePause
+  /** Can this item be paused? Shows pause button when true. Default: false */
+  get pauseable(): boolean {
+    return this.#options.pauseable
   }
 
-  set enablePause(enablePause: boolean) {
-    this.update({ enablePause })
+  set pauseable(pauseable: boolean) {
+    this.update({ pauseable })
   }
 
-  /** Automatically complete if value greater than or equals to maxValue. Default: true */
-  get autoComplete(): boolean {
-    return this._privates.autoComplete
+  /** Is this item currently paused? Setting this emits a 'paused' event. */
+  get paused(): boolean {
+    return this.#paused
   }
 
-  set autoComplete(autoComplete: boolean) {
-    this.update({ autoComplete })
+  set paused(value: boolean) {
+    if (this.#paused === value) return
+    this.#paused = value
+    this.emit('paused', value)
   }
 
-  /** Remove immediately when item is completed? Or wait for window behavior. */
-  get removeOnComplete(): boolean {
-    return this._privates.removeOnComplete
+  /** Automatically mark as completed when value reaches maxValue. Default: true */
+  get completeAutomatically(): boolean {
+    return this.#options.completeAutomatically
   }
 
-  set removeOnComplete(removeOnComplete: boolean) {
-    this.update({ removeOnComplete })
+  set completeAutomatically(completeAutomatically: boolean) {
+    this.update({ completeAutomatically })
+  }
+
+  /** Automatically remove from window when completed. Default: true */
+  get autoRemove(): boolean {
+    return this.#options.autoRemove
+  }
+
+  set autoRemove(autoRemove: boolean) {
+    this.update({ autoRemove })
   }
 
   /**
@@ -355,7 +392,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
    * Default: true
    */
   get initiallyVisible(): boolean {
-    return this._privates.initiallyVisible
+    return this.#options.initiallyVisible
   }
 
   /**
@@ -366,7 +403,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
    * Default: 0 (show immediately)
    */
   get delayIndeterminateMs(): number {
-    return this._privates.delayIndeterminateMs || 0
+    return this.#options.delayIndeterminateMs || 0
   }
 
   /**
@@ -379,31 +416,31 @@ export class ProgressItem extends ProgressItemEventsEmitter {
    * Default: 0 (show immediately)
    */
   get showWhenEstimateExceedsMs(): number {
-    return this._privates.showWhenEstimateExceedsMs || 0
+    return this.#options.showWhenEstimateExceedsMs || 0
   }
 
-  /**
-   * Set progress value and optionally update other properties.
-   * If indeterminate, this will do nothing.
-   * If value is greater than or equal to maxValue, this will complete the item.
-   * Default maxValue is 100, but it may have been changed.
-   * @param value - progress value
-   * @param otherOptions - other options to update
-   * @returns void
-   */
-  setProgress(
-    value: number,
-    otherOptions = {} as Partial<Omit<ProgressItemOptions, 'value'>>
-  ) {
-    if (this.indeterminate) return
-    this.update({ value, ...otherOptions })
+  /** Is this item completed? */
+  get completed(): boolean {
+    return this.#completed
   }
 
+  /** Is this item still in progress (not completed)? */
+  get inProgress(): boolean {
+    return !this.#completed
+  }
+
+  /** Is this item currently visible in the window? */
+  get visible(): boolean {
+    return !this.removed && !!this.#visible
+  }
+
+  /** Get the estimated total time based on current progress */
   getEstimatedTotalTime(): number | undefined {
-    if (this.indeterminate) return
-    if (this.value === 0) return
-    if (this.value >= this.maxValue) return
-    const elapsed = Date.now() - this._startTime
+    if (this.indeterminate) return undefined
+    if (this.value === 0) return undefined
+    if (this.value >= this.maxValue) return undefined
+    if (this.#startTime === null) return undefined
+    const elapsed = Date.now() - this.#startTime
     const estimatedTotalTime = (elapsed / this.value) * this.maxValue
     return estimatedTotalTime
   }
@@ -413,81 +450,57 @@ export class ProgressItem extends ProgressItemEventsEmitter {
    * @param options - options to update
    */
   update(options: Partial<ProgressItemOptions>) {
-    // logger.silly('ProgressItem.update()', options)
     // istanbul ignore if
     if (this.removed) {
       return
     }
-    const hasChanged = Object.entries(options).some(
-      ([key, val]: [
-        keyof ProgressItemOptions,
-        ProgressItemOptions[keyof ProgressItemOptions]
-      ]) => !isEqual(this._privates[key], val)
-    )
+    const hasChanged = Object.entries(options).some(([key, val]) => {
+      const optionKey = key as keyof ProgressItemOptions
+      return !deepEqual(this.#options[optionKey], val)
+    })
     // if none of the options have changed, return
     if (!hasChanged) {
       return
     }
-    this._privates = { ...this._privates, ...options }
+    this.#options = { ...this.#options, ...options }
     this.emit('update')
     // if we're not visible and the estimated time remaining is greater than the threshold, show
+    const estimatedTime = this.getEstimatedTotalTime()
     if (
-      !this.isVisible() &&
-      this.getEstimatedTotalTime() > this.showWhenEstimateExceedsMs
+      !this.visible &&
+      estimatedTime !== undefined &&
+      estimatedTime > this.showWhenEstimateExceedsMs
     ) {
       this.show()
     }
     if (
-      !this.isCompleted() &&
-      this.autoComplete &&
-      this._privates.value >= this.maxValue
+      !this.completed &&
+      this.completeAutomatically &&
+      this.#options.value >= this.maxValue
     ) {
-      this.setCompleted()
+      this.complete()
     }
   }
 
   /**
-   * Set the progress item to completed.
+   * Mark the progress item as completed.
    * Automatically sets value to maxValue.
-   * If removeOnComplete is true, the item will be removed.
-   * @returns void
+   * If autoRemove is true, the item will be removed.
    */
-  setCompleted() {
-    // logger.debug('ProgressItem.setCompleted()')
-    if (this.isCompleted() || this.removed) {
+  complete() {
+    if (this.completed || this.removed) {
       return
     }
-    this._privates.value = this.maxValue
-    this._completed = true
+    this.#options.value = this.maxValue
+    this.#completed = true
     this.emit('complete')
-    if (this.removeOnComplete) {
+    if (this.autoRemove) {
       this.remove()
     }
   }
 
-  /** Is this item completed? */
-  isCompleted() {
-    return this._completed
-  }
-
-  /** Is this item in progress? */
-  isInProgress() {
-    return !this.isCompleted()
-  }
-
-  /** Is this item indeterminate? */
-  isIndeterminate() {
-    return this.indeterminate
-  }
-
-  /** Is this item visible? */
-  isVisible() {
-    return !this.removed && !!this._visible
-  }
-
   /** Remove the ProgressItem from the ProgressWindow */
   remove() {
-    // logger.debug('ProgressItem.remove()')
     this.removed = true
     this.emit('remove')
   }
@@ -497,82 +510,55 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     if (this.cancelled || this.removed) {
       return
     }
-    const event = new Event('will-cancel', { cancelable: true })
-    this.emit('will-cancel', event)
+    const event = new CancelableEvent('willCancel')
+    this.emit('willCancel', event)
     if (event.defaultPrevented) {
       return
     }
-    // logger.debug('ProgressItem.cancel()')
     this.cancelled = true
     this.emit('cancelled')
     this.remove()
   }
 
-  /**
-   * Pause/resume the ProgressItem
-   * @param shouldPause - should the item be paused? Default: true
-   */
-  pause(shouldPause = true) {
-    // logger.debug('ProgressItem.pause()')
-    // istanbul ignore if
-    if (this.paused === shouldPause) {
-      return
-    }
-    this.paused = shouldPause
-    this.emit('pause', shouldPause)
-  }
-
-  /** Resume if paused */
-  resume() {
-    this.pause(false)
-  }
-
-  /** Toggle pause state */
-  togglePause() {
-    this.pause(!this.paused)
-  }
-
   /** Show the ProgressItem */
   show() {
-    // logger.debug('ProgressItem.show()')
     // istanbul ignore if
-    if (this._visible === true) {
+    if (this.#visible === true) {
       return
     }
-    this._visible = true
+    this.#visible = true
     this.emit('show')
   }
 
   /** Hide the ProgressItem */
   hide() {
-    // logger.debug('ProgressItem.hide()')
-    if (this._visible === false) {
+    if (this.#visible === false) {
       return
     }
-    this._visible = false
+    this.#visible = false
     this.emit('hide')
   }
 
   /** Get a transferable object for IPC - @internal */
   transferable(): ProgressItemTransferable {
     return {
-      autoComplete: this.autoComplete,
-      cancelled: this.cancelled,
-      completed: this.isCompleted(),
-      cssVars: this.cssTransferable,
-      detail: this.detail,
-      enableCancel: this.enableCancel,
-      enablePause: this.enablePause,
-      error: this.error,
       id: this.id,
-      indeterminate: this.indeterminate,
-      maxValue: this.maxValue,
-      paused: this.paused,
-      removeOnComplete: this.removeOnComplete,
       title: this.title,
-      theme: this.theme,
+      detail: this.detail,
       value: this.value,
-      visible: this._visible,
+      maxValue: this.maxValue,
+      indeterminate: this.indeterminate,
+      theme: this.theme,
+      error: this.error,
+      cancellable: this.cancellable,
+      pauseable: this.pauseable,
+      completeAutomatically: this.completeAutomatically,
+      autoRemove: this.autoRemove,
+      paused: this.paused,
+      cancelled: this.cancelled,
+      completed: this.completed,
+      visible: this.#visible,
+      cssVars: this.cssTransferable,
     }
   }
 }

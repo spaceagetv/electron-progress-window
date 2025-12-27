@@ -5,7 +5,7 @@ Display multiple progress bars in an Electron window.
 ## Advantages
 
 * Full Typescript support, including event types
-* Zero dependencies
+* Zero runtime dependencies
 * Full [documentation](docs/electron-progress-window.md)
 * [Example](examples) playground to try it out in an Electron app 
 * Progress bars are displayed in a single window (or multiple windows if you prefer)
@@ -39,7 +39,7 @@ const { ProgressWindow } = require('@spaceagetv/electron-progress-window')
 // Configure the settings for ProgressWindow
 ProgressWindow.configure({
   closeOnComplete: true,
-  focusWhenAddingItem: true,
+  focusOnAdd: true,
   windowOptions: { // these are Electron BrowserWindow options
     title: 'Progress',
     width: 300,
@@ -63,32 +63,33 @@ async function somethingThatTakesTime(progressCallback) {
     await new Promise((resolve) => setTimeout(resolve, 100))
     progressCallback(Math.round((i + 1) / 100 * 100))
   }
-  const setPause(isPaused) {
+  const setPause = (isPaused) => {
     state.paused = isPaused
   }
-  const cancel() {
+  const cancel = () => {
     state.cancelled = true
   }
   return { setPause, cancel }
 }
 
 async function start() {
-  const progressItem = ProgressWindow.addProgressItem({
+  const progressItem = await ProgressWindow.addItem({
     title: 'Something that takes time',
     detail: '0% complete',
     value: 0,
     maxValue: 100,
-    enablePause: true,
-    enableCancel: true,
+    pauseable: true,
+    cancellable: true,
   })
 
   const updateProgress = (progress) => {
-    progressItem.setProgress(progress, {detail: `${progress}% complete`})
+    progressItem.value = progress
+    progressItem.detail = `${progress}% complete`
   }
-  
+
   const { setPause, cancel } = await somethingThatTakesTime(updateProgress)
 
-  progressItem.on('pause', (isPaused) => {
+  progressItem.on('paused', (isPaused) => {
     setPause(isPaused)
   })
   progressItem.on('cancelled', () => {

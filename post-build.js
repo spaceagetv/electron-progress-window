@@ -1,6 +1,9 @@
 /**
- * After building the project, copy html file to the dist folder,
- * and insert the renderer script into the html file.
+ * After building the project:
+ * 1. Insert the renderer script into the HTML file
+ * 2. Embed the HTML content into ProgressWindow.js
+ * 3. Embed the preload script content into ProgressWindow.js
+ * 4. Clean up intermediate files
  */
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -19,6 +22,7 @@ const origHtmlFilePath = path.resolve(
 const cjsPath = path.resolve(distDir, 'cjs')
 const esmPath = path.resolve(distDir, 'esm')
 
+// Renderer script paths
 const rendererJsPathCjs = path.resolve(cjsPath, 'ProgressWindow/renderer.js')
 const rendererJsDefinitionsPathCjs = path.resolve(
   cjsPath,
@@ -30,11 +34,26 @@ const rendererJsDefinitionsPathEsm = path.resolve(
   'ProgressWindow/renderer.d.ts'
 )
 
+// Preload script paths
+const preloadJsPathCjs = path.resolve(cjsPath, 'ProgressWindow/preload.js')
+const preloadJsDefinitionsPathCjs = path.resolve(
+  cjsPath,
+  'ProgressWindow/preload.d.ts'
+)
+const preloadJsPathEsm = path.resolve(esmPath, 'ProgressWindow/preload.js')
+const preloadJsDefinitionsPathEsm = path.resolve(
+  esmPath,
+  'ProgressWindow/preload.d.ts'
+)
+
+// Read the renderer script (use ESM version for both)
 const rendererJSEsmContent = fs.readFileSync(rendererJsPathEsm, 'utf-8')
 
-// insert esm script into both html files
-const htmlContent = fs.readFileSync(origHtmlFilePath, 'utf-8')
+// Read the preload script (use CJS version since it runs in Node context)
+const preloadJsContent = fs.readFileSync(preloadJsPathCjs, 'utf-8')
 
+// Insert renderer script into HTML
+const htmlContent = fs.readFileSync(origHtmlFilePath, 'utf-8')
 const htmlContentWithScript = htmlContent.replace(
   '</body>',
   `
@@ -44,51 +63,79 @@ const htmlContentWithScript = htmlContent.replace(
   </body>`
 )
 
+// ProgressWindow.js paths
 const cjsScriptPath = path.resolve(cjsPath, 'ProgressWindow/ProgressWindow.js')
 const esmScriptPath = path.resolve(esmPath, 'ProgressWindow/ProgressWindow.js')
 
-function escapeHtml(html) {
-  return html
-    .replace(/`/g, '\\`')
-    .replace(/\$/g, '\\$')
-    .replace(/{/g, '\\{')
-    .replace(/}/g, '\\}')
+/**
+ * Escape a string for safe embedding in a JavaScript template literal.
+ * Handles backslashes, backticks, and template placeholder sequences (${...}).
+ */
+function escapeForTemplate(str) {
+  return str
+    .replace(/\\/g, '\\\\')  // Escape backslashes first
+    .replace(/`/g, '\\`')    // Escape backticks
+    .replace(/\$/g, '\\$')   // Escape $ to prevent ${...} template placeholders
 }
 
-const cjsScriptContent = fs.readFileSync(cjsScriptPath, 'utf-8')
-const esmScriptContent = fs.readFileSync(esmScriptPath, 'utf-8')
+let cjsScriptContent = fs.readFileSync(cjsScriptPath, 'utf-8')
+let esmScriptContent = fs.readFileSync(esmScriptPath, 'utf-8')
 
-// find the line that start with `const htmlContent = ` and replace everything after it until `;`
-// example: const htmlContent = fs.readFileSync(htmlPath, 'utf8');
-// should become: const htmlContent = `<!DOCTYPE html> ...`;
-const regex = /const htmlContent = [^;]+;/
-
-// test it
-// console.log('cjs matching?', regex.test(cjsScriptContent))
-// console.log('esm matching?', regex.test(esmScriptContent))
-
-const cjsScriptContentWithRenderer = cjsScriptContent.replace(
-  regex,
-  `const htmlContent = \`${escapeHtml(htmlContentWithScript)}\`;`
+// Replace the htmlContent fs.readFileSync with the embedded content
+const htmlRegex = /const htmlContent = [^;]+;/
+cjsScriptContent = cjsScriptContent.replace(
+  htmlRegex,
+  `const htmlContent = \`${escapeForTemplate(htmlContentWithScript)}\`;`
 )
-const esmScriptContentWithRenderer = esmScriptContent.replace(
-  regex,
-  `const htmlContent = \`${escapeHtml(htmlContentWithScript)}\`;`
+esmScriptContent = esmScriptContent.replace(
+  htmlRegex,
+  `const htmlContent = \`${escapeForTemplate(htmlContentWithScript)}\`;`
 )
 
-// console.log('cjsScriptContentWithRenderer', cjsScriptContentWithRenderer)
-// console.log('esmScriptContentWithRenderer', esmScriptContentWithRenderer)
+// Replace the getPreloadContent function to return embedded content
+const preloadFunctionRegex = /function getPreloadContent\(\)[^{]*\{[\s\S]*?return preloadContent;\s*\}/
+const embeddedPreloadFunction = `function getPreloadContent() {
+  if (!preloadContent) {
+    preloadContent = \`${escapeForTemplate(preloadJsContent)}\`;
+  }
+  return preloadContent;
+}`
+cjsScriptContent = cjsScriptContent.replace(preloadFunctionRegex, embeddedPreloadFunction)
+esmScriptContent = esmScriptContent.replace(preloadFunctionRegex, embeddedPreloadFunction)
 
-fs.writeFileSync(cjsScriptPath, cjsScriptContentWithRenderer)
-fs.writeFileSync(esmScriptPath, esmScriptContentWithRenderer)
+// Write the modified ProgressWindow.js files
+fs.writeFileSync(cjsScriptPath, cjsScriptContent)
+fs.writeFileSync(esmScriptPath, esmScriptContent)
 
-// remove the renderer.js files
-fs.unlinkSync(rendererJsPathCjs)
-fs.unlinkSync(rendererJsPathCjs + '.map')
-fs.unlinkSync(rendererJsDefinitionsPathCjs)
-fs.unlinkSync(rendererJsDefinitionsPathCjs + '.map')
+// Helper function to safely unlink files
+function safeUnlink(filePath) {
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath)
+    }
+  } catch (e) {
+    console.warn(`Warning: Could not delete ${filePath}: ${e.message}`)
+  }
+}
 
-fs.unlinkSync(rendererJsPathEsm)
-fs.unlinkSync(rendererJsPathEsm + '.map')
-fs.unlinkSync(rendererJsDefinitionsPathEsm)
-fs.unlinkSync(rendererJsDefinitionsPathEsm + '.map')
+// Remove the renderer.js files (no longer needed, embedded in HTML)
+safeUnlink(rendererJsPathCjs)
+safeUnlink(rendererJsPathCjs + '.map')
+safeUnlink(rendererJsDefinitionsPathCjs)
+safeUnlink(rendererJsDefinitionsPathCjs + '.map')
+safeUnlink(rendererJsPathEsm)
+safeUnlink(rendererJsPathEsm + '.map')
+safeUnlink(rendererJsDefinitionsPathEsm)
+safeUnlink(rendererJsDefinitionsPathEsm + '.map')
+
+// Remove the preload.js files (no longer needed, content embedded in ProgressWindow.js)
+safeUnlink(preloadJsPathCjs)
+safeUnlink(preloadJsPathCjs + '.map')
+safeUnlink(preloadJsDefinitionsPathCjs)
+safeUnlink(preloadJsDefinitionsPathCjs + '.map')
+safeUnlink(preloadJsPathEsm)
+safeUnlink(preloadJsPathEsm + '.map')
+safeUnlink(preloadJsDefinitionsPathEsm)
+safeUnlink(preloadJsDefinitionsPathEsm + '.map')
+
+console.log('Post-build: Embedded renderer and preload scripts successfully.')

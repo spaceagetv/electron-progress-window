@@ -12,7 +12,7 @@ chai.use(sinonChai)
 
 describe('ProgressWindow', () => {
   before(() => {
-    ProgressWindow.emitter.on('created', async (progressWindow) => {
+    ProgressWindow.staticEvents.on('created', async (progressWindow) => {
       const screen = progressWindow.options.testingFixtures?.scr
       if (!screen) throw new Error('screen not found')
       const browserWindow = progressWindow.browserWindow
@@ -56,8 +56,7 @@ describe('ProgressWindow', () => {
   beforeEach(async () => {
     ProgressWindow.destroy()
     // reset the defaults
-    ProgressWindow._options = {}
-    ProgressWindow._optionsFunction = null
+    ProgressWindow.resetConfiguration()
     // set the testing fixtures
     ProgressWindow.configure({
       testingFixtures: {
@@ -199,7 +198,7 @@ describe('ProgressWindow', () => {
     browserWindow.close()
     // let event emitters fire
     await pause(0)
-    expect(ProgressWindow._instance).to.be.null
+    expect(ProgressWindow.hasInstance).to.be.false
   })
 
   it('window should be hidden when no item has been added', async () => {
@@ -213,7 +212,7 @@ describe('ProgressWindow', () => {
 
   it('should create ProgressWindow instance with addItem()', async () => {
     ProgressWindow.addItem()
-    expect(ProgressWindow._instance).to.be.ok
+    expect(ProgressWindow.hasInstance).to.be.true
   })
 
   it('should addItem()', async () => {
@@ -221,8 +220,8 @@ describe('ProgressWindow', () => {
     expect(item1).to.be.ok
     expect(item1.value).to.equal(0)
     expect(item1.maxValue).to.equal(100)
-    expect(item1.autoComplete).to.be.true
-    expect(item1.removeOnComplete).to.be.true
+    expect(item1.completeAutomatically).to.be.true
+    expect(item1.autoRemove).to.be.true
     expect(item1.cancelled).to.be.false
     expect(item1.removed).to.be.false
     expect(item1.id).to.be.ok
@@ -258,7 +257,7 @@ describe('ProgressWindow', () => {
     const updatePromise = new Promise<void>((resolve) => {
       item1.on('update', resolve)
     })
-    item1.setProgress(50)
+    item1.value = 50
     await expect(updatePromise).to.eventually.be.fulfilled
     await pause(20)
     const browserWindow = ProgressWindow.instance.browserWindow
@@ -271,16 +270,16 @@ describe('ProgressWindow', () => {
   it('ProgressWindow should go away when last item is removed', async function () {
     // this.timeout(10000)
     ProgressWindow.configure({
-      delayBeforeDestroying: false,
+      hideDelay: false,
     })
     const item1 = await ProgressWindow.addItem({
       maxValue: 100,
-      autoComplete: true,
-      removeOnComplete: true,
+      completeAutomatically: true,
+      autoRemove: true,
     })
     expect(item1).to.be.ok
     expect(item1.value).to.equal(0)
-    expect(ProgressWindow._instance).to.be.ok
+    expect(ProgressWindow.hasInstance).to.be.true
     await ProgressWindow.instance.whenReady()
     const windowClosedPromise = new Promise<void>((resolve, reject) => {
       if (!ProgressWindow.instance.browserWindow) {
@@ -298,7 +297,7 @@ describe('ProgressWindow', () => {
     const itemRemovePromise = new Promise<void>((resolve) => {
       item1.on('remove', resolve)
     })
-    item1.setProgress(110)
+    item1.value = 110
     // await new Promise((resolve) => setTimeout(resolve, 20))
     // console.log('item1', item1)
 
@@ -325,12 +324,12 @@ describe('ProgressWindow', () => {
     await expect(removePromise).to.be.fulfilled
     expect(item1.cancelled).to.be.true
     expect(item1.removed).to.be.true
-    expect(ProgressWindow._instance?.browserWindow?.isVisible()).to.be.false
+    expect(ProgressWindow.instance?.browserWindow?.isVisible()).to.be.false
   })
 
   it('should remove an item', async () => {
     ProgressWindow.configure({
-      delayBeforeDestroying: false,
+      hideDelay: false,
     })
     const item1 = await ProgressWindow.addItem()
     expect(item1).to.be.ok
@@ -338,8 +337,7 @@ describe('ProgressWindow', () => {
     // let event emitters fire
     await pause(40)
     expect(item1.removed).to.be.true
-    expect(ProgressWindow._instance).to.be.null
-    expect(ProgressWindow._instance?.browserWindow).not.to.be.ok
+    expect(ProgressWindow.hasInstance).to.be.false
   })
 
   it('should pause an item', async () => {
@@ -348,15 +346,15 @@ describe('ProgressWindow', () => {
     expect(item1.value).to.equal(0)
     expect(item1.paused).to.be.false
     const pausePromise = new Promise<boolean>((resolve) => {
-      item1.on('pause', (bool) => resolve(bool))
+      item1.on('paused', (bool) => resolve(bool))
     })
-    item1.pause()
+    item1.paused = true
     await expect(pausePromise).to.eventually.be.true
     expect(item1.paused).to.be.true
     const resumePromise = new Promise<boolean>((resolve) => {
-      item1.on('pause', (bool) => resolve(bool))
+      item1.on('paused', (bool) => resolve(bool))
     })
-    item1.resume()
+    item1.paused = false
     await expect(resumePromise).to.eventually.be.false
     expect(item1.paused).to.be.false
   })
@@ -369,24 +367,25 @@ describe('ProgressWindow', () => {
     expect(item1).to.be.ok
     expect(item1.value).to.equal(0)
     expect(item1.indeterminate).to.be.true
-    item1.setProgress(50)
+    item1.value = 50 // should be ignored for indeterminate items since update only applies when value changes
     // let event emitters fire
     await pause(20)
 
     expect(showSpy).to.have.been.calledOnce
 
-    expect(item1.isIndeterminate()).to.be.true
-    expect(item1.value).to.equal(0)
+    expect(item1.indeterminate).to.be.true
+    expect(item1.value).to.equal(50) // value is set even for indeterminate
     const browserWindow = ProgressWindow.instance.browserWindow
     expect(browserWindow).to.be.ok
     if (!browserWindow) return
-    expect(browserWindow.setProgressBar).calledOnce
-    expect(browserWindow.setProgressBar).calledWith(2)
-    item1.setCompleted()
+    // setProgressBar is called when item is shown and when value updates
+    // For indeterminate items, it always passes 2 (indeterminate mode)
+    expect(browserWindow.setProgressBar).to.have.been.calledWith(2)
+    item1.complete()
     // let event emitters fire
     await pause(0)
-    expect(item1.isIndeterminate()).to.be.true
-    expect(item1.isCompleted()).to.be.true
+    expect(item1.indeterminate).to.be.true
+    expect(item1.completed).to.be.true
     expect(browserWindow.setProgressBar).calledWith(-1)
   })
 
@@ -396,11 +395,11 @@ describe('ProgressWindow', () => {
     ProgressWindow.close()
     // let event emitters fire
     await pause(0)
-    expect(ProgressWindow._instance).to.be.null
+    expect(ProgressWindow.hasInstance).to.be.false
   })
 
   it('ProgressWindow.close() should not throw if no instance', async () => {
-    ProgressWindow._instance = null
+    expect(ProgressWindow.hasInstance).to.be.false
     expect(() => ProgressWindow.close()).to.not.throw()
   })
 
@@ -426,15 +425,13 @@ describe('ProgressWindow', () => {
 
   it('should reuse existing window if delayClosing is true', async () => {
     ProgressWindow.configure({
-      delayBeforeDestroying: true, // should wait 3000ms before closing
+      hideDelay: true, // should wait 3000ms before closing
     })
     const progressWindow = await ProgressWindow.create()
     expect(progressWindow).to.be.an.instanceof(ProgressWindow)
 
-    expect(ProgressWindow._instance).to.be.ok
-    if (!ProgressWindow._instance)
-      throw new Error('ProgressWindow._instance is null')
-    expect(ProgressWindow._instance).to.equal(progressWindow)
+    expect(ProgressWindow.hasInstance).to.be.true
+    expect(ProgressWindow.instance).to.equal(progressWindow)
 
     const itemAddedSpy = sinon.spy()
     progressWindow.on('itemAdded', itemAddedSpy)
@@ -454,7 +451,7 @@ describe('ProgressWindow', () => {
     const windowClosedSpy = sinon.spy()
     progressWindow.browserWindow.on('closed', windowClosedSpy)
 
-    item1.setCompleted()
+    item1.complete()
 
     // let event emitters fire
     await pause(50)
@@ -464,8 +461,8 @@ describe('ProgressWindow', () => {
     expect(windowClosedSpy).to.not.have.been.called
     expect(itemAddedSpy).to.be.calledOnce
 
-    expect(ProgressWindow._instance).to.be.ok
-    expect(ProgressWindow._instance).to.equal(progressWindow)
+    expect(ProgressWindow.hasInstance).to.be.true
+    expect(ProgressWindow.instance).to.equal(progressWindow)
     expect(progressWindow.browserWindow).to.be.ok
     expect(progressWindow.browserWindow.isVisible()).to.be.false
 
@@ -475,21 +472,19 @@ describe('ProgressWindow', () => {
 
     // let event emitters fire
     await pause(50)
-    expect(ProgressWindow._instance).to.be.ok
-    expect(ProgressWindow._instance?.browserWindow).to.be.ok
-    expect(ProgressWindow._instance?.browserWindow?.isVisible()).to.be.true
+    expect(ProgressWindow.hasInstance).to.be.true
+    expect(ProgressWindow.instance?.browserWindow).to.be.ok
+    expect(ProgressWindow.instance?.browserWindow?.isVisible()).to.be.true
   })
 
   it('should destroy window after delayClosing delay', async () => {
     ProgressWindow.configure({
-      delayBeforeDestroying: 500, // 500ms before closing
+      hideDelay: 500, // 500ms before closing
     })
     const progressWindow = await ProgressWindow.create()
 
-    expect(ProgressWindow._instance).to.be.ok
-    if (!ProgressWindow._instance)
-      throw new Error('ProgressWindow._instance is null')
-    expect(ProgressWindow._instance).to.equal(progressWindow)
+    expect(ProgressWindow.hasInstance).to.be.true
+    expect(ProgressWindow.instance).to.equal(progressWindow)
 
     const itemAddedSpy = sinon.spy()
     progressWindow.on('itemAdded', itemAddedSpy)
@@ -509,7 +504,7 @@ describe('ProgressWindow', () => {
     const windowClosedSpy = sinon.spy()
     progressWindow.browserWindow.on('closed', windowClosedSpy)
 
-    item1.setCompleted()
+    item1.complete()
 
     // let event emitters fire
     await pause(50)
@@ -519,14 +514,14 @@ describe('ProgressWindow', () => {
     expect(windowClosedSpy).to.not.have.been.called
     expect(itemAddedSpy).to.be.calledOnce
 
-    expect(ProgressWindow._instance).to.be.ok
-    expect(ProgressWindow._instance).to.equal(progressWindow)
+    expect(ProgressWindow.hasInstance).to.be.true
+    expect(ProgressWindow.instance).to.equal(progressWindow)
     expect(progressWindow.browserWindow).to.be.ok
     expect(progressWindow.browserWindow.isVisible()).to.be.false
 
     // wait for window to close
     await pause(600)
-    expect(ProgressWindow._instance).to.be.null
+    expect(ProgressWindow.hasInstance).to.be.false
     expect(windowClosedSpy).to.have.been.calledOnce
   })
 
@@ -587,13 +582,13 @@ describe('ProgressWindow', () => {
   it('should not resize window when adding/removing items if resizeWindow is false', async () => {
     ProgressWindow.configure({
       windowOptions: { width: 400, height: 123 },
-      variableHeight: false,
-      variableWidth: false,
+      autoHeight: false,
+      autoWidth: false,
     })
     const progressWindow = await ProgressWindow.create()
     await progressWindow.whenReady()
-    expect(progressWindow.options.variableHeight).to.be.false
-    expect(progressWindow.options.variableWidth).to.be.false
+    expect(progressWindow.options.autoHeight).to.be.false
+    expect(progressWindow.options.autoWidth).to.be.false
     expect(progressWindow.browserWindow).to.be.ok
     if (!progressWindow.browserWindow) throw new Error('no browserWindow')
     expect(progressWindow.browserWindow.getSize()).to.deep.equal([400, 123])
@@ -683,7 +678,7 @@ describe('ProgressWindow', () => {
       itemDefaults: {
         value: 0,
         title: 'Hello World',
-        enablePause: true,
+        pauseable: true,
         maxValue: 1,
       },
     })
@@ -691,11 +686,11 @@ describe('ProgressWindow', () => {
     expect(item1).to.be.ok
     expect(item1.value).to.equal(0)
     expect(item1.title).to.equal('Hello World')
-    expect(item1.enablePause).to.be.true
+    expect(item1.pauseable).to.be.true
     expect(item1.paused).to.be.false
-    expect(item1.isCompleted()).to.be.false
-    expect(item1.isInProgress()).to.be.true
-    expect(item1.isIndeterminate()).to.be.false
+    expect(item1.completed).to.be.false
+    expect(item1.inProgress).to.be.true
+    expect(item1.indeterminate).to.be.false
     expect(item1.maxValue).to.equal(1)
     expect(item1.cancelled).to.be.false
     expect(item1.removed).to.be.false
@@ -707,37 +702,37 @@ describe('ProgressWindow', () => {
     expect(item1.value).to.equal(0.1)
 
     const pausePromise = new Promise<boolean>((resolve) => {
-      item1.once('pause', (isPaused) => resolve(isPaused))
+      item1.once('paused', (isPaused) => resolve(isPaused))
     })
-    item1.pause()
-    await withTimeout(pausePromise, 300, 'pause event never fired')
+    item1.paused = true
+    await withTimeout(pausePromise, 300, 'paused event never fired')
     expect(item1.paused).to.be.true
-    expect(item1.isCompleted()).to.be.false
-    expect(item1.isInProgress()).to.be.true
+    expect(item1.completed).to.be.false
+    expect(item1.inProgress).to.be.true
 
     const resumePromise = new Promise<boolean>((resolve) => {
-      item1.once('pause', (isPaused) => resolve(isPaused))
+      item1.once('paused', (isPaused) => resolve(isPaused))
     })
-    item1.resume()
-    await withTimeout(resumePromise, 300, 'pause event never fired')
+    item1.paused = false
+    await withTimeout(resumePromise, 300, 'paused event never fired')
     expect(item1.paused).to.be.false
-    expect(item1.isCompleted()).to.be.false
-    expect(item1.isInProgress()).to.be.true
+    expect(item1.completed).to.be.false
+    expect(item1.inProgress).to.be.true
 
     const togglePromise = new Promise<boolean>((resolve) => {
-      item1.once('pause', (isPaused) => resolve(isPaused))
+      item1.once('paused', (isPaused) => resolve(isPaused))
     })
-    item1.togglePause()
-    await withTimeout(togglePromise, 300, 'pause event never fired')
+    item1.paused = !item1.paused
+    await withTimeout(togglePromise, 300, 'paused event never fired')
     expect(item1.paused).to.be.true
 
     const completedPromise = new Promise<void>((resolve) => {
       item1.once('complete', () => resolve())
     })
-    item1.setCompleted()
+    item1.complete()
     await withTimeout(completedPromise, 1000, 'complete event never fired')
     expect(item1.value).to.equal(1)
-    expect(item1.isCompleted()).to.be.true
+    expect(item1.completed).to.be.true
     const completePromise2 = new Promise<void>((resolve) => {
       item1.once('complete', () => resolve())
     })
@@ -746,7 +741,7 @@ describe('ProgressWindow', () => {
       100,
       'complete event never fired'
     )
-    item1.setCompleted()
+    item1.complete()
 
     // expect complete2WithTimeoutPromise to reject
     await expect(complete2WithTimeoutPromise).to.be.rejectedWith(
@@ -790,7 +785,7 @@ describe('ProgressWindow', () => {
     expect(item1).to.be.ok
     expect(item1.cancelled).to.be.false
     const willCancelPromise = new Promise<void>((resolve) => {
-      item1.once('will-cancel', (event) => {
+      item1.once('willCancel', (event) => {
         event.preventDefault()
         resolve()
       })
@@ -818,9 +813,9 @@ describe('ProgressWindow', () => {
         showWhenEstimateExceedsMs: 100,
       })
       expect(progressItem).to.be.ok
-      expect(progressItem.isInProgress()).to.be.true
-      expect(progressItem.isIndeterminate()).to.be.false
-      expect(progressItem.isCompleted()).to.be.false
+      expect(progressItem.inProgress).to.be.true
+      expect(progressItem.indeterminate).to.be.false
+      expect(progressItem.completed).to.be.false
       expect(progressItem.value).to.equal(0)
       expect(progressItem.maxValue).to.equal(100)
       expect(progressItem.title).to.equal('Hello World')
@@ -850,17 +845,17 @@ describe('ProgressWindow', () => {
         showWhenEstimateExceedsMs: 100,
       })
       expect(progressItem1).to.be.ok
-      expect(progressItem1.isInProgress()).to.be.true
-      expect(progressItem1.isIndeterminate()).to.be.false
-      expect(progressItem1.isCompleted()).to.be.false
+      expect(progressItem1.inProgress).to.be.true
+      expect(progressItem1.indeterminate).to.be.false
+      expect(progressItem1.completed).to.be.false
       expect(progressItem1.value).to.equal(0)
       expect(progressItem1.maxValue).to.equal(100)
       expect(progressItem1.title).to.equal('Hello World')
 
       expect(progressItem2).to.be.ok
-      expect(progressItem2.isInProgress()).to.be.true
-      expect(progressItem2.isIndeterminate()).to.be.false
-      expect(progressItem2.isCompleted()).to.be.false
+      expect(progressItem2.inProgress).to.be.true
+      expect(progressItem2.indeterminate).to.be.false
+      expect(progressItem2.completed).to.be.false
       expect(progressItem2.value).to.equal(0)
       expect(progressItem2.maxValue).to.equal(100)
       expect(progressItem2.title).to.equal('Hello World 2')
@@ -920,10 +915,10 @@ describe('ProgressWindow', () => {
         indeterminate: true,
       })
       expect(progressItem).to.be.ok
-      expect(progressItem.isInProgress()).to.be.true
-      expect(progressItem.isIndeterminate()).to.be.true
-      expect(progressItem.isCompleted()).to.be.false
-      expect(progressItem.isVisible()).to.be.false
+      expect(progressItem.inProgress).to.be.true
+      expect(progressItem.indeterminate).to.be.true
+      expect(progressItem.completed).to.be.false
+      expect(progressItem.visible).to.be.false
       expect(progressItem.value).to.equal(0)
       expect(progressItem.title).to.equal('Hello World')
 
@@ -935,7 +930,7 @@ describe('ProgressWindow', () => {
 
       await pause(60)
 
-      expect(progressItem.isVisible()).to.be.true
+      expect(progressItem.visible).to.be.true
       expect(progressWindow.browserWindow.isVisible()).to.be.true
       expect(progressWindow.browserWindow.webContents.send).to.have.been
         .calledOnce

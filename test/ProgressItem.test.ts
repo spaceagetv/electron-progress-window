@@ -12,16 +12,6 @@ chai.use(sinonChai)
 
 describe('ProgressItem', () => {
   describe('event emitters', () => {
-    it('should emit a "update" event on setProgress()', () => {
-      const updateSpy = sinon.spy()
-      const progressItem = new ProgressItem()
-      progressItem.on('update', updateSpy)
-
-      progressItem.setProgress(0.1)
-
-      expect(updateSpy.calledOnce).to.be.true
-    })
-
     it('should emit a "update" event on update()', () => {
       const updateSpy = sinon.spy()
       const progressItem = new ProgressItem()
@@ -120,28 +110,28 @@ describe('ProgressItem', () => {
       expect(updateSpy.calledOnce).to.be.true
     })
 
-    it('should emit a "update" event on assignment of "enableCancel"', () => {
+    it('should emit a "update" event on assignment of "cancellable"', () => {
       const updateSpy = sinon.spy()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
-      progressItem.enableCancel = false
+      progressItem.cancellable = false
 
       expect(updateSpy.calledOnce).to.be.true
-      expect(progressItem.enableCancel).to.be.false
+      expect(progressItem.cancellable).to.be.false
     })
 
-    it('should emit a "update" event on assignment of "enablePause"', () => {
+    it('should emit a "update" event on assignment of "pauseable"', () => {
       const updateSpy = sinon.spy()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
-      progressItem.enablePause = true
+      progressItem.pauseable = true
 
       expect(updateSpy.calledOnce).to.be.true
-      expect(progressItem.enablePause).to.be.true
+      expect(progressItem.pauseable).to.be.true
     })
 
     it('should emit a "update" event on assignment of "error"', () => {
@@ -156,28 +146,28 @@ describe('ProgressItem', () => {
       expect(progressItem.error).to.be.true
     })
 
-    it('should emit a "update" event on assignment of "autoComplete"', () => {
+    it('should emit a "update" event on assignment of "completeAutomatically"', () => {
       const updateSpy = sinon.spy()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
-      progressItem.autoComplete = false
+      progressItem.completeAutomatically = false
 
       expect(updateSpy.calledOnce).to.be.true
-      expect(progressItem.autoComplete).to.be.false
+      expect(progressItem.completeAutomatically).to.be.false
     })
 
-    it('should emit a "update" event on assignment of "removeOnComplete"', () => {
+    it('should emit a "update" event on assignment of "autoRemove"', () => {
       const updateSpy = sinon.spy()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
-      progressItem.removeOnComplete = false
+      progressItem.autoRemove = false
 
       expect(updateSpy.calledOnce).to.be.true
-      expect(progressItem.removeOnComplete).to.be.false
+      expect(progressItem.autoRemove).to.be.false
     })
 
     it('should NOT emit a "update" event on assignment of current options', () => {
@@ -193,11 +183,11 @@ describe('ProgressItem', () => {
         },
         theme: 'none',
         indeterminate: true,
-        enableCancel: false,
-        enablePause: true,
+        cancellable: false,
+        pauseable: true,
         error: true,
-        autoComplete: false,
-        removeOnComplete: false,
+        completeAutomatically: false,
+        autoRemove: false,
       })
 
       progressItem.on('update', updateSpy)
@@ -211,48 +201,48 @@ describe('ProgressItem', () => {
       }
       progressItem.theme = 'none'
       progressItem.indeterminate = true
-      progressItem.enableCancel = false
-      progressItem.enablePause = true
+      progressItem.cancellable = false
+      progressItem.pauseable = true
       progressItem.error = true
-      progressItem.autoComplete = false
-      progressItem.removeOnComplete = false
+      progressItem.completeAutomatically = false
+      progressItem.autoRemove = false
 
       expect(updateSpy.called).to.be.false
     })
 
-    // pause event
-    it('should emit a "pause" event when paused', () => {
+    // paused event
+    it('should emit a "paused" event when paused', () => {
       const pauseSpy = sinon.spy()
       const progressItem = new ProgressItem()
-      progressItem.on('pause', pauseSpy)
+      progressItem.on('paused', pauseSpy)
 
-      progressItem.pause()
+      progressItem.paused = true
 
       expect(pauseSpy).to.have.been.calledOnce
       expect(pauseSpy).to.have.been.calledWith(true)
 
-      progressItem.resume()
+      progressItem.paused = false
       expect(pauseSpy).to.have.been.calledTwice
       expect(pauseSpy).to.have.been.calledWith(false)
     })
 
-    // will-cancel event
-    it('should emit a "will-cancel" event when cancelled', () => {
+    // willCancel event
+    it('should emit a "willCancel" event when cancelled', () => {
       const willCancelSpy = sinon.spy()
       const progressItem = new ProgressItem()
-      progressItem.on('will-cancel', willCancelSpy)
+      progressItem.on('willCancel', willCancelSpy)
 
       progressItem.cancel()
 
       expect(willCancelSpy).to.have.been.calledOnce
     })
 
-    // will-cancel with preventDefault
+    // willCancel with preventDefault
     it('should not emit a "cancelled" event when cancelled with preventDefault', () => {
       const cancelledSpy = sinon.spy()
       const progressItem = new ProgressItem()
       progressItem.on('cancelled', cancelledSpy)
-      progressItem.on('will-cancel', (e) => e.preventDefault())
+      progressItem.on('willCancel', (e) => e.preventDefault())
 
       progressItem.cancel()
 
@@ -287,7 +277,7 @@ describe('ProgressItem', () => {
       const progressItem = new ProgressItem()
       progressItem.on('complete', completeSpy)
 
-      progressItem.setCompleted()
+      progressItem.complete()
 
       expect(completeSpy).to.have.been.calledOnce
     })
@@ -298,7 +288,7 @@ describe('ProgressItem', () => {
       const progressItem = new ProgressItem()
       progressItem.on('complete', completeSpy)
 
-      progressItem.setProgress(100)
+      progressItem.value = 100
 
       expect(completeSpy).to.have.been.calledOnce
     })
@@ -313,7 +303,7 @@ describe('ProgressItem', () => {
         await pause(20)
 
         expect(showSpy).to.have.been.calledOnce
-        expect(progressItem.isVisible()).to.be.true
+        expect(progressItem.visible).to.be.true
       })
 
       it('should not emit "show" immediately if initiallyVisible is false', async () => {
@@ -327,7 +317,7 @@ describe('ProgressItem', () => {
         await pause(1)
 
         expect(showSpy).to.not.have.been.called
-        expect(progressItem.isVisible()).to.be.false
+        expect(progressItem.visible).to.be.false
       })
 
       it('should emit "show" when show() is called', async () => {
@@ -339,7 +329,7 @@ describe('ProgressItem', () => {
 
         await pause(1)
 
-        expect(progressItem.isVisible()).to.be.false
+        expect(progressItem.visible).to.be.false
         expect(showSpy).to.not.have.been.called
 
         progressItem.show()
@@ -347,7 +337,7 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(1)
 
-        expect(progressItem.isVisible()).to.be.true
+        expect(progressItem.visible).to.be.true
         expect(showSpy).to.have.been.calledOnce
       })
 
@@ -358,7 +348,7 @@ describe('ProgressItem', () => {
 
         await pause(10)
 
-        expect(progressItem.isVisible()).to.be.true
+        expect(progressItem.visible).to.be.true
         expect(hideSpy).to.not.have.been.called
 
         progressItem.hide()
@@ -367,7 +357,7 @@ describe('ProgressItem', () => {
         await pause(1)
 
         expect(hideSpy).to.have.been.calledOnce
-        expect(progressItem.isVisible()).to.be.false
+        expect(progressItem.visible).to.be.false
       })
 
       it('should emit "show" after a delay when delayIndeterminateMs has value', async () => {
@@ -381,13 +371,13 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(1)
 
-        expect(progressItem.isVisible()).to.be.false
+        expect(progressItem.visible).to.be.false
         expect(showSpy).to.not.have.been.called
 
         // wait for delayIndeterminateMs
         await pause(150)
 
-        expect(progressItem.isVisible()).to.be.true
+        expect(progressItem.visible).to.be.true
         expect(showSpy).to.have.been.calledOnce
       })
 
@@ -399,10 +389,10 @@ describe('ProgressItem', () => {
         })
         progressItem.on('show', showSpy)
 
-        // wait for events to fire
-        await pause(1)
+        // wait for setImmediate to fire
+        await pause(20)
 
-        expect(progressItem.isVisible()).to.be.true
+        expect(progressItem.visible).to.be.true
         expect(showSpy).to.have.been.calledOnce
       })
 
@@ -417,22 +407,22 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(20)
 
-        expect(progressItem.isVisible()).to.be.true
+        expect(progressItem.visible).to.be.true
         expect(showSpy).to.have.been.calledOnce
       })
 
-      it('should emit "show" immediately when delayIndeterminateMs is null', async () => {
+      it('should emit "show" immediately when delayIndeterminateMs is undefined', async () => {
         const showSpy = sinon.spy()
         const progressItem = new ProgressItem({
           indeterminate: true,
-          delayIndeterminateMs: null,
+          delayIndeterminateMs: undefined,
         })
         progressItem.on('show', showSpy)
 
         // wait for events to fire
         await pause(20)
 
-        expect(progressItem.isVisible()).to.be.true
+        expect(progressItem.visible).to.be.true
         expect(showSpy).to.have.been.calledOnce
       })
 
@@ -446,18 +436,18 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(1)
 
-        expect(progressItem.isVisible()).to.be.false
+        expect(progressItem.visible).to.be.false
         expect(showSpy).to.not.have.been.called
         expect(progressItem.getEstimatedTotalTime()).to.be.undefined
 
         // wait for showWhenEstimateExceedsMs
         await pause(100)
-        progressItem.setProgress(49)
+        progressItem.value = 49
         expect(progressItem.getEstimatedTotalTime()).to.be.greaterThan(200)
         await pause(1)
 
         expect(showSpy).to.have.been.calledOnce
-        expect(progressItem.isVisible()).to.be.true
+        expect(progressItem.visible).to.be.true
       })
 
       it('should not emit "show" when estimated time exceeds showWhenEstimateExceedsMs', async () => {
@@ -470,18 +460,18 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(1)
 
-        expect(progressItem.isVisible()).to.be.false
+        expect(progressItem.visible).to.be.false
         expect(showSpy).to.not.have.been.called
         expect(progressItem.getEstimatedTotalTime()).to.be.undefined
 
         // wait for showWhenEstimateExceedsMs
         await pause(100)
-        progressItem.setProgress(49)
+        progressItem.value = 49
         expect(progressItem.getEstimatedTotalTime()).to.be.lessThan(2000)
         await pause(1)
 
         expect(showSpy).to.not.have.been.called
-        expect(progressItem.isVisible()).to.be.false
+        expect(progressItem.visible).to.be.false
       })
 
       it('should emit "show" immediately when showWhenEstimateExceedsMs is 0', async () => {
@@ -494,7 +484,7 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(10)
 
-        expect(progressItem.isVisible()).to.be.true
+        expect(progressItem.visible).to.be.true
         expect(showSpy).to.have.been.calledOnce
       })
 
@@ -508,21 +498,21 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(10)
 
-        expect(progressItem.isVisible()).to.be.true
+        expect(progressItem.visible).to.be.true
         expect(showSpy).to.have.been.calledOnce
       })
 
-      it('should emit "show" immediately when showWhenEstimateExceedsMs is null', async () => {
+      it('should emit "show" immediately when showWhenEstimateExceedsMs is undefined', async () => {
         const showSpy = sinon.spy()
         const progressItem = new ProgressItem({
-          showWhenEstimateExceedsMs: null,
+          showWhenEstimateExceedsMs: undefined,
         })
         progressItem.on('show', showSpy)
 
         // wait for events to fire
         await pause(10)
 
-        expect(progressItem.isVisible()).to.be.true
+        expect(progressItem.visible).to.be.true
         expect(showSpy).to.have.been.calledOnce
       })
     })
