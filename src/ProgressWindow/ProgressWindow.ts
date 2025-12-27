@@ -16,18 +16,40 @@ import {
 } from './ProgressItem'
 import { deepMerge } from './utils'
 
+/**
+ * PRELOAD SCRIPT HANDLING
+ *
+ * Electron's webPreferences.preload option requires a file path - it cannot accept
+ * inline content or data URLs. To ensure compatibility with bundlers like Webpack
+ * (which can break __dirname), we:
+ *
+ * 1. BUILD TIME: post-build.js embeds the preload script content as a string literal
+ *    into getPreloadContent(), replacing the fs.readFileSync call below.
+ *
+ * 2. RUNTIME: getPreloadPath() writes that embedded content to a temp file and
+ *    returns the path. The file uses a content-based hash in its name, so:
+ *    - It's only written once per unique version of the preload script
+ *    - Multiple instances/apps can safely share the same temp file
+ *    - The file persists in temp until the OS cleans it up
+ *
+ * This approach ensures the library works regardless of how the consuming
+ * application is bundled, while minimizing filesystem writes.
+ */
+
 /** Cached preload script content and path */
 let preloadContent: string | null = null
 let preloadPath: string | null = null
 
 /**
  * Get the preload script content.
- * This function is replaced at build time by post-build.js with embedded content.
+ * At build time, post-build.js replaces this function body to return
+ * the embedded preload script content as a string literal.
  * @internal
  */
 function getPreloadContent(): string {
   if (!preloadContent) {
-    // This fs.readFileSync is replaced at build time with embedded content
+    // NOTE: This fs.readFileSync is replaced at build time with embedded content.
+    // It only runs during development/testing when preload.js exists as a file.
     preloadContent = fs.readFileSync(
       path.resolve(__dirname, 'preload.js'),
       'utf8'
@@ -37,14 +59,15 @@ function getPreloadContent(): string {
 }
 
 /**
- * Get the path to the preload script.
- * Writes to temp on first call, returns cached path thereafter.
+ * Get the path to the preload script file.
+ * Writes the embedded preload content to a temp file on first call.
+ * Uses content hash in filename for cache invalidation across versions.
  * @internal
  */
 function getPreloadPath(): string {
   if (!preloadPath) {
     const content = getPreloadContent()
-    // Use content hash for deterministic filename
+    // Hash ensures unique filename per preload script version
     const hash = crypto
       .createHash('md5')
       .update(content)
@@ -55,7 +78,7 @@ function getPreloadPath(): string {
       `electron-progress-window-preload-${hash}.js`
     )
 
-    // Only write if file doesn't exist
+    // Only write if this version's file doesn't already exist
     if (!fs.existsSync(preloadPath)) {
       fs.writeFileSync(preloadPath, content, 'utf8')
     }
