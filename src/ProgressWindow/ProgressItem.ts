@@ -1,6 +1,30 @@
 import { EventEmitter } from 'events'
 import { deepEqual, deepMerge } from './utils'
 
+/**
+ * A simple cancelable event that works in both Node.js and browser environments.
+ * Unlike the DOM Event class, this is available in pure Node.js.
+ * @public
+ */
+export class CancelableEvent {
+  readonly type: string
+  private _defaultPrevented = false
+
+  constructor(type: string) {
+    this.type = type
+  }
+
+  /** Prevent the default action associated with this event */
+  preventDefault(): void {
+    this._defaultPrevented = true
+  }
+
+  /** Whether preventDefault() has been called */
+  get defaultPrevented(): boolean {
+    return this._defaultPrevented
+  }
+}
+
 export type ProgressItemTheme = 'stripes' | 'none'
 
 /**
@@ -96,7 +120,7 @@ export type ProgressItemTransferable = {
  * - `update` - Item was updated. listener: `() => void`<br/>
  * - `complete` - Item was completed. listener: `() => void`<br/>
  * - `remove` - Item was removed. listener: `() => void`<br/>
- * - `willCancel` - Item will cancel. Call event.preventDefault() to stop it. listener: `(event: Event) => void`<br/>
+ * - `willCancel` - Item will cancel. Call event.preventDefault() to stop it. listener: `(event: CancelableEvent) => void`<br/>
  * - `cancelled` - Item was cancelled. listener: `() => void`<br/>
  * - `paused` - Item pause state changed. listener: `(isPaused: boolean) => void`<br/>
  * - `hide` - Item is being hidden. listener: `() => void`<br/>
@@ -112,7 +136,7 @@ export type ProgressItemEvents = {
   /** Item was removed - @public */
   remove: () => void
   /** Item will cancel. Call event.preventDefault() to stop it. */
-  willCancel: (event: Event) => void
+  willCancel: (event: CancelableEvent) => void
   /** Item was cancelled - @public */
   cancelled: () => void
   /** Item pause state changed - @public */
@@ -486,7 +510,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     if (this.cancelled || this.removed) {
       return
     }
-    const event = new Event('willCancel', { cancelable: true })
+    const event = new CancelableEvent('willCancel')
     this.emit('willCancel', event)
     if (event.defaultPrevented) {
       return
