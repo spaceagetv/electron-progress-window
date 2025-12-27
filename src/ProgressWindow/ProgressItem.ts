@@ -1,18 +1,6 @@
 import { EventEmitter } from 'events'
 import { isEqual, merge } from 'lodash'
 import TypedEmitter from 'typed-emitter'
-// import { logger } from '../logger'
-
-// logger.setLevel(LogLevel.DEBUG)
-
-// const logger = {
-//   log: console.log,
-//   error: console.error,
-//   warn: console.warn,
-//   info: console.info,
-//   debug: console.debug,
-//   silly: console.debug,
-// }
 
 export type ProgressItemTheme = 'stripes' | 'none'
 
@@ -54,7 +42,7 @@ export const itemCssMap = {
   /** Background of the progress bar. Default: #ffffff6c */
   progressBackground: '--progress-background',
   /** Foreground of the progress bar. This is actually the "background" property on a div. Default: #1f65fd */
-  progressForeground: '--progress-foreground',
+  progressForeground: '--progress-foreground-color',
   /** Background of the item's containing div. */
   itemBackground: '--item-background',
   /** Border radius of the item's containing div. Default: 4px */
@@ -413,7 +401,6 @@ export class ProgressItem extends ProgressItemEventsEmitter {
    * @param options - options to update
    */
   update(options: Partial<ProgressItemOptions>) {
-    // logger.silly('ProgressItem.update()', options)
     // istanbul ignore if
     if (this.removed) {
       return
@@ -453,7 +440,6 @@ export class ProgressItem extends ProgressItemEventsEmitter {
    * @returns void
    */
   setCompleted() {
-    // logger.debug('ProgressItem.setCompleted()')
     if (this.isCompleted() || this.removed) {
       return
     }
@@ -487,7 +473,6 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   /** Remove the ProgressItem from the ProgressWindow */
   remove() {
-    // logger.debug('ProgressItem.remove()')
     this.removed = true
     this.emit('remove')
   }
@@ -502,7 +487,6 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     if (event.defaultPrevented) {
       return
     }
-    // logger.debug('ProgressItem.cancel()')
     this.cancelled = true
     this.emit('cancelled')
     this.remove()
@@ -513,7 +497,6 @@ export class ProgressItem extends ProgressItemEventsEmitter {
    * @param shouldPause - should the item be paused? Default: true
    */
   pause(shouldPause = true) {
-    // logger.debug('ProgressItem.pause()')
     // istanbul ignore if
     if (this.paused === shouldPause) {
       return
@@ -534,7 +517,6 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   /** Show the ProgressItem */
   show() {
-    // logger.debug('ProgressItem.show()')
     // istanbul ignore if
     if (this._visible === true) {
       return
@@ -545,7 +527,6 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   /** Hide the ProgressItem */
   hide() {
-    // logger.debug('ProgressItem.hide()')
     if (this._visible === false) {
       return
     }

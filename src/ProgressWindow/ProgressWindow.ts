@@ -454,10 +454,6 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
         },
       },
     } as ProgressWindowOptions
-    // logger.debug('ProgressWindow defaults', this.defaults)
-    // logger.debug('ProgressWindow overrides', overrides)
-    // logger.debug('options', options)
-    // logger.debug('ProgressWindow options', this.options)
     this.options = merge(
       {},
       this.defaults,
@@ -465,8 +461,6 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
       options,
       overrides
     )
-    // logger.debug('Merged options', this.options)
-    // logger.debug('ProgressWindow options', this.options)
 
     // Are we using BrowserWindow or a mock?
     const bwFunction = this.options.testingFixtures.bw
@@ -483,7 +477,6 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     })
     this._ready = new Promise((resolve) => {
       this.browserWindow.once('ready-to-show', () => {
-        // this.browserWindow?.show()
         this.emit('ready')
         resolve(this)
       })
@@ -502,9 +495,6 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
     this.browserWindow.loadURL(
       'data:text/html;charset=UTF8,' + encodeURIComponent(htmlWithCss)
     )
-
-    // devtools
-    // this.browserWindow.webContents.openDevTools()
 
     // we're going to get x/y here too... but we'll just ignore them
     this.lastContentDimensions = this.browserWindow.getContentBounds()
@@ -559,7 +549,6 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    * @public
    */
   async addItem(options = {} as Partial<ProgressItemOptions> | ProgressItem) {
-    // logger.debug('ProgressWindow.addItem()', options)
     // istanbul ignore next
     if (!this.browserWindow) {
       throw new Error('ProgressWindow.addItem() called without window instance')
@@ -624,7 +613,6 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    * @internal
    */
   private async updateItem(item: ProgressItem) {
-    // logger.silly('ProgressWindow.updateItem()', item)
     // istanbul ignore next
     if (!this.browserWindow) {
       throw new Error(
@@ -648,7 +636,6 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    * @returns - resolves when the item has been removed
    */
   async removeItem(id: string) {
-    // logger.debug('ProgressWindow.removeItem()', id)
     // istanbul ignore next
     if (!this.browserWindow) {
       throw new Error(
@@ -670,7 +657,6 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    * Items will be removed after they are cancelled.
    */
   cancelAll() {
-    // logger.debug('ProgressWindow.cancelAll()')
     Object.values(this.progressItems).forEach((item) => item.cancel())
   }
 
@@ -678,7 +664,6 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
    * Remove all items (without cancelling them)
    */
   removeAll() {
-    // logger.debug('ProgressWindow.removeAll()')
     Object.keys(this.progressItems).forEach((id) => this.removeItem(id))
   }
 
@@ -737,7 +722,6 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
         'ProgressWindow.updateContentSize() called without browserWindow instance'
       )
     }
-    // logger.debug('ProgressWindow.updateContentSize()', dimensions)
     if (!this.options.variableHeight && !this.options.variableWidth) {
       // we shouldn't be resizing the window
       return
@@ -827,7 +811,6 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
 
   /** Close the window if all items are completed */
   private maybeCloseWindow() {
-    // logger.silly('ProgressWindow.maybeCloseWindow()')
     // istanbul ignore next
     if (!this.browserWindow) {
       throw new Error(
@@ -884,7 +867,6 @@ export class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInst
 
   /** Close the window */
   close() {
-    // logger.debug('ProgressWindow.close()')
     // istanbul ignore next
     if (!this.browserWindow) {
       return
