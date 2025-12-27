@@ -412,9 +412,10 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   /** Get the estimated total time based on current progress */
   getEstimatedTotalTime(): number | undefined {
-    if (this.indeterminate) return
-    if (this.value === 0) return
-    if (this.value >= this.maxValue) return
+    if (this.indeterminate) return undefined
+    if (this.value === 0) return undefined
+    if (this.value >= this.maxValue) return undefined
+    if (this.#startTime === null) return undefined
     const elapsed = Date.now() - this.#startTime
     const estimatedTotalTime = (elapsed / this.value) * this.maxValue
     return estimatedTotalTime
@@ -429,12 +430,10 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     if (this.removed) {
       return
     }
-    const hasChanged = Object.entries(options).some(
-      ([key, val]: [
-        keyof ProgressItemOptions,
-        ProgressItemOptions[keyof ProgressItemOptions]
-      ]) => !deepEqual(this.#options[key], val)
-    )
+    const hasChanged = Object.entries(options).some(([key, val]) => {
+      const optionKey = key as keyof ProgressItemOptions
+      return !deepEqual(this.#options[optionKey], val)
+    })
     // if none of the options have changed, return
     if (!hasChanged) {
       return
@@ -442,9 +441,11 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     this.#options = { ...this.#options, ...options }
     this.emit('update')
     // if we're not visible and the estimated time remaining is greater than the threshold, show
+    const estimatedTime = this.getEstimatedTotalTime()
     if (
       !this.visible &&
-      this.getEstimatedTotalTime() > this.showWhenEstimateExceedsMs
+      estimatedTime !== undefined &&
+      estimatedTime > this.showWhenEstimateExceedsMs
     ) {
       this.show()
     }

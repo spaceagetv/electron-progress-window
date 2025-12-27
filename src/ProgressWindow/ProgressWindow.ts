@@ -518,20 +518,21 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     ) as ProgressWindowOptions
 
     // Are we using BrowserWindow or a mock?
-    const bwFunction = this.options.testingFixtures.bw
+    // testingFixtures is always defined via defaults
+    const bwFunction = this.options.testingFixtures!.bw!
     // Are we using screen or a mock?
-    this.#screenInstance = this.options.testingFixtures.scr
-    this.itemDefaults = this.options.itemDefaults
+    this.#screenInstance = this.options.testingFixtures!.scr
+    this.itemDefaults = this.options.itemDefaults ?? {}
 
     // create the window
     this.browserWindow = new bwFunction(this.options.windowOptions)
     // prevent the window from navigating away from the initial URL
     // istanbul ignore next
-    this.browserWindow.webContents.on('will-navigate', (event) => {
+    this.browserWindow!.webContents.on('will-navigate', (event) => {
       event.preventDefault()
     })
     this.#ready = new Promise((resolve) => {
-      this.browserWindow.once('ready-to-show', () => {
+      this.browserWindow!.once('ready-to-show', () => {
         this.emit('ready')
         resolve(this)
       })
@@ -547,45 +548,45 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
         )
       : htmlContent
 
-    this.browserWindow.loadURL(
+    this.browserWindow!.loadURL(
       'data:text/html;charset=UTF8,' + encodeURIComponent(htmlWithCss)
     )
 
     // we're going to get x/y here too... but we'll just ignore them
-    this.#lastContentDimensions = this.browserWindow.getContentBounds()
+    this.#lastContentDimensions = this.browserWindow!.getContentBounds()
 
-    this.browserWindow.on('close', () => {
+    this.browserWindow!.on('close', () => {
       if (this.options.cancelOnClose) {
         this.cancelAll()
       } else {
         this.removeAll()
       }
-      this.browserWindow.setProgressBar(-1)
+      this.browserWindow?.setProgressBar(-1)
     })
-    this.browserWindow.on('closed', () => {
+    this.browserWindow!.on('closed', () => {
       this.browserWindow = null
       this.emit('windowClosed')
     })
     // istanbul ignore next
-    this.browserWindow.webContents.ipc.on(
+    this.browserWindow!.webContents.ipc.on(
       'progress-update-content-size',
       (_event, dimensions: { width: number; height: number }) => {
         this.#updateContentSize(dimensions)
       }
     )
     // istanbul ignore next
-    this.browserWindow.webContents.ipc.on(
+    this.browserWindow!.webContents.ipc.on(
       'progress-item-cancel',
       (_event, itemId: string) => {
-        this.progressItems[itemId].cancel()
+        this.progressItems[itemId]?.cancel()
       }
     )
     // istanbul ignore next
-    this.browserWindow.webContents.ipc.on(
+    this.browserWindow!.webContents.ipc.on(
       'progress-item-pause',
       (_event, itemId: string) => {
         const item = this.progressItems[itemId]
-        item.paused = !item.paused
+        if (item) item.paused = !item.paused
       }
     )
     ProgressWindow.staticEvents.emit('created', this)
@@ -639,6 +640,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     })
     this.progressItems[item.id] = item
     item.on('show', () => {
+      if (!this.browserWindow) return
       this.browserWindow.webContents.send(
         'progress-item-add',
         item.transferable()
@@ -654,6 +656,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       }
     })
     item.on('hide', () => {
+      if (!this.browserWindow) return
       this.browserWindow.webContents.send(
         'progress-item-remove',
         item.transferable()
@@ -703,6 +706,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       )
     }
     const item = this.progressItems[id]
+    if (!item) return
     item.removeAllListeners()
     delete this.progressItems[id]
     await this.whenReady()

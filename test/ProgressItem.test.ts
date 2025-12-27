@@ -411,11 +411,11 @@ describe('ProgressItem', () => {
         expect(showSpy).to.have.been.calledOnce
       })
 
-      it('should emit "show" immediately when delayIndeterminateMs is null', async () => {
+      it('should emit "show" immediately when delayIndeterminateMs is undefined', async () => {
         const showSpy = sinon.spy()
         const progressItem = new ProgressItem({
           indeterminate: true,
-          delayIndeterminateMs: null,
+          delayIndeterminateMs: undefined,
         })
         progressItem.on('show', showSpy)
 
@@ -502,10 +502,10 @@ describe('ProgressItem', () => {
         expect(showSpy).to.have.been.calledOnce
       })
 
-      it('should emit "show" immediately when showWhenEstimateExceedsMs is null', async () => {
+      it('should emit "show" immediately when showWhenEstimateExceedsMs is undefined', async () => {
         const showSpy = sinon.spy()
         const progressItem = new ProgressItem({
-          showWhenEstimateExceedsMs: null,
+          showWhenEstimateExceedsMs: undefined,
         })
         progressItem.on('show', showSpy)
 
