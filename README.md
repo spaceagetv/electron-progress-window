@@ -5,7 +5,7 @@ Display multiple progress bars in an Electron window.
 ## Advantages
 
 * Full Typescript support, including event types
-* Zero dependencies
+* Minimal dependencies (lodash, typed-emitter)
 * Full [documentation](docs/electron-progress-window.md)
 * [Example](examples) playground to try it out in an Electron app 
 * Progress bars are displayed in a single window (or multiple windows if you prefer)
@@ -63,17 +63,17 @@ async function somethingThatTakesTime(progressCallback) {
     await new Promise((resolve) => setTimeout(resolve, 100))
     progressCallback(Math.round((i + 1) / 100 * 100))
   }
-  const setPause(isPaused) {
+  const setPause = (isPaused) => {
     state.paused = isPaused
   }
-  const cancel() {
+  const cancel = () => {
     state.cancelled = true
   }
   return { setPause, cancel }
 }
 
 async function start() {
-  const progressItem = ProgressWindow.addProgressItem({
+  const progressItem = await ProgressWindow.addItem({
     title: 'Something that takes time',
     detail: '0% complete',
     value: 0,
