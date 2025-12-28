@@ -3,38 +3,210 @@
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data:; img-src 'self' data:; style-src 'self' 'unsafe-inline';" />
-    <title>Hello World!</title>
+    <title>Progress Window Playground</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: #f5f5f7;
+        min-height: 100vh;
+        padding: 16px;
+        color: #1d1d1f;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 16px;
+      }
+
+      h1 {
+        color: #1d1d1f;
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        letter-spacing: -0.5px;
+      }
+
+      .subtitle {
+        color: #6e6e73;
+        font-size: 12px;
+        font-weight: 400;
+      }
+
+      .section {
+        background: white;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        border: 1px solid #e5e5e7;
+      }
+
+      .section-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: #86868b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+      }
+
+      .button-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 6px;
+      }
+
+      button.timer {
+        background: #007aff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      button.timer:hover {
+        background: #0051d5;
+      }
+
+      button.timer:active {
+        background: #004bb8;
+      }
+
+      /* Variant colors */
+      .section:nth-child(3) button.timer {
+        background: #ff3b30;
+      }
+
+      .section:nth-child(3) button.timer:hover {
+        background: #d72a21;
+      }
+
+      .section:nth-child(4) button.timer {
+        background: #5ac8fa;
+      }
+
+      .section:nth-child(4) button.timer:hover {
+        background: #32b5e8;
+      }
+
+      .section:nth-child(5) button.timer {
+        background: #34c759;
+      }
+
+      .section:nth-child(5) button.timer:hover {
+        background: #28a745;
+      }
+
+      .section:nth-child(6) button.timer {
+        background: #ff9500;
+      }
+
+      .section:nth-child(6) button.timer:hover {
+        background: #e07900;
+      }
+
+      .section:nth-child(7) button.timer {
+        background: #af52de;
+      }
+
+      .section:nth-child(7) button.timer:hover {
+        background: #9037c2;
+      }
+
+      .section:nth-child(8) button.timer {
+        background: #ff2d55;
+      }
+
+      .section:nth-child(8) button.timer:hover {
+        background: #d91846;
+      }
+    </style>
   </head>
   <body>
-    <div>
-      <button class="timer" data-time="3">3 seconds</button>
-      <button class="timer" data-time="10">10 seconds</button>
-      <button class="timer" data-time="30">30 seconds</button>
-      <button class="timer" data-time="60">60 seconds</button>
-    </div>
-    <div>
-      <button class="timer" data-time="3" data-description="true">3 seconds (description)</button>
-      <button class="timer" data-time="10" data-description="true">10 seconds (description)</button>
-      <button class="timer" data-time="30" data-description="true">30 seconds (description)</button>
-      <button class="timer" data-time="60" data-description="true">60 seconds (description)</button>
-    </div>
+    <div class="container">
+      <header>
+        <h1>Progress Window Playground</h1>
+        <p class="subtitle">Click any button to see the progress window in action</p>
+      </header>
 
-    <div>
-      <button class="timer" data-time="5" data-indeterminate="true">5 seconds indeterminate</button>
-      <button class="timer" data-time="10" data-indeterminate="true">10 seconds indeterminate</button>
-    </div>
-    <div>
-      <button class="timer" data-time="5" data-persist="true">5 seconds persistent</button>
-      <button class="timer" data-time="10" data-persist="true">10 seconds persistent</button>
-    </div>
-    <div>
-      <button class="timer" data-time="20" data-title="This is a long title with very descriptive text explaining the thing that is happening right now but that should finish at some point in the future.">Long title</button>  
-      <button class="timer" data-time="20" data-description-text="This is a long description with very descriptive text explaining the thing that is happening right now but that should finish at some point in the future.">Long description</button>    
-    </div>
-    <div>
-      <button class="timer" data-time="15" data-pauseable="false" data-cancellable="false" data-title="This item can be neither paused nor cancelled">15 seconds no pause no cancel</button>
-      <button class="timer" data-time="15" data-cancellable="false" data-title="This item can be paused, but not cancelled">15 seconds no cancel</button>
-      <button class="timer" data-time="15" data-pauseable="false" data-title="This item can be cancelled, but not paused">15 seconds no pause</button>
+      <div class="section">
+        <div class="section-title">Basic Timers</div>
+        <div class="button-grid">
+          <button class="timer" data-time="3">3 seconds</button>
+          <button class="timer" data-time="10">10 seconds</button>
+          <button class="timer" data-time="30">30 seconds</button>
+          <button class="timer" data-time="60">60 seconds</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">With Description</div>
+        <div class="button-grid">
+          <button class="timer" data-time="3" data-description="true">3 seconds</button>
+          <button class="timer" data-time="10" data-description="true">10 seconds</button>
+          <button class="timer" data-time="30" data-description="true">30 seconds</button>
+          <button class="timer" data-time="60" data-description="true">60 seconds</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Indeterminate Progress</div>
+        <div class="button-grid">
+          <button class="timer" data-time="5" data-indeterminate="true">5 seconds</button>
+          <button class="timer" data-time="10" data-indeterminate="true">10 seconds</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Persistent Items</div>
+        <div class="button-grid">
+          <button class="timer" data-time="5" data-persist="true">5 seconds</button>
+          <button class="timer" data-time="10" data-persist="true">10 seconds</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Long Text</div>
+        <div class="button-grid">
+          <button class="timer" data-time="20" data-title="This is a long title with very descriptive text explaining the thing that is happening right now but that should finish at some point in the future.">Long title</button>
+          <button class="timer" data-time="20" data-description-text="This is a long description with very descriptive text explaining the thing that is happening right now but that should finish at some point in the future.">Long description</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Control Options</div>
+        <div class="button-grid">
+          <button class="timer" data-time="15" data-pauseable="false" data-cancellable="false" data-title="This item can be neither paused nor cancelled">No pause/cancel</button>
+          <button class="timer" data-time="15" data-cancellable="false" data-title="This item can be paused, but not cancelled">No cancel</button>
+          <button class="timer" data-time="15" data-pauseable="false" data-title="This item can be cancelled, but not paused">No pause</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Styling & States</div>
+        <div class="button-grid">
+          <button class="timer" data-time="5" data-error="true" data-title="This will show an error state">Error state</button>
+          <button class="timer" data-time="10" data-theme="stripes" data-title="Progress with stripes theme">Stripes theme</button>
+          <button class="timer" data-time="10" data-css-custom="true" data-title="Custom CSS colors">Custom colors</button>
+        </div>
+      </div>
     </div>
   </body>
 </html>

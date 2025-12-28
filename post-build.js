@@ -129,13 +129,10 @@ safeUnlink(rendererJsDefinitionsPathEsm)
 safeUnlink(rendererJsDefinitionsPathEsm + '.map')
 
 // Remove the preload.js files (no longer needed, content embedded in ProgressWindow.js)
+// Keep preload.d.ts files since ProgressWindowAPI type is exported from index.ts
 safeUnlink(preloadJsPathCjs)
 safeUnlink(preloadJsPathCjs + '.map')
-safeUnlink(preloadJsDefinitionsPathCjs)
-safeUnlink(preloadJsDefinitionsPathCjs + '.map')
 safeUnlink(preloadJsPathEsm)
 safeUnlink(preloadJsPathEsm + '.map')
-safeUnlink(preloadJsDefinitionsPathEsm)
-safeUnlink(preloadJsDefinitionsPathEsm + '.map')
 
 console.log('Post-build: Embedded renderer and preload scripts successfully.')

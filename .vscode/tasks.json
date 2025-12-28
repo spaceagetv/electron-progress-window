@@ -1,0 +1,145 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Lint and Type Check",
+      "type": "npm",
+      "script": "lint",
+      "problemMatcher": [
+        "$eslint-stylish",
+        "$tsc"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      },
+      "runOptions": {
+        "runOn": "default"
+      }
+    },
+    {
+      "label": "Type Check",
+      "type": "shell",
+      "command": "npm run build",
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Lint",
+      "type": "npm",
+      "script": "lint",
+      "problemMatcher": [
+        "$eslint-stylish"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Lint and Fix",
+      "type": "npm",
+      "script": "lint:fix",
+      "problemMatcher": [
+        "$eslint-stylish"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Run Unit Tests",
+      "type": "npm",
+      "script": "test",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Run E2E Tests",
+      "type": "npm",
+      "script": "test:e2e",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Build",
+      "type": "npm",
+      "script": "build",
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}

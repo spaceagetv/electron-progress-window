@@ -1,10 +1,10 @@
 import { ipcMain } from 'electron'
-import { ProgressWindow } from 'electron-progress-window'
+import { ProgressWindow, ProgressItemOptions } from 'electron-progress-window'
 
 ProgressWindow.configure({
   closeOnComplete: true,
   itemDefaults: {
-    enablePause: true,
+    pauseable: true,
   },
   // css: `
   //   body {
@@ -21,9 +21,9 @@ ProgressWindow.configure({
   },
 })
 
-ProgressWindow.emitter.on('created', (_progressWindow) => {
-  console.log('created')
-  // _progressWindow.browserWindow.webContents.openDevTools({ mode: 'detach' })
+ProgressWindow.staticEvents.on('created', (progressWindow) => {
+  console.log('created', progressWindow.options.windowOptions?.title)
+  // progressWindow.browserWindow?.webContents.openDevTools({ mode: 'detach' })
 })
 
 ipcMain.on(
@@ -39,6 +39,10 @@ ipcMain.on(
       descriptionText,
       enablePause,
       enableCancel,
+      error,
+      theme,
+      cssCustom,
+      identifier,
     }
   ) => {
     // console.log({
@@ -63,15 +67,32 @@ ipcMain.on(
       ? // otherwise, if there's a description, enable the detail field
         `0% complete`
       : undefined
-    const progressItem = await ProgressWindow.addItem({
+    const options: Partial<ProgressItemOptions> = {
       title,
       detail: desc,
       indeterminate,
       maxValue: 1,
-      removeOnComplete: !persist,
-      enablePause,
-      enableCancel,
-    })
+      autoRemove: !persist,
+      pauseable: enablePause,
+      cancellable: enableCancel,
+      identifier, // Pass through the custom identifier if provided
+    }
+
+    // Add theme if specified
+    if (theme) {
+      options.theme = theme as 'stripes'
+    }
+
+    // Add custom CSS if requested
+    if (cssCustom) {
+      options.cssVars = {
+        progressForeground: '#ff6b6b',
+        itemBackground: '#4ecdc4',
+        textColor: '#ffffff',
+      }
+    }
+
+    const progressItem = await ProgressWindow.addItem(options)
     const handle = runTimer(time * 1000, (progressValue, finished) => {
       let detail: string | undefined
       if (descriptionText) {
@@ -79,9 +100,18 @@ ipcMain.on(
       } else if (description) {
         detail = `${Math.round(progressValue * 100)}% complete`
       }
-      progressItem.setProgress(progressValue, { detail })
+      progressItem.value = progressValue
+      if (detail !== undefined) {
+        progressItem.detail = detail
+      }
+
+      // Trigger error state halfway through if error flag is set
+      if (error && progressValue >= 0.5 && progressValue < 0.6) {
+        progressItem.error = true
+      }
+
       if (finished && indeterminate) {
-        progressItem.setCompleted()
+        progressItem.complete()
       }
     })
     progressItem.on('cancelled', () => {
@@ -90,8 +120,8 @@ ipcMain.on(
     progressItem.on('remove', () => {
       handle.cancel()
     })
-    progressItem.on('pause', (bool: boolean) => {
-      if (bool) {
+    progressItem.on('paused', (isPaused: boolean) => {
+      if (isPaused) {
         handle.pause()
       } else {
         handle.resume()
