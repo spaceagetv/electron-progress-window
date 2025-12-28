@@ -38,6 +38,12 @@ jobs:
           NPM_CONFIG_PROVENANCE: true
         run: npx semantic-release
 
+      - name: Publish to npm with provenance
+        env:
+          NPM_CONFIG_PROVENANCE: true
+        run: npm publish --provenance --access public
+        continue-on-error: true
+
       - name: Build Documentation
         run: npm run docs
 
