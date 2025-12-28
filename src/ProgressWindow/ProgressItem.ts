@@ -49,6 +49,7 @@ export type ProgressItemOptions = Pick<
   | 'initiallyVisible'
   | 'delayIndeterminateMs'
   | 'showWhenEstimateExceedsMs'
+  | 'identifier'
 >
 
 export const itemCssMap = {
@@ -190,10 +191,11 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     initiallyVisible: true,
     delayIndeterminateMs: 0,
     showWhenEstimateExceedsMs: 0,
+    identifier: undefined,
   }
 
   /** Unique ID for the progress bar item - start with alpha for HTML id - @public @readonly */
-  readonly id: string = 'p' + Math.random().toString(36).substring(2, 11)
+  readonly id: string
 
   /** Is the item completed? @internal */
   #completed = false
@@ -213,6 +215,13 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   constructor(options = {} as Partial<ProgressItemOptions>) {
     super()
+
+    // Set the ID first - use custom identifier if provided, otherwise generate one
+    // Sanitize identifier to ensure it's a valid HTML id attribute
+    const rawIdentifier =
+      options.identifier || 'p' + Math.random().toString(36).substring(2, 11)
+    this.id = this.sanitizeIdentifier(rawIdentifier)
+
     deepMerge(this.#options, {
       ...options,
       delayIndeterminateMs: Math.max(0, options.delayIndeterminateMs || 0),
@@ -224,6 +233,34 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
     this.#startTime = Date.now()
     this.handleVisibility()
+  }
+
+  /**
+   * Sanitizes an identifier to ensure it's a valid HTML id attribute.
+   * HTML id attributes must start with a letter (a-zA-Z) and can only contain
+   * letters, digits, hyphens, underscores, colons, and periods.
+   *
+   * Note: This uses a permissive approach that encodes characters rather than
+   * rejecting them, so any string can be used as an identifier safely.
+   *
+   * @param identifier - The raw identifier to sanitize
+   * @returns A valid HTML id attribute
+   */
+  private sanitizeIdentifier(identifier: string): string {
+    if (!identifier || typeof identifier !== 'string') {
+      return 'p' + Math.random().toString(36).substring(2, 11)
+    }
+
+    // Use encodeURIComponent to handle special characters safely
+    // This preserves the original identifier while making it HTML-safe
+    const encoded = encodeURIComponent(identifier)
+
+    // Ensure it starts with a letter (if not, prefix with 'id-')
+    if (!/^[a-zA-Z]/.test(encoded)) {
+      return 'id-' + encoded
+    }
+
+    return encoded
   }
 
   /**
@@ -417,6 +454,18 @@ export class ProgressItem extends ProgressItemEventsEmitter {
    */
   get showWhenEstimateExceedsMs(): number {
     return this.#options.showWhenEstimateExceedsMs || 0
+  }
+
+  /**
+   * Custom identifier for this progress item.
+   * If provided during construction, this will be used as the id.
+   * Otherwise, a random id is generated.
+   *
+   * This identifier is rendered as both the HTML id attribute and data-testid attribute
+   * on the .progress-item element, making it easy to target specific items in tests.
+   */
+  get identifier(): string | undefined {
+    return this.#options.identifier
   }
 
   /** Is this item completed? */

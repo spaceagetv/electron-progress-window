@@ -55,6 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const list = document.getElementById('progress-items')
       if (list) {
         list.appendChild(widget.element)
+        // Scroll the newly added item into view
+        widget.element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       }
       updateContentSize()
     }
@@ -138,6 +140,8 @@ class ProgressWidget {
     this.element = document.createElement('div')
     this.element.className = 'progress-item'
     this.element.id = item.id
+    // Also set data-testid for easier test targeting
+    this.element.dataset.testid = item.id
     this.element.innerHTML = `
       <div class="progress-item-actions">
         <span class="progress-item-pause" data-item-id="${this.id}">${PAUSE_SVG}</span>

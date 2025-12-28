@@ -1,8 +1,21 @@
+# Dependencies
 node_modules
-temp
-out
+
+# Build outputs
 dist
-npmrc
+out
+
+# API Extractor outputs
+temp
+
+# Test outputs
 coverage
 .nyc_output
+test-results
+
+# Environment files
+npmrc
 env.*.sh
+
+# IDE and system files
+.DS_Store

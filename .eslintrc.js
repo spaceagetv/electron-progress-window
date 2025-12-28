@@ -19,5 +19,22 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     'tsdoc/syntax': 'warn',
   },
-  ignorePatterns: ['node_modules/', 'dist/', 'coverage/'],
+  overrides: [
+    {
+      // Disable non-null assertion warnings in test files
+      files: ['**/*.test.ts', '**/*.spec.ts', 'e2e/**/*.ts', 'test/**/*.ts'],
+      rules: {
+        '@typescript-eslint/no-non-null-assertion': 'off',
+      },
+    },
+  ],
+  ignorePatterns: [
+    'node_modules/',
+    'dist/',
+    'coverage/',
+    'test-results/',
+    'examples/',
+    'temp/',
+    '.serena/',
+  ],
 }

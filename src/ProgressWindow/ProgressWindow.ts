@@ -519,8 +519,10 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
 
     // Are we using BrowserWindow or a mock?
     // testingFixtures is always defined via defaults
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const bwFunction = this.options.testingFixtures!.bw!
     // Are we using screen or a mock?
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.#screenInstance = this.options.testingFixtures!.scr
     this.itemDefaults = this.options.itemDefaults ?? {}
 
@@ -528,10 +530,12 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     this.browserWindow = new bwFunction(this.options.windowOptions)
     // prevent the window from navigating away from the initial URL
     // istanbul ignore next
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.browserWindow!.webContents.on('will-navigate', (event) => {
       event.preventDefault()
     })
     this.#ready = new Promise((resolve) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.browserWindow!.once('ready-to-show', () => {
         this.emit('ready')
         resolve(this)
@@ -548,13 +552,16 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
         )
       : htmlContent
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.browserWindow!.loadURL(
       'data:text/html;charset=UTF8,' + encodeURIComponent(htmlWithCss)
     )
 
     // we're going to get x/y here too... but we'll just ignore them
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.#lastContentDimensions = this.browserWindow!.getContentBounds()
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.browserWindow!.on('close', () => {
       if (this.options.cancelOnClose) {
         this.cancelAll()
@@ -563,11 +570,13 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       }
       this.browserWindow?.setProgressBar(-1)
     })
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.browserWindow!.on('closed', () => {
       this.browserWindow = null
       this.emit('windowClosed')
     })
     // istanbul ignore next
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.browserWindow!.webContents.ipc.on(
       'progress-update-content-size',
       (_event, dimensions: { width: number; height: number }) => {
@@ -575,6 +584,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       }
     )
     // istanbul ignore next
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.browserWindow!.webContents.ipc.on(
       'progress-item-cancel',
       (_event, itemId: string) => {
@@ -582,6 +592,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       }
     )
     // istanbul ignore next
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.browserWindow!.webContents.ipc.on(
       'progress-item-pause',
       (_event, itemId: string) => {
@@ -836,8 +847,10 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     const contentWidth = this.options.autoWidth
       ? Math.min(newDimensions.width, displayWidth)
       : windowOldWidth
+    // Limit height to 80% of display work area height
+    const maxHeight = Math.floor(displayHeight * 0.8) - titleBarHeight
     const contentHeight = this.options.autoHeight
-      ? Math.min(newDimensions.height, displayHeight - titleBarHeight)
+      ? Math.min(newDimensions.height, maxHeight)
       : windowOldHeight
 
     // negative if smaller, positive if larger

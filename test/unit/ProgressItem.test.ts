@@ -3,7 +3,7 @@
  */
 
 import chai, { expect } from 'chai'
-import { ProgressItem } from '../src/index'
+import { ProgressItem } from '../../src/index'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import { pause } from './pause'
