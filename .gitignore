@@ -18,4 +18,4 @@ npmrc
 env.*.sh
 
 # IDE and system files
-.DS_Store
+.DS_Storeetc/
