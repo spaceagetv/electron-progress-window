@@ -8,6 +8,7 @@
 
 |  Class | Description |
 |  --- | --- |
+|  [CancelableEvent](./electron-progress-window.cancelableevent.md) | A simple cancelable event that works in both Node.js and browser environments. Unlike the DOM Event class, this is available in pure Node.js. |
 |  [ProgressItem](./electron-progress-window.progressitem.md) | A progress bar item within a ProgressWindow. There shouldn't be much need to call this directly. Instead use ProgressWindow.addItem() or progressWindowInstance.addItem() |
 |  [ProgressWindow](./electron-progress-window.progresswindow.md) | <p>An Electron Window that displays progress items. This class has a singleton instance that is created on demand, and gets destroyed when the window is closed and/or all of its ProgressItems have completed.</p><p>It has static methods for configuring the window and adding items to the default instance.</p><p>However, you can create multiple instances, if you want to create multiple windows, or if you want to have multiple windows with different configurations.</p> |
 

@@ -4,10 +4,10 @@
 
 ## ProgressWindowOptions.windowOptions property
 
-Options for the BrowserWindow instance
+Options passed to Electron's BrowserWindow constructor
 
 **Signature:**
 
 ```typescript
-windowOptions?: Partial<Electron.BrowserWindowConstructorOptions>;
+windowOptions?: Partial<BrowserWindowConstructorOptions>;
 ```

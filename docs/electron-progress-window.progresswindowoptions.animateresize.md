@@ -4,7 +4,7 @@
 
 ## ProgressWindowOptions.animateResize property
 
-Animate when varying the height/width the BrowserWindow (on Mac)
+Animate window resize (macOS only). Default: false
 
 **Signature:**
 

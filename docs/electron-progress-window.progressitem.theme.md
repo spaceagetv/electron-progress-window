@@ -4,6 +4,8 @@
 
 ## ProgressItem.theme property
 
+Visual theme for the progress bar
+
 **Signature:**
 
 ```typescript

@@ -14,7 +14,7 @@ itemCssMap: {
     readonly progressHeight: "--progress-height";
     readonly progressPadding: "--progress-padding";
     readonly progressBackground: "--progress-background";
-    readonly progressForeground: "--progress-foreground";
+    readonly progressForeground: "--progress-foreground-color";
     readonly itemBackground: "--item-background";
     readonly itemBorderRadius: "--item-border-radius";
     readonly pausedBackground: "--paused-background";

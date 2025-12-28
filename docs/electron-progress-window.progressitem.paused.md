@@ -4,10 +4,12 @@
 
 ## ProgressItem.paused property
 
-Is this progress item paused?
+Is this item currently paused? Setting this emits a 'paused' event.
 
 **Signature:**
 
 ```typescript
-paused: boolean;
+get paused(): boolean;
+
+set paused(value: boolean);
 ```

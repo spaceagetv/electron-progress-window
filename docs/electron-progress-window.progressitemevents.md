@@ -13,15 +13,16 @@ export type ProgressItemEvents = {
     update: () => void;
     complete: () => void;
     remove: () => void;
-    'will-cancel': (event: Event) => void;
+    willCancel: (event: CancelableEvent) => void;
     cancelled: () => void;
-    pause: (isPaused: boolean) => void;
+    paused: (isPaused: boolean) => void;
     hide: () => void;
     show: () => void;
 };
 ```
+**References:** [CancelableEvent](./electron-progress-window.cancelableevent.md)
 
 ## Remarks
 
-Events:<br/> - `update` - Item was updated. listener: `() => void`<br/> - `complete` - Item was completed. listener: `() => void`<br/> - `remove` - Item was removed. listener: `() => void`<br/> - `will-cancel` - Item will cancel. Call event.preventDefault() to stop it. listener: `(event: Event) => void`<br/> - `cancelled` - Item was cancelled. listener: `() => void`<br/> - `pause` - Item was paused. listener: `(isPaused: boolean) => void`<br/> - `hide` - Item is being hidden. listener: `() => void`<br/> - `show` - Item is being shown. listener: `() => void`<br/>
+Events:<br/> - `update` - Item was updated. listener: `() => void`<br/> - `complete` - Item was completed. listener: `() => void`<br/> - `remove` - Item was removed. listener: `() => void`<br/> - `willCancel` - Item will cancel. Call event.preventDefault() to stop it. listener: `(event: CancelableEvent) => void`<br/> - `cancelled` - Item was cancelled. listener: `() => void`<br/> - `paused` - Item pause state changed. listener: `(isPaused: boolean) => void`<br/> - `hide` - Item is being hidden. listener: `() => void`<br/> - `show` - Item is being shown. listener: `() => void`<br/>
 

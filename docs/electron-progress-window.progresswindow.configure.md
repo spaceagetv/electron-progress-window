@@ -27,15 +27,15 @@ void
 
 ```ts
 ProgressWindow.configure({
- variableHeight: true,
- variableWidth: false,
+ autoHeight: true,
+ autoWidth: false,
  closeOnComplete: true,
  itemDefaults: {
-   closeOnComplete: false,
+   autoRemove: false,
  },
  windowOptions: { // these are Electron BrowserWindow options
    width: 300,
-   height: 60, // variableHeight means this will expand as items are added
+   height: 60, // autoHeight means this will expand as items are added
    backgroundColor: '#0f0',
  },
  css: `

@@ -4,7 +4,7 @@
 
 ## ProgressItem.maxValue property
 
-Maximum value
+Maximum value (default: 100)
 
 **Signature:**
 

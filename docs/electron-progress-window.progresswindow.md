@@ -13,9 +13,9 @@ However, you can create multiple instances, if you want to create multiple windo
 **Signature:**
 
 ```typescript
-export declare class ProgressWindow extends EventEmitterAsTypedEmitterProgressWindowInstanceEvents 
+export declare class ProgressWindow extends ProgressWindowInstanceEventsEmitter 
 ```
-**Extends:** EventEmitterAsTypedEmitterProgressWindowInstanceEvents
+**Extends:** ProgressWindowInstanceEventsEmitter
 
 ## Example
 
@@ -23,10 +23,10 @@ export declare class ProgressWindow extends EventEmitterAsTypedEmitterProgressWi
 ```ts
 // configure the default instance
 ProgressWindow.configure({
- variableHeight: true,
- variableWidth: false,
+ autoHeight: true,
+ autoWidth: false,
  closeOnComplete: true,
- focusWhenAddingItem: true,
+ focusOnAdd: true,
  windowOptions: { // these are Electron BrowserWindow options
   width: 300,
   height: 60,
@@ -41,10 +41,12 @@ const item1 = await ProgressWindow.addItem({
 })
 
 setTimeout(() => {
- item1.setProgress(50, { detail: '50% complete' })
+ item1.value = 50
+ item1.detail = '50% complete'
 }, 200)
 setTimeout(() => {
- item1.setProgress(100, { detail: '100% complete' })
+ item1.value = 100
+ item1.detail = '100% complete'
 }, 400)
 
 // once the item is complete, it will be removed from the window
@@ -55,7 +57,7 @@ setTimeout(() => {
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [emitter](./electron-progress-window.progresswindow.emitter.md) | <p><code>static</code></p><p><code>readonly</code></p> | TypedEmitter&lt;[ProgressWindowStaticEvents](./electron-progress-window.progresswindowstaticevents.md)<!-- -->&gt; | Static event emitter for ProgressWindow events. |
+|  [staticEvents](./electron-progress-window.progresswindow.staticevents.md) | <p><code>static</code></p><p><code>readonly</code></p> | TypedEventEmitter&lt;[ProgressWindowStaticEvents](./electron-progress-window.progresswindowstaticevents.md)<!-- -->&gt; | Static event emitter for ProgressWindow class-level events. Use this to listen for window creation/destruction across all instances. |
 
 ## Constructors
 
@@ -70,6 +72,7 @@ setTimeout(() => {
 |  [browserWindow](./electron-progress-window.progresswindow.browserwindow.md) |  | BrowserWindow \| null | The Electron BrowserWindow instance. |
 |  [defaults](./electron-progress-window.progresswindow.defaults.md) | <code>readonly</code> | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | defaults for the current instance |
 |  [defaults](./electron-progress-window.progresswindow.defaults.md) | <p><code>static</code></p><p><code>readonly</code></p> | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | Readonly convenience to see default options for new ProgressWindows. Override these with ProgressWindow.configure(). |
+|  [hasInstance](./electron-progress-window.progresswindow.hasinstance.md) | <p><code>static</code></p><p><code>readonly</code></p> | boolean | Check if there's currently an active instance. |
 |  [instance](./electron-progress-window.progresswindow.instance.md) | <p><code>static</code></p><p><code>readonly</code></p> | [ProgressWindow](./electron-progress-window.progresswindow.md) | Get/create the default ProgressWindow instance. |
 |  [itemDefaults](./electron-progress-window.progresswindow.itemdefaults.md) |  | Partial&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt; | Default values for new ProgressItems added to this ProgressWindow instance. |
 |  [options](./electron-progress-window.progresswindow.options.md) |  | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | The options used to create this ProgressWindow instance. |
@@ -85,11 +88,9 @@ setTimeout(() => {
 |  [cancelAll()](./electron-progress-window.progresswindow.cancelall.md) |  | Cancel all items + trigger the 'cancelled' event on each item. Items will be removed after they are cancelled. |
 |  [close()](./electron-progress-window.progresswindow.close.md) |  | Close the window |
 |  [close()](./electron-progress-window.progresswindow.close.md) | <code>static</code> | Close the default ProgressWindow instance (if open). |
-|  [closeIfEmpty()](./electron-progress-window.progresswindow.closeifempty.md) |  | Close (destroy) the window if there are no items. |
 |  [configure(options)](./electron-progress-window.progresswindow.configure.md) | <code>static</code> | Configure new ProgressWindow instances with these options. |
 |  [create()](./electron-progress-window.progresswindow.create.md) | <code>static</code> | Asynchronously create the ProgressWindow instance |
 |  [destroy()](./electron-progress-window.progresswindow.destroy.md) | <code>static</code> | Destroy the ProgressWindow instance. |
-|  [hideThenCloseIfEmpty()](./electron-progress-window.progresswindow.hidethencloseifempty.md) |  | Hide the window. Then, after a delay, close it if there are no items. |
 |  [removeAll()](./electron-progress-window.progresswindow.removeall.md) |  | Remove all items (without cancelling them) |
 |  [removeItem(id)](./electron-progress-window.progresswindow.removeitem.md) |  | Remove an item from the window |
 |  [whenReady()](./electron-progress-window.progresswindow.whenready.md) |  | A promise that resolves when the window is ready to use. |

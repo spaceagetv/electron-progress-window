@@ -4,7 +4,7 @@
 
 ## ProgressWindowOptions.itemDefaults property
 
-Default options for new ProgressItem
+Default options for new ProgressItem instances
 
 **Signature:**
 

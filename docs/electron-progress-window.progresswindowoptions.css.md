@@ -4,7 +4,7 @@
 
 ## ProgressWindowOptions.css property
 
-Additional CSS for the window
+Additional CSS to inject into the window
 
 **Signature:**
 

@@ -4,7 +4,7 @@
 
 ## ProgressItem.indeterminate property
 
-Indeterminate?
+Is this a indeterminate progress bar (no specific value)?
 
 **Signature:**
 

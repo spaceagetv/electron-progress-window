@@ -16,14 +16,14 @@ export interface ProgressWindowOptions
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [animateResize?](./electron-progress-window.progresswindowoptions.animateresize.md) |  | boolean | _(Optional)_ Animate when varying the height/width the BrowserWindow (on Mac) |
+|  [animateResize?](./electron-progress-window.progresswindowoptions.animateresize.md) |  | boolean | _(Optional)_ Animate window resize (macOS only). Default: false |
+|  [autoHeight?](./electron-progress-window.progresswindowoptions.autoheight.md) |  | boolean | _(Optional)_ Automatically adjust window height as items are added/removed. Default: true |
+|  [autoWidth?](./electron-progress-window.progresswindowoptions.autowidth.md) |  | boolean | _(Optional)_ Automatically adjust window width as needed. Default: false |
 |  [cancelOnClose?](./electron-progress-window.progresswindowoptions.cancelonclose.md) |  | boolean | _(Optional)_ Send 'cancelled' for all current items when closing the window. Default: false |
 |  [closeOnComplete?](./electron-progress-window.progresswindowoptions.closeoncomplete.md) |  | boolean | _(Optional)_ Close window automatically when all items complete. Default: true |
-|  [css?](./electron-progress-window.progresswindowoptions.css.md) |  | string | _(Optional)_ Additional CSS for the window |
-|  [delayBeforeDestroying?](./electron-progress-window.progresswindowoptions.delaybeforedestroying.md) |  | boolean \| number | _(Optional)_ Hide the window for a moment before closing. Window will pop up faster if a subsequent item is added before delay is finished. True/false or number of milliseconds. Defaults to true, which delays for 3000ms. |
-|  [focusWhenAddingItem?](./electron-progress-window.progresswindowoptions.focuswhenaddingitem.md) |  | boolean | _(Optional)_ Focus the window when adding a new item. Default: true |
-|  [itemDefaults?](./electron-progress-window.progresswindowoptions.itemdefaults.md) |  | Partial&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt; | _(Optional)_ Default options for new ProgressItem |
-|  [variableHeight?](./electron-progress-window.progresswindowoptions.variableheight.md) |  | boolean | _(Optional)_ Expand height of window as needed? Default: true. Scroll otherwise. |
-|  [variableWidth?](./electron-progress-window.progresswindowoptions.variablewidth.md) |  | boolean | _(Optional)_ Expand width of window as needed? Default: false |
-|  [windowOptions?](./electron-progress-window.progresswindowoptions.windowoptions.md) |  | Partial&lt;Electron.BrowserWindowConstructorOptions&gt; | _(Optional)_ Options for the BrowserWindow instance |
+|  [css?](./electron-progress-window.progresswindowoptions.css.md) |  | string | _(Optional)_ Additional CSS to inject into the window |
+|  [focusOnAdd?](./electron-progress-window.progresswindowoptions.focusonadd.md) |  | boolean | _(Optional)_ Focus the window when adding a new item. Default: true |
+|  [hideDelay?](./electron-progress-window.progresswindowoptions.hidedelay.md) |  | boolean \| number | _(Optional)_ Delay (in ms) before closing the window after all items complete. This allows the window to reappear quickly if a new item is added. Set to <code>true</code> for default 3000ms, <code>false</code> to close immediately, or a number for custom delay. Default: true (3000ms) |
+|  [itemDefaults?](./electron-progress-window.progresswindowoptions.itemdefaults.md) |  | Partial&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt; | _(Optional)_ Default options for new ProgressItem instances |
+|  [windowOptions?](./electron-progress-window.progresswindowoptions.windowoptions.md) |  | Partial&lt;BrowserWindowConstructorOptions&gt; | _(Optional)_ Options passed to Electron's BrowserWindow constructor |
 

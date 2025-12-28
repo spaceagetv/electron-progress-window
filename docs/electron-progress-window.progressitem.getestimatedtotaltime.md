@@ -4,6 +4,8 @@
 
 ## ProgressItem.getEstimatedTotalTime() method
 
+Get the estimated total time based on current progress
+
 **Signature:**
 
 ```typescript
