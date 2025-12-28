@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/spaceagetv/electron-progress-window/compare/v2.0.0...v2.0.1) (2025-12-28)
+
+
+### Bug Fixes
+
+* package.json url format issue ([c05cede](https://github.com/spaceagetv/electron-progress-window/commit/c05cede0379ab2cc1465453764380f4a3032d5e2))
+
 # [2.0.0](https://github.com/spaceagetv/electron-progress-window/compare/v1.5.1...v2.0.0) (2025-12-27)
 
 
