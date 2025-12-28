@@ -1,3 +1,17 @@
+## [2.1.0](https://github.com/spaceagetv/electron-progress-window/compare/v2.0.1...v2.1.0) (2025-12-28)
+
+### Features
+
+* configure npm trusted publishing with provenance ([417c61c](https://github.com/spaceagetv/electron-progress-window/commit/417c61cdfa5f7b5e8f399a52b7bf5188bf3e97fc))
+
+### Bug Fixes
+
+* configure npm provenance publishing for trusted publishing ([c04976e](https://github.com/spaceagetv/electron-progress-window/commit/c04976e242f3b249256ead8b12f750c8f58f44c9))
+* Playwright E2E tests + code reorg ([f71f9ca](https://github.com/spaceagetv/electron-progress-window/commit/f71f9ca1b0a2296460d7cce61976c79941c934c5))
+* remove registry-url from setup-node for provenance publishing ([82ce016](https://github.com/spaceagetv/electron-progress-window/commit/82ce0165379a7aa6d503c77fc02d237c8ee953a2))
+* update PR workflow to use Node.js 22.x ([868d966](https://github.com/spaceagetv/electron-progress-window/commit/868d9667f411785fdb45de97e1b87b89a9e5d3cc))
+* use manual npm publish with provenance after semantic-release ([c451352](https://github.com/spaceagetv/electron-progress-window/commit/c451352ebf5bd3c781f21fdbb99684aeea1fd130))
+
 ## [2.0.1](https://github.com/spaceagetv/electron-progress-window/compare/v2.0.0...v2.0.1) (2025-12-28)
 
 
