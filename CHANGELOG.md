@@ -1,3 +1,9 @@
+## [2.1.3](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.2...v2.1.3) (2025-12-28)
+
+### Bug Fixes
+
+* add etc/.gitkeep to track etc folder in git ([c80b3d2](https://github.com/spaceagetv/electron-progress-window/commit/c80b3d2a7fa725d3c3499e9fbbe66f67c0573dcc))
+
 ## [2.1.2](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.1...v2.1.2) (2025-12-28)
 
 ### Bug Fixes
