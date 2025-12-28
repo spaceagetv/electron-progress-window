@@ -1,3 +1,9 @@
+## [2.1.1](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.0...v2.1.1) (2025-12-28)
+
+### Bug Fixes
+
+* upgrade npm to 11.5.1+ for trusted publishing OIDC support ([836bc37](https://github.com/spaceagetv/electron-progress-window/commit/836bc374f3c2c718d167f7060ae59753f25623a7))
+
 ## [2.1.0](https://github.com/spaceagetv/electron-progress-window/compare/v2.0.1...v2.1.0) (2025-12-28)
 
 ### Features
