@@ -1,3 +1,9 @@
+## [2.1.2](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.1...v2.1.2) (2025-12-28)
+
+### Bug Fixes
+
+* create etc folder for API extractor reports ([ec1d667](https://github.com/spaceagetv/electron-progress-window/commit/ec1d6677abfb8da529ca8e9753f44159a845a1d9))
+
 ## [2.1.1](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.0...v2.1.1) (2025-12-28)
 
 ### Bug Fixes
