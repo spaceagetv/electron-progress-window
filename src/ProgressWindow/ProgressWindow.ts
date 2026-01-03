@@ -104,6 +104,13 @@ export interface ProgressWindowOptions {
    * Default: true (3000ms)
    */
   hideDelay?: boolean | number
+  /**
+   * Minimum time (in ms) the window must remain visible once shown.
+   * This prevents jarring flashes for quick operations.
+   * Set to `false` to disable, or a number for custom duration.
+   * Default: 3000
+   */
+  minimumDisplayMs?: boolean | number
   /** Send 'cancelled' for all current items when closing the window. Default: false */
   cancelOnClose?: boolean
   /** Focus the window when adding a new item. Default: true */
@@ -276,6 +283,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     autoWidth: false,
     closeOnComplete: true,
     hideDelay: true,
+    minimumDisplayMs: 3000,
     focusOnAdd: true,
     animateResize: false,
     windowOptions: {
@@ -473,6 +481,18 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
 
   #lastContentDimensions = { width: 0, height: 0 }
 
+  /** @internal - Timestamp when window was first shown */
+  #windowShownAt: number | null = null
+
+  /** @internal - Timeout ID for pending hide-then-close operation */
+  #hideDelayTimeout: ReturnType<typeof setTimeout> | null = null
+
+  /** @internal - Whether we're waiting to show the window after renderer confirms */
+  #showPending = false
+
+  /** @internal - Timeout ID for fallback show if renderer doesn't respond */
+  #showFallbackTimeout: ReturnType<typeof setTimeout> | null = null
+
   /** @internal */
   #ready: Promise<ProgressWindow>
 
@@ -563,6 +583,14 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.browserWindow!.on('close', () => {
+      // Clean up any pending timeouts
+      this.#cancelHideDelay()
+      if (this.#showFallbackTimeout !== null) {
+        clearTimeout(this.#showFallbackTimeout)
+        this.#showFallbackTimeout = null
+      }
+      this.#showPending = false
+
       if (this.options.cancelOnClose) {
         this.cancelAll()
       } else {
@@ -652,19 +680,18 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     this.progressItems[item.id] = item
     item.on('show', () => {
       if (!this.browserWindow) return
+
+      // Cancel any pending hide-then-close operation since we have a new item
+      this.#cancelHideDelay()
+
       this.browserWindow.webContents.send(
         'progress-item-add',
         item.transferable()
       )
       this.#setWindowProgress()
-      if (
-        this.options.focusOnAdd ||
-        Object.keys(this.progressItems).length === 1
-      ) {
-        this.browserWindow.show()
-      } else {
-        this.browserWindow.showInactive()
-      }
+
+      // Queue the window show - we'll actually show when renderer confirms via content size update
+      this.#queueWindowShow()
     })
     item.on('hide', () => {
       if (!this.browserWindow) return
@@ -797,6 +824,12 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
         'ProgressWindow.updateContentSize() called without browserWindow instance'
       )
     }
+
+    // Renderer has processed items - if we're waiting to show, now is the time
+    if (this.#showPending) {
+      this.#actuallyShowWindow()
+    }
+
     if (!this.options.autoHeight && !this.options.autoWidth) {
       // we shouldn't be resizing the window
       return
@@ -897,7 +930,9 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     if (this.options.closeOnComplete) {
       const items = Object.values(this.progressItems)
       if (items.every((item) => item.completed)) {
-        if (this.options.hideDelay) {
+        // Use #hideThenCloseIfEmpty if either hideDelay or minimumDisplayMs is set
+        // This ensures we respect minimum display time even when hideDelay is false
+        if (this.options.hideDelay || this.options.minimumDisplayMs) {
           this.#hideThenCloseIfEmpty()
         } else {
           this.close()
@@ -906,28 +941,162 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     }
   }
 
+  /** Cancel any pending hide-then-close timeout */
+  #cancelHideDelay() {
+    if (this.#hideDelayTimeout !== null) {
+      clearTimeout(this.#hideDelayTimeout)
+      this.#hideDelayTimeout = null
+    }
+  }
+
+  /** Queue window show - wait for renderer to confirm content before actually showing */
+  #queueWindowShow() {
+    if (this.#showPending) return // Already queued
+
+    this.#showPending = true
+
+    // Clear any existing fallback timeout
+    if (this.#showFallbackTimeout !== null) {
+      clearTimeout(this.#showFallbackTimeout)
+    }
+
+    // Fallback: show window after 100ms even if renderer doesn't respond
+    // This prevents the window from never appearing if something goes wrong
+    this.#showFallbackTimeout = setTimeout(() => {
+      this.#showFallbackTimeout = null
+      if (this.#showPending) {
+        this.#actuallyShowWindow()
+      }
+    }, 100)
+  }
+
+  /** Actually show the window (called when renderer confirms or fallback timeout fires) */
+  #actuallyShowWindow() {
+    if (!this.#showPending) return
+    if (!this.browserWindow) return
+
+    this.#showPending = false
+
+    // Clear fallback timeout if it's still pending
+    if (this.#showFallbackTimeout !== null) {
+      clearTimeout(this.#showFallbackTimeout)
+      this.#showFallbackTimeout = null
+    }
+
+    // Show with or without focus based on options
+    if (
+      this.options.focusOnAdd ||
+      Object.keys(this.progressItems).length === 1
+    ) {
+      this.browserWindow.show()
+    } else {
+      this.browserWindow.showInactive()
+    }
+
+    // Track when window was first shown for minimum display time
+    if (this.#windowShownAt === null) {
+      this.#windowShownAt = Date.now()
+    }
+  }
+
+  /** Get the minimum display time in ms */
+  #getMinimumDisplayMs(): number {
+    const opt = this.options.minimumDisplayMs
+    if (opt === false) return 0
+    if (typeof opt === 'number') return opt
+    return 3000 // default
+  }
+
+  /** Get the hide delay in ms */
+  #getHideDelayMs(): number {
+    const opt = this.options.hideDelay
+    if (opt === false) return 0
+    if (typeof opt === 'number') return opt
+    return 3000 // default
+  }
+
   /** Hide the window. Then, after a delay, close it if there are no items. */
   async #hideThenCloseIfEmpty() {
-    let delayMs = 3000 // default delay
-    if (typeof this.options.hideDelay === 'number') {
-      delayMs = this.options.hideDelay
+    // istanbul ignore next
+    if (!this.browserWindow) {
+      return
     }
-    // istanbul ignore if
-    if (
-      typeof this.options.hideDelay === 'boolean' &&
-      this.options.hideDelay === false
-    ) {
-      delayMs = 0
+
+    // Cancel any existing hide delay
+    this.#cancelHideDelay()
+
+    const hideDelayMs = this.#getHideDelayMs()
+    const minimumDisplayMs = this.#getMinimumDisplayMs()
+
+    // Calculate how long the window has been shown
+    const shownDuration = this.#windowShownAt
+      ? Date.now() - this.#windowShownAt
+      : 0
+
+    // If minimum display time hasn't elapsed, wait for it first
+    const remainingMinDisplay = Math.max(0, minimumDisplayMs - shownDuration)
+
+    if (remainingMinDisplay > 0) {
+      // Wait for minimum display time before hiding
+      // Note: #hideDelayTimeout is only set to null by #cancelHideDelay(),
+      // not by the timeout callback itself, so we can detect cancellation
+      await new Promise<void>((resolve) => {
+        this.#hideDelayTimeout = setTimeout(resolve, remainingMinDisplay)
+      })
+
+      // Check if we were cancelled during the wait (new item added)
+      // If #hideDelayTimeout is null, it was cancelled via #cancelHideDelay()
+      if (this.#hideDelayTimeout === null) {
+        return
+      }
+      // Clear the completed timeout reference
+      this.#hideDelayTimeout = null
     }
 
     // istanbul ignore next
     if (!this.browserWindow) {
       return
     }
-    this.browserWindow.hide()
-    if (delayMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delayMs))
+
+    // Check if there are now visible items (in case items were added during min display wait)
+    const visibleItems = Object.values(this.progressItems).filter(
+      (item) => item.visible
+    )
+    if (visibleItems.length > 0) {
+      return
     }
+
+    this.browserWindow.hide()
+    this.#windowShownAt = null // Reset for next time window is shown
+
+    if (hideDelayMs > 0) {
+      // Wait for hide delay before closing
+      await new Promise<void>((resolve) => {
+        this.#hideDelayTimeout = setTimeout(resolve, hideDelayMs)
+      })
+
+      // Check if we were cancelled during the wait
+      if (this.#hideDelayTimeout === null) {
+        return
+      }
+      this.#hideDelayTimeout = null
+
+      // istanbul ignore next
+      if (!this.browserWindow) {
+        return
+      }
+
+      // Check if new visible items were added while we waited
+      const newVisibleItems = Object.values(this.progressItems).filter(
+        (item) => item.visible
+      )
+      if (newVisibleItems.length > 0) {
+        // New items were added, don't close - the window should already be visible
+        // from the 'show' event handler
+        return
+      }
+    }
+
     this.#closeIfEmpty()
   }
 

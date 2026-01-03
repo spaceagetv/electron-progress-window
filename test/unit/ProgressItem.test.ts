@@ -515,6 +515,75 @@ describe('ProgressItem', () => {
         expect(progressItem.visible).to.be.true
         expect(showSpy).to.have.been.calledOnce
       })
+
+      it('should cancel delayIndeterminateMs timeout when item is removed', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem({
+          indeterminate: true,
+          delayIndeterminateMs: 100,
+        })
+        progressItem.on('show', showSpy)
+
+        // wait briefly but not long enough for delay
+        await pause(30)
+        expect(progressItem.visible).to.be.false
+        expect(showSpy).to.not.have.been.called
+
+        // remove the item before delay fires
+        progressItem.remove()
+
+        // wait for delay to have fired (if it wasn't cancelled)
+        await pause(150)
+
+        // show should never have been called
+        expect(showSpy).to.not.have.been.called
+        expect(progressItem.visible).to.be.false
+      })
+
+      it('should cancel delayIndeterminateMs timeout when item is cancelled', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem({
+          indeterminate: true,
+          delayIndeterminateMs: 100,
+        })
+        progressItem.on('show', showSpy)
+
+        // wait briefly but not long enough for delay
+        await pause(30)
+        expect(progressItem.visible).to.be.false
+
+        // cancel the item before delay fires
+        progressItem.cancel()
+
+        // wait for delay to have fired (if it wasn't cancelled)
+        await pause(150)
+
+        // show should never have been called
+        expect(showSpy).to.not.have.been.called
+      })
+
+      it('should cancel delayIndeterminateMs timeout when item is completed', async () => {
+        const showSpy = sinon.spy()
+        const progressItem = new ProgressItem({
+          indeterminate: true,
+          delayIndeterminateMs: 100,
+          autoRemove: false, // don't auto-remove so we can check visibility
+        })
+        progressItem.on('show', showSpy)
+
+        // wait briefly but not long enough for delay
+        await pause(30)
+        expect(progressItem.visible).to.be.false
+
+        // complete the item before delay fires
+        progressItem.complete()
+
+        // wait for delay to have fired (if it wasn't cancelled)
+        await pause(150)
+
+        // show should never have been called
+        expect(showSpy).to.not.have.been.called
+      })
     })
   })
 })
