@@ -213,6 +213,9 @@ export class ProgressItem extends ProgressItemEventsEmitter {
   /** Has the item been removed? */
   removed = false
 
+  /** @internal - Timeout for delayed visibility */
+  #visibilityTimeout: ReturnType<typeof setTimeout> | null = null
+
   constructor(options = {} as Partial<ProgressItemOptions>) {
     super()
 
@@ -273,8 +276,9 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     if (this.indeterminate) {
       shouldShow = this.initiallyVisible && this.delayIndeterminateMs <= 0
       if (!shouldShow && this.delayIndeterminateMs > 0) {
-        setTimeout(() => {
-          if (this.inProgress) {
+        this.#visibilityTimeout = setTimeout(() => {
+          this.#visibilityTimeout = null
+          if (this.inProgress && !this.removed) {
             this.show()
           }
         }, this.delayIndeterminateMs)
@@ -285,8 +289,18 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
     if (shouldShow) {
       setImmediate(() => {
-        this.show()
+        if (!this.removed) {
+          this.show()
+        }
       })
+    }
+  }
+
+  /** Clear any pending visibility timeout */
+  private clearVisibilityTimeout() {
+    if (this.#visibilityTimeout !== null) {
+      clearTimeout(this.#visibilityTimeout)
+      this.#visibilityTimeout = null
     }
   }
 
@@ -540,6 +554,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     if (this.completed || this.removed) {
       return
     }
+    this.clearVisibilityTimeout()
     this.#options.value = this.maxValue
     this.#completed = true
     this.emit('complete')
@@ -550,6 +565,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
 
   /** Remove the ProgressItem from the ProgressWindow */
   remove() {
+    this.clearVisibilityTimeout()
     this.removed = true
     this.emit('remove')
   }
@@ -559,6 +575,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
     if (this.cancelled || this.removed) {
       return
     }
+    this.clearVisibilityTimeout()
     const event = new CancelableEvent('willCancel')
     this.emit('willCancel', event)
     if (event.defaultPrevented) {

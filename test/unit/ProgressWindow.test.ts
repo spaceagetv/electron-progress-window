@@ -31,15 +31,21 @@ describe('ProgressWindow', () => {
       })
 
       // emulate the preload script sending ipc 'progress-update-content-size'
-      // when items are added or removed
+      // when items are added or removed, or when delayed items become visible
       const setContentSize = async () => {
         await progressWindow.whenReady()
+        // Small delay to allow item's show event to fire first (via setImmediate)
+        // This emulates the real renderer behavior where content size update
+        // happens after the item is rendered in the DOM
+        await new Promise((resolve) => setTimeout(resolve, 5))
         const browserWindow = progressWindow.browserWindow
         if (!browserWindow) return
-        // emulate the item resizing the window
+        // emulate the item resizing the window - only count VISIBLE items
         const bounds = browserWindow.getBounds()
-        const height =
-          Object.keys(progressWindow.progressItems).length * 60 + 20
+        const visibleItemCount = Object.values(
+          progressWindow.progressItems
+        ).filter((item) => item.visible).length
+        const height = visibleItemCount * 60 + 20
         browserWindow.webContents.ipc.emit(
           'progress-update-content-size',
           null,
@@ -49,7 +55,16 @@ describe('ProgressWindow', () => {
           }
         )
       }
-      progressWindow.on('itemAdded', setContentSize)
+      // Listen for itemAdded to hook into item's 'show' event for delayed items
+      progressWindow.on('itemAdded', (item) => {
+        // For initially visible items, setContentSize will be triggered immediately
+        // For delayed items, we need to trigger when they become visible
+        item.on('show', setContentSize)
+        // Trigger immediately in case item is already visible
+        if (item.visible) {
+          setContentSize()
+        }
+      })
       progressWindow.on('itemRemoved', setContentSize)
     })
   })
@@ -58,11 +73,14 @@ describe('ProgressWindow', () => {
     // reset the defaults
     ProgressWindow.resetConfiguration()
     // set the testing fixtures
+    // Disable minimumDisplayMs by default for faster tests
+    // (tests that need to verify minimumDisplayMs behavior can override)
     ProgressWindow.configure({
       testingFixtures: {
         bw: MockBrowserWindow,
         scr: new MockScreen(),
       },
+      minimumDisplayMs: false,
     })
   })
 
@@ -426,6 +444,7 @@ describe('ProgressWindow', () => {
   it('should reuse existing window if delayClosing is true', async () => {
     ProgressWindow.configure({
       hideDelay: true, // should wait 3000ms before closing
+      minimumDisplayMs: false, // disable minimum display time for this test
     })
     const progressWindow = await ProgressWindow.create()
     expect(progressWindow).to.be.an.instanceof(ProgressWindow)
@@ -480,6 +499,7 @@ describe('ProgressWindow', () => {
   it('should destroy window after delayClosing delay', async () => {
     ProgressWindow.configure({
       hideDelay: 500, // 500ms before closing
+      minimumDisplayMs: false, // disable minimum display time for this test
     })
     const progressWindow = await ProgressWindow.create()
 
@@ -555,24 +575,24 @@ describe('ProgressWindow', () => {
       60 * 1 + 20 + 22,
     ])
     const item2 = await ProgressWindow.addItem()
-    // wait a tick for event emitters to fire
-    await pause(0)
+    // wait for async setContentSize to complete
+    await pause(20)
     expect(item2).to.be.ok
     expect(progressWindow.browserWindow.getSize()).to.deep.equal([
       400,
       60 * 2 + 20 + 22,
     ])
     const item3 = await ProgressWindow.addItem()
-    // wait a tick for event emitters to fire
-    await pause(0)
+    // wait for async setContentSize to complete
+    await pause(20)
     expect(item3).to.be.ok
     expect(progressWindow.browserWindow.getSize()).to.deep.equal([
       400,
       60 * 3 + 20 + 22,
     ])
     item1.cancel()
-    // wait a tick for event emitters to fire
-    await pause(0)
+    // wait for async setContentSize to complete
+    await pause(20)
     expect(progressWindow.browserWindow.getSize()).to.deep.equal([
       400,
       60 * 2 + 20 + 22,
@@ -623,8 +643,8 @@ describe('ProgressWindow', () => {
     if (!progressWindow.browserWindow) throw new Error('no browserWindow')
     // add a single item
     await ProgressWindow.addItem()
-    // wait a tick for event emitters to fire
-    await pause(0)
+    // wait for async setContentSize to complete
+    await pause(20)
 
     // center the window on the display
     const screen = progressWindow.options.testingFixtures?.scr
@@ -649,8 +669,8 @@ describe('ProgressWindow', () => {
 
     // add a second item
     await ProgressWindow.addItem()
-    // wait a tick for event emitters to fire
-    await pause(0)
+    // wait for async setContentSize to complete
+    await pause(20)
     // get the current bounds
     const bounds2 = { ...progressWindow.browserWindow.getBounds() }
     expect(bounds2).to.be.ok
@@ -830,6 +850,8 @@ describe('ProgressWindow', () => {
       })
       progressItem.value = 20
       await withTimeout(updatePromise, 1000, 'update event never fired')
+      // Wait for async setContentSize and #actuallyShowWindow to complete
+      await pause(20)
 
       expect(progressWindow.browserWindow.isVisible()).to.be.true
     })
@@ -870,6 +892,8 @@ describe('ProgressWindow', () => {
       })
       progressItem1.value = 20
       await withTimeout(updatePromise, 1000, 'update event never fired')
+      // Wait for async setContentSize and #actuallyShowWindow to complete
+      await pause(20)
 
       expect(progressWindow.browserWindow.isVisible()).to.be.true
     })
@@ -895,6 +919,8 @@ describe('ProgressWindow', () => {
       })
       progressItem1.value = 10
       await withTimeout(updatePromise1, 1000, 'update event never fired')
+      // Wait for async setContentSize and #actuallyShowWindow to complete
+      await pause(20)
 
       expect(progressWindow.browserWindow.isVisible()).to.be.true
       expect(progressWindow.browserWindow.webContents.send).to.have.been
@@ -928,7 +954,8 @@ describe('ProgressWindow', () => {
       expect(progressWindow.browserWindow.webContents.send).not.to.have.been
         .called
 
-      await pause(60)
+      // Wait for delay to elapse plus async setContentSize and #actuallyShowWindow
+      await pause(80)
 
       expect(progressItem.visible).to.be.true
       expect(progressWindow.browserWindow.isVisible()).to.be.true
@@ -937,6 +964,169 @@ describe('ProgressWindow', () => {
       expect(
         progressWindow.browserWindow.webContents.send
       ).to.have.been.calledWith('progress-item-add')
+    })
+  })
+
+  describe('window timing behavior', () => {
+    it('should wait minimumDisplayMs before hiding window', async () => {
+      ProgressWindow.configure({
+        hideDelay: false, // disable hide delay to isolate minimumDisplayMs
+        minimumDisplayMs: 200,
+      })
+      const progressWindow = await ProgressWindow.create()
+
+      if (!progressWindow.browserWindow)
+        throw new Error('browserWindow is null')
+
+      const windowHideSpy = sinon.spy()
+      progressWindow.browserWindow.on('hide', windowHideSpy)
+
+      const item = await progressWindow.addItem({ title: 'test' })
+
+      // wait for window to show
+      await pause(50)
+      expect(progressWindow.browserWindow.isVisible()).to.be.true
+
+      // complete the item immediately
+      item.complete()
+
+      // wait a bit but less than minimumDisplayMs
+      await pause(50)
+
+      // window should still be visible due to minimumDisplayMs
+      expect(windowHideSpy).to.not.have.been.called
+
+      // wait for minimumDisplayMs to elapse
+      await pause(200)
+
+      // now window should be hidden
+      expect(windowHideSpy).to.have.been.called
+    })
+
+    it('should cancel hide delay when new item is added', async () => {
+      ProgressWindow.configure({
+        hideDelay: 500,
+        minimumDisplayMs: false, // disable minimum display time
+      })
+      const progressWindow = await ProgressWindow.create()
+
+      if (!progressWindow.browserWindow)
+        throw new Error('browserWindow is null')
+
+      const windowClosedSpy = sinon.spy()
+      progressWindow.browserWindow.on('closed', windowClosedSpy)
+
+      const item1 = await progressWindow.addItem({ title: 'item1' })
+
+      // wait for window to show
+      await pause(50)
+      expect(progressWindow.browserWindow.isVisible()).to.be.true
+
+      // complete the first item - this starts the hide delay
+      item1.complete()
+
+      // wait a bit for hide delay to start
+      await pause(100)
+
+      // add a new item during the hide delay
+      const item2 = await progressWindow.addItem({ title: 'item2' })
+
+      // wait for window to show again
+      await pause(50)
+      expect(progressWindow.browserWindow.isVisible()).to.be.true
+
+      // wait past the original hide delay
+      await pause(500)
+
+      // window should still be open because item2 is still in progress
+      expect(windowClosedSpy).to.not.have.been.called
+      expect(item2.inProgress).to.be.true
+    })
+
+    it('should wait for content size update before showing window', async () => {
+      // Create a window and remove the automatic content size emulation
+      // so we can control when content size updates are sent
+      const mockScreen = new MockScreen()
+      const progressWindow = new ProgressWindow({
+        testingFixtures: {
+          bw: MockBrowserWindow,
+          scr: mockScreen,
+        },
+      })
+
+      // Remove listeners added by the before() hook
+      progressWindow.removeAllListeners('itemAdded')
+      progressWindow.removeAllListeners('itemRemoved')
+
+      await progressWindow.whenReady()
+      if (!progressWindow.browserWindow)
+        throw new Error('browserWindow is null')
+
+      const showSpy = sinon.spy()
+      progressWindow.browserWindow.on('show', showSpy)
+
+      // Add item but don't trigger content size update
+      const itemPromise = progressWindow.addItem({ title: 'test' })
+
+      // wait for setImmediate to fire
+      await pause(10)
+
+      // Window should not be visible yet (waiting for content size update)
+      // Note: show is queued but not yet triggered
+      expect(showSpy).to.not.have.been.called
+
+      // Simulate renderer sending content size update
+      progressWindow.browserWindow.webContents.ipc.emit(
+        'progress-update-content-size',
+        null,
+        { width: 300, height: 80 }
+      )
+
+      // Now window should be shown
+      await pause(10)
+      expect(showSpy).to.have.been.called
+
+      await itemPromise
+    })
+
+    it('should show window after fallback timeout if renderer does not respond', async () => {
+      // Create a window and remove the automatic content size emulation
+      // so we can test the fallback behavior
+      const mockScreen = new MockScreen()
+      const progressWindow = new ProgressWindow({
+        testingFixtures: {
+          bw: MockBrowserWindow,
+          scr: mockScreen,
+        },
+      })
+
+      // Remove listeners added by the before() hook
+      progressWindow.removeAllListeners('itemAdded')
+      progressWindow.removeAllListeners('itemRemoved')
+
+      await progressWindow.whenReady()
+      if (!progressWindow.browserWindow)
+        throw new Error('browserWindow is null')
+
+      const showSpy = sinon.spy()
+      progressWindow.browserWindow.on('show', showSpy)
+
+      // Add item but don't trigger content size update
+      const itemPromise = progressWindow.addItem({ title: 'test' })
+
+      // wait for setImmediate to fire
+      await pause(10)
+
+      // Window should not be visible yet
+      expect(showSpy).to.not.have.been.called
+
+      // Wait for fallback timeout (100ms)
+      await pause(120)
+
+      // Window should be shown via fallback
+      expect(showSpy).to.have.been.called
+
+      await itemPromise
     })
   })
 })
