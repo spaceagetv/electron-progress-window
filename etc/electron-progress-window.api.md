@@ -219,6 +219,7 @@ export interface ProgressWindowOptions {
     focusOnAdd?: boolean;
     hideDelay?: boolean | number;
     itemDefaults?: Partial<ProgressItemOptions>;
+    minimumDisplayMs?: boolean | number;
     // @internal
     testingFixtures?: {
         bw?: any;
