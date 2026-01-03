@@ -19,3 +19,6 @@ env.*.sh
 
 # IDE and system files
 .DS_Storeetc/
+
+# Auto Claude data directory
+.auto-claude/
