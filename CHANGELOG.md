@@ -1,3 +1,9 @@
+## [2.1.4](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.3...v2.1.4) (2026-01-03)
+
+### Bug Fixes
+
+* improving timing and visibility quirks ([97a157a](https://github.com/spaceagetv/electron-progress-window/commit/97a157a559f35dd5cd21935eb30577e00b449098))
+
 ## [2.1.3](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.2...v2.1.3) (2025-12-28)
 
 ### Bug Fixes
