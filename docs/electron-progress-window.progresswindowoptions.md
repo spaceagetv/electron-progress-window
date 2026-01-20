@@ -14,17 +14,235 @@ export interface ProgressWindowOptions
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [animateResize?](./electron-progress-window.progresswindowoptions.animateresize.md) |  | boolean | _(Optional)_ Animate window resize (macOS only). Default: false |
-|  [autoHeight?](./electron-progress-window.progresswindowoptions.autoheight.md) |  | boolean | _(Optional)_ Automatically adjust window height as items are added/removed. Default: true |
-|  [autoWidth?](./electron-progress-window.progresswindowoptions.autowidth.md) |  | boolean | _(Optional)_ Automatically adjust window width as needed. Default: false |
-|  [cancelOnClose?](./electron-progress-window.progresswindowoptions.cancelonclose.md) |  | boolean | _(Optional)_ Send 'cancelled' for all current items when closing the window. Default: false |
-|  [closeOnComplete?](./electron-progress-window.progresswindowoptions.closeoncomplete.md) |  | boolean | _(Optional)_ Close window automatically when all items complete. Default: true |
-|  [css?](./electron-progress-window.progresswindowoptions.css.md) |  | string | _(Optional)_ Additional CSS to inject into the window |
-|  [focusOnAdd?](./electron-progress-window.progresswindowoptions.focusonadd.md) |  | boolean | _(Optional)_ Focus the window when adding a new item. Default: true |
-|  [hideDelay?](./electron-progress-window.progresswindowoptions.hidedelay.md) |  | boolean \| number | _(Optional)_ Delay (in ms) before closing the window after all items complete. This allows the window to reappear quickly if a new item is added. Set to <code>true</code> for default 3000ms, <code>false</code> to close immediately, or a number for custom delay. Default: true (3000ms) |
-|  [itemDefaults?](./electron-progress-window.progresswindowoptions.itemdefaults.md) |  | Partial&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt; | _(Optional)_ Default options for new ProgressItem instances |
-|  [minimumDisplayMs?](./electron-progress-window.progresswindowoptions.minimumdisplayms.md) |  | boolean \| number | _(Optional)_ Minimum time (in ms) the window must remain visible once shown. This prevents jarring flashes for quick operations. Set to <code>false</code> to disable, or a number for custom duration. Default: 3000 |
-|  [windowOptions?](./electron-progress-window.progresswindowoptions.windowoptions.md) |  | Partial&lt;BrowserWindowConstructorOptions&gt; | _(Optional)_ Options passed to Electron's BrowserWindow constructor |
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[animateResize?](./electron-progress-window.progresswindowoptions.animateresize.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ Animate window resize (macOS only). Default: false
+
+
+</td></tr>
+<tr><td>
+
+[autoHeight?](./electron-progress-window.progresswindowoptions.autoheight.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ Automatically adjust window height as items are added/removed. Default: true
+
+
+</td></tr>
+<tr><td>
+
+[autoWidth?](./electron-progress-window.progresswindowoptions.autowidth.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ Automatically adjust window width as needed. Default: false
+
+
+</td></tr>
+<tr><td>
+
+[cancelOnClose?](./electron-progress-window.progresswindowoptions.cancelonclose.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ Send 'cancelled' for all current items when closing the window. Default: false
+
+
+</td></tr>
+<tr><td>
+
+[closeOnComplete?](./electron-progress-window.progresswindowoptions.closeoncomplete.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ Close window automatically when all items complete. Default: true
+
+
+</td></tr>
+<tr><td>
+
+[css?](./electron-progress-window.progresswindowoptions.css.md)
+
+
+</td><td>
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+_(Optional)_ Additional CSS to inject into the window
+
+
+</td></tr>
+<tr><td>
+
+[focusOnAdd?](./electron-progress-window.progresswindowoptions.focusonadd.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ Focus the window when adding a new item. Default: true
+
+
+</td></tr>
+<tr><td>
+
+[hideDelay?](./electron-progress-window.progresswindowoptions.hidedelay.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean \| number
+
+
+</td><td>
+
+_(Optional)_ Delay (in ms) before closing the window after all items complete. This allows the window to reappear quickly if a new item is added. Set to `true` for default 3000ms, `false` to close immediately, or a number for custom delay. Default: true (3000ms)
+
+
+</td></tr>
+<tr><td>
+
+[itemDefaults?](./electron-progress-window.progresswindowoptions.itemdefaults.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Partial&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt;
+
+
+</td><td>
+
+_(Optional)_ Default options for new ProgressItem instances
+
+
+</td></tr>
+<tr><td>
+
+[minimumDisplayMs?](./electron-progress-window.progresswindowoptions.minimumdisplayms.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean \| number
+
+
+</td><td>
+
+_(Optional)_ Minimum time (in ms) the window must remain visible once shown. This prevents jarring flashes for quick operations. Set to `false` to disable, or a number for custom duration. Default: 3000
+
+
+</td></tr>
+<tr><td>
+
+[windowOptions?](./electron-progress-window.progresswindowoptions.windowoptions.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Partial&lt;BrowserWindowConstructorOptions&gt;
+
+
+</td><td>
+
+_(Optional)_ Options passed to Electron's BrowserWindow constructor
+
+
+</td></tr>
+</tbody></table>
 

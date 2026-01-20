@@ -14,9 +14,37 @@ static configure(options: ProgressWindowOptions | ProgressWindowOptionsFunction)
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  options | [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) \| [ProgressWindowOptionsFunction](./electron-progress-window.progresswindowoptionsfunction.md) |  |
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+options
+
+
+</td><td>
+
+[ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) \| [ProgressWindowOptionsFunction](./electron-progress-window.progresswindowoptionsfunction.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 
 **Returns:**
 

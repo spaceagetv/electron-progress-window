@@ -6,36 +6,218 @@
 
 ## Classes
 
-|  Class | Description |
-|  --- | --- |
-|  [CancelableEvent](./electron-progress-window.cancelableevent.md) | A simple cancelable event that works in both Node.js and browser environments. Unlike the DOM Event class, this is available in pure Node.js. |
-|  [ProgressItem](./electron-progress-window.progressitem.md) | A progress bar item within a ProgressWindow. There shouldn't be much need to call this directly. Instead use ProgressWindow.addItem() or progressWindowInstance.addItem() |
-|  [ProgressWindow](./electron-progress-window.progresswindow.md) | <p>An Electron Window that displays progress items. This class has a singleton instance that is created on demand, and gets destroyed when the window is closed and/or all of its ProgressItems have completed.</p><p>It has static methods for configuring the window and adding items to the default instance.</p><p>However, you can create multiple instances, if you want to create multiple windows, or if you want to have multiple windows with different configurations.</p> |
+<table><thead><tr><th>
+
+Class
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[CancelableEvent](./electron-progress-window.cancelableevent.md)
+
+
+</td><td>
+
+A simple cancelable event that works in both Node.js and browser environments. Unlike the DOM Event class, this is available in pure Node.js.
+
+
+</td></tr>
+<tr><td>
+
+[ProgressItem](./electron-progress-window.progressitem.md)
+
+
+</td><td>
+
+A progress bar item within a ProgressWindow. There shouldn't be much need to call this directly. Instead use ProgressWindow.addItem() or progressWindowInstance.addItem()
+
+
+</td></tr>
+<tr><td>
+
+[ProgressWindow](./electron-progress-window.progresswindow.md)
+
+
+</td><td>
+
+An Electron Window that displays progress items. This class has a singleton instance that is created on demand, and gets destroyed when the window is closed and/or all of its ProgressItems have completed.
+
+It has static methods for configuring the window and adding items to the default instance.
+
+However, you can create multiple instances, if you want to create multiple windows, or if you want to have multiple windows with different configurations.
+
+
+</td></tr>
+</tbody></table>
 
 ## Interfaces
 
-|  Interface | Description |
-|  --- | --- |
-|  [ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md) | Options for creating/configuring a ProgressWindow |
+<table><thead><tr><th>
+
+Interface
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[ProgressWindowOptions](./electron-progress-window.progresswindowoptions.md)
+
+
+</td><td>
+
+Options for creating/configuring a ProgressWindow
+
+
+</td></tr>
+</tbody></table>
 
 ## Variables
 
-|  Variable | Description |
-|  --- | --- |
-|  [itemCssMap](./electron-progress-window.itemcssmap.md) |  |
+<table><thead><tr><th>
+
+Variable
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[itemCssMap](./electron-progress-window.itemcssmap.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 
 ## Type Aliases
 
-|  Type Alias | Description |
-|  --- | --- |
-|  [ItemCss](./electron-progress-window.itemcss.md) |  |
-|  [ItemCssProperty](./electron-progress-window.itemcssproperty.md) |  |
-|  [ItemCssValue](./electron-progress-window.itemcssvalue.md) |  |
-|  [ProgressItemEvents](./electron-progress-window.progressitemevents.md) | Events emitted by a ProgressItem instance |
-|  [ProgressItemOptions](./electron-progress-window.progressitemoptions.md) | Options for creating a new progress item |
-|  [ProgressItemTheme](./electron-progress-window.progressitemtheme.md) |  |
-|  [ProgressWindowInstanceEvents](./electron-progress-window.progresswindowinstanceevents.md) | Events emitted by ProgressWindow instances |
-|  [ProgressWindowOptionsFunction](./electron-progress-window.progresswindowoptionsfunction.md) | Use a function that returns ProgressWindowOptions to allow for dynamic options. |
-|  [ProgressWindowStaticEvents](./electron-progress-window.progresswindowstaticevents.md) | Events emitted by ProgressWindow.emitter |
-|  [TransferableItemCss](./electron-progress-window.transferableitemcss.md) |  |
+<table><thead><tr><th>
+
+Type Alias
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[ItemCss](./electron-progress-window.itemcss.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[ItemCssProperty](./electron-progress-window.itemcssproperty.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[ItemCssValue](./electron-progress-window.itemcssvalue.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[ProgressItemEvents](./electron-progress-window.progressitemevents.md)
+
+
+</td><td>
+
+Events emitted by a ProgressItem instance
+
+
+</td></tr>
+<tr><td>
+
+[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)
+
+
+</td><td>
+
+Options for creating a new progress item
+
+
+</td></tr>
+<tr><td>
+
+[ProgressItemTheme](./electron-progress-window.progressitemtheme.md)
+
+
+</td><td>
+
+
+</td></tr>
+<tr><td>
+
+[ProgressWindowInstanceEvents](./electron-progress-window.progresswindowinstanceevents.md)
+
+
+</td><td>
+
+Events emitted by ProgressWindow instances
+
+
+</td></tr>
+<tr><td>
+
+[ProgressWindowOptionsFunction](./electron-progress-window.progresswindowoptionsfunction.md)
+
+
+</td><td>
+
+Use a function that returns ProgressWindowOptions to allow for dynamic options.
+
+
+</td></tr>
+<tr><td>
+
+[ProgressWindowStaticEvents](./electron-progress-window.progresswindowstaticevents.md)
+
+
+</td><td>
+
+Events emitted by ProgressWindow.emitter
+
+
+</td></tr>
+<tr><td>
+
+[TransferableItemCss](./electron-progress-window.transferableitemcss.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 

@@ -14,20 +14,134 @@ export declare class CancelableEvent
 
 ## Constructors
 
-|  Constructor | Modifiers | Description |
-|  --- | --- | --- |
-|  [(constructor)(type)](./electron-progress-window.cancelableevent._constructor_.md) |  | Constructs a new instance of the <code>CancelableEvent</code> class |
+<table><thead><tr><th>
+
+Constructor
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[(constructor)(type)](./electron-progress-window.cancelableevent._constructor_.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Constructs a new instance of the `CancelableEvent` class
+
+
+</td></tr>
+</tbody></table>
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [defaultPrevented](./electron-progress-window.cancelableevent.defaultprevented.md) | <code>readonly</code> | boolean | Whether preventDefault() has been called |
-|  [type](./electron-progress-window.cancelableevent.type.md) | <code>readonly</code> | string |  |
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[defaultPrevented](./electron-progress-window.cancelableevent.defaultprevented.md)
+
+
+</td><td>
+
+`readonly`
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+Whether preventDefault() has been called
+
+
+</td></tr>
+<tr><td>
+
+[type](./electron-progress-window.cancelableevent.type.md)
+
+
+</td><td>
+
+`readonly`
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 
 ## Methods
 
-|  Method | Modifiers | Description |
-|  --- | --- | --- |
-|  [preventDefault()](./electron-progress-window.cancelableevent.preventdefault.md) |  | Prevent the default action associated with this event |
+<table><thead><tr><th>
+
+Method
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[preventDefault()](./electron-progress-window.cancelableevent.preventdefault.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Prevent the default action associated with this event
+
+
+</td></tr>
+</tbody></table>
 

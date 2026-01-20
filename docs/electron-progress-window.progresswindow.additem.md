@@ -14,9 +14,39 @@ static addItem(options?: ProgressItem | Partial<ProgressItemOptions>): Promise<P
 
 ## Parameters
 
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  options | [ProgressItem](./electron-progress-window.progressitem.md) \| Partial&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt; | _(Optional)_ options for the new item |
+<table><thead><tr><th>
+
+Parameter
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+options
+
+
+</td><td>
+
+[ProgressItem](./electron-progress-window.progressitem.md) \| Partial&lt;[ProgressItemOptions](./electron-progress-window.progressitemoptions.md)<!-- -->&gt;
+
+
+</td><td>
+
+_(Optional)_ options for the new item
+
+
+</td></tr>
+</tbody></table>
 
 **Returns:**
 

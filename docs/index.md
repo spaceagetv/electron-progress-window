@@ -6,7 +6,25 @@
 
 ## Packages
 
-|  Package | Description |
-|  --- | --- |
-|  [@spaceagetv/electron-progress-window](./electron-progress-window.md) |  |
+<table><thead><tr><th>
+
+Package
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[@spaceagetv/electron-progress-window](./electron-progress-window.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 
