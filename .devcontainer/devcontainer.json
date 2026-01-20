@@ -1,0 +1,56 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
+{
+	"name": "Node.js & TypeScript",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"installZsh": true,
+			"installOhMyZsh": true,
+			"installOhMyZshConfig": true,
+			"upgradePackages": true,
+			"installSsl": true,
+			"username": "automatic",
+			"userUid": "automatic",
+			"userGid": "automatic"
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {
+			"installDirectlyFromGitHubRelease": true,
+			"version": "latest"
+		},
+		"ghcr.io/stu-bell/devcontainer-features/claude-code:0": {}
+	},
+
+	// Mount host's Claude config for authentication
+	"mounts": [
+		"source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind,consistency=cached"
+	],
+
+	// Install Electron dependencies, Xvfb for headless display, and project dependencies
+	"postCreateCommand": "sudo apt-get update && sudo apt-get install -y xvfb libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 xdg-utils libatspi2.0-0 libdrm2 libgbm1 libasound2 --no-install-recommends && npm install && npx playwright install --with-deps",
+
+	// Environment variables for Electron in headless mode
+	"containerEnv": {
+		"DISPLAY": ":99",
+		"ELECTRON_DISABLE_GPU": "true"
+	},
+
+	// Start Xvfb on container start
+	"postStartCommand": "Xvfb :99 -screen 0 1920x1080x24 &",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode",
+				"ms-playwright.playwright",
+				"anthropics.claude-code",
+				"streetsidesoftware.code-spell-checker",
+				"usernamehw.errorlens",
+				"christian-kohler.npm-intellisense"
+			]
+		}
+	}
+}

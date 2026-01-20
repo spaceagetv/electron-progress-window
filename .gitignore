@@ -18,7 +18,12 @@ npmrc
 env.*.sh
 
 # IDE and system files
-.DS_Storeetc/
+.DS_Store
+etc/
 
 # Auto Claude data directory
 .auto-claude/
+
+# Claude Code local settings
+.claude/settings.local.json
+.claude_settings.json
