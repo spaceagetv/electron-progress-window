@@ -2,6 +2,13 @@
 
 Display multiple progress bars in an Electron window.
 
+[![npm version](https://img.shields.io/npm/v/@spaceagetv/electron-progress-window)](https://www.npmjs.com/package/@spaceagetv/electron-progress-window)
+[![npm downloads](https://img.shields.io/npm/dm/@spaceagetv/electron-progress-window)](https://www.npmjs.com/package/@spaceagetv/electron-progress-window)
+[![Tests](https://github.com/spaceagetv/electron-progress-window/actions/workflows/pull_request.yml/badge.svg)](https://github.com/spaceagetv/electron-progress-window/actions/workflows/pull_request.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/node/v/@spaceagetv/electron-progress-window)](https://nodejs.org/)
+
 ## Advantages
 
 * Full Typescript support, including event types

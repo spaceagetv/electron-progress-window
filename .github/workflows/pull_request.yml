@@ -1,7 +1,12 @@
-name: Pull Request Checks
+name: CI
 
 on:
   pull_request:
+    branches:
+      - main
+  # Also run on push to main so the CI badge in the README reflects the
+  # actual test status of the main branch
+  push:
     branches:
       - main
 
