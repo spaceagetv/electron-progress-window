@@ -968,10 +968,16 @@ describe('ProgressWindow', () => {
   })
 
   describe('window timing behavior', () => {
-    it('should wait minimumDisplayMs before hiding window', async () => {
+    it('should wait minimumDisplayMs before hiding window (with autoRemove: false)', async () => {
+      // minimumDisplayMs should apply when items are completed but still visible
+      // (autoRemove: false). When items are removed (autoRemove: true), there's
+      // nothing to display so minimumDisplayMs doesn't apply.
       ProgressWindow.configure({
         hideDelay: false, // disable hide delay to isolate minimumDisplayMs
         minimumDisplayMs: 200,
+        itemDefaults: {
+          autoRemove: false, // keep items visible after completion
+        },
       })
       const progressWindow = await ProgressWindow.create()
 
@@ -987,7 +993,7 @@ describe('ProgressWindow', () => {
       await pause(50)
       expect(progressWindow.browserWindow.isVisible()).to.be.true
 
-      // complete the item immediately
+      // complete the item immediately (but it stays visible due to autoRemove: false)
       item.complete()
 
       // wait a bit but less than minimumDisplayMs
@@ -1041,6 +1047,38 @@ describe('ProgressWindow', () => {
       // window should still be open because item2 is still in progress
       expect(windowClosedSpy).to.not.have.been.called
       expect(item2.inProgress).to.be.true
+    })
+
+    it('should close immediately when last item is removed (not wait for minimumDisplayMs)', async () => {
+      // This test verifies the fix for the bug where an empty titlebar would
+      // linger for several seconds after the last item was removed, because
+      // the code was waiting for minimumDisplayMs even when there were no items
+      ProgressWindow.configure({
+        hideDelay: false,
+        minimumDisplayMs: 3000, // Long delay that we should NOT wait for
+      })
+      const progressWindow = await ProgressWindow.create()
+
+      if (!progressWindow.browserWindow)
+        throw new Error('browserWindow is null')
+
+      const windowClosedSpy = sinon.spy()
+      progressWindow.browserWindow.on('closed', windowClosedSpy)
+
+      const item = await progressWindow.addItem({ title: 'test' })
+
+      // wait for window to show
+      await pause(50)
+      expect(progressWindow.browserWindow.isVisible()).to.be.true
+
+      // complete the item (with autoRemove: true, this removes it)
+      item.complete()
+
+      // wait a small amount - window should close immediately, NOT wait 3000ms
+      await pause(50)
+
+      // window should be closed since there are no items left
+      expect(windowClosedSpy).to.have.been.called
     })
 
     it('should wait for content size update before showing window', async () => {
