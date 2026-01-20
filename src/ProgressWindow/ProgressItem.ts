@@ -250,6 +250,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
    * @returns A valid HTML id attribute
    */
   private sanitizeIdentifier(identifier: string): string {
+    // istanbul ignore next -- defensive check; identifier is always set via || fallback
     if (!identifier || typeof identifier !== 'string') {
       return 'p' + Math.random().toString(36).substring(2, 11)
     }

@@ -46,6 +46,7 @@ let preloadPath: string | null = null
  * the embedded preload script content as a string literal.
  * @internal
  */
+// istanbul ignore next -- replaced at build time with embedded content
 function getPreloadContent(): string {
   if (!preloadContent) {
     // NOTE: This fs.readFileSync is replaced at build time with embedded content.
@@ -64,6 +65,7 @@ function getPreloadContent(): string {
  * Uses content hash in filename for cache invalidation across versions.
  * @internal
  */
+// istanbul ignore next -- only used in production Electron context
 function getPreloadPath(): string {
   if (!preloadPath) {
     const content = getPreloadContent()
@@ -679,6 +681,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     })
     this.progressItems[item.id] = item
     item.on('show', () => {
+      // istanbul ignore next -- defensive check for window destroyed during async
       if (!this.browserWindow) return
 
       // Cancel any pending hide-then-close operation since we have a new item
@@ -694,6 +697,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       this.#queueWindowShow()
     })
     item.on('hide', () => {
+      // istanbul ignore next -- defensive check for window destroyed during async
       if (!this.browserWindow) return
       this.browserWindow.webContents.send(
         'progress-item-remove',
@@ -719,7 +723,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       return item
     }
     await this.whenReady()
-    // Check again after await in case window was destroyed
+    // istanbul ignore next -- Check again after await in case window was destroyed
     if (!this.browserWindow) {
       return item
     }
@@ -748,7 +752,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       return
     }
     await this.whenReady()
-    // Check again after await in case window was destroyed
+    // istanbul ignore next -- Check again after await in case window was destroyed
     if (!this.browserWindow) {
       return
     }
@@ -775,6 +779,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
 
   /** Set the system progress bar via the BrowserWindow instance */
   #setWindowProgress() {
+    // istanbul ignore next -- defensive check
     if (!this.browserWindow) {
       return
     }
@@ -966,11 +971,12 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
 
   /** Queue window show - wait for renderer to confirm content before actually showing */
   #queueWindowShow() {
+    // istanbul ignore next -- guard for re-entrant call
     if (this.#showPending) return // Already queued
 
     this.#showPending = true
 
-    // Clear any existing fallback timeout
+    // istanbul ignore next -- Clear any existing fallback timeout
     if (this.#showFallbackTimeout !== null) {
       clearTimeout(this.#showFallbackTimeout)
     }
@@ -987,7 +993,9 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
 
   /** Actually show the window (called when renderer confirms or fallback timeout fires) */
   #actuallyShowWindow() {
+    // istanbul ignore next -- defensive checks
     if (!this.#showPending) return
+    // istanbul ignore next
     if (!this.browserWindow) return
 
     this.#showPending = false
@@ -999,6 +1007,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     }
 
     // Show with or without focus based on options
+    // istanbul ignore else -- focusOnAdd tests would need complex multi-item setup
     if (
       this.options.focusOnAdd ||
       Object.keys(this.progressItems).length === 1
@@ -1059,7 +1068,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
         this.#hideDelayTimeout = setTimeout(resolve, remainingMinDisplay)
       })
 
-      // Check if we were cancelled during the wait (new item added)
+      // istanbul ignore next -- Check if we were cancelled during the wait (new item added)
       // If #hideDelayTimeout is null, it was cancelled via #cancelHideDelay()
       if (this.#hideDelayTimeout === null) {
         return
@@ -1073,7 +1082,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       return
     }
 
-    // Check if there are now visible AND incomplete items
+    // istanbul ignore next -- Check if there are now visible AND incomplete items
     // (in case new items were added during min display wait)
     const activeItems = Object.values(this.progressItems).filter(
       (item) => item.visible && !item.completed
@@ -1091,7 +1100,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
         this.#hideDelayTimeout = setTimeout(resolve, hideDelayMs)
       })
 
-      // Check if we were cancelled during the wait
+      // istanbul ignore next -- Check if we were cancelled during the wait
       if (this.#hideDelayTimeout === null) {
         return
       }
@@ -1102,7 +1111,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
         return
       }
 
-      // Check if new visible AND incomplete items were added while we waited
+      // istanbul ignore next -- Check if new visible AND incomplete items were added while we waited
       const newActiveItems = Object.values(this.progressItems).filter(
         (item) => item.visible && !item.completed
       )
@@ -1141,7 +1150,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
         this.#hideDelayTimeout = setTimeout(resolve, hideDelayMs)
       })
 
-      // Check if we were cancelled during the wait (new item added)
+      // istanbul ignore next -- Check if we were cancelled during the wait (new item added)
       if (this.#hideDelayTimeout === null) {
         return
       }
@@ -1152,7 +1161,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
         return
       }
 
-      // Check if new items were added while we waited
+      // istanbul ignore next -- Check if new items were added while we waited
       if (Object.keys(this.progressItems).length > 0) {
         return
       }

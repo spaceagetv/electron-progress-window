@@ -1,3 +1,4 @@
+/* istanbul ignore file -- @preserve Renderer script runs in browser context, tested via E2E */
 /**
  * Renderer process code for the ProgressWindow.
  *
