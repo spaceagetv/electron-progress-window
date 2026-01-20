@@ -14,6 +14,7 @@
     "baseUrl": ".",
     "declaration": true,
     "declarationMap": true,
+    "types": ["vitest/globals"],
     "paths": {
       "*": [
         "node_modules/*",

@@ -2,74 +2,70 @@
  * Tests for ProgressItem.ts
  */
 
-import chai, { expect } from 'chai'
+import { vi } from 'vitest'
 import { ProgressItem } from '../../src/index'
-import sinon from 'sinon'
-import sinonChai from 'sinon-chai'
 import { pause } from './pause'
-
-chai.use(sinonChai)
 
 describe('ProgressItem', () => {
   describe('event emitters', () => {
     it('should emit a "update" event on update()', () => {
-      const updateSpy = sinon.spy()
+      const updateSpy = vi.fn()
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
       progressItem.update({ value: 0.1 })
 
-      expect(updateSpy.calledOnce).to.be.true
+      expect(updateSpy).toHaveBeenCalledTimes(1)
     })
 
     it('should emit a "update" event on assignment of "value"', () => {
-      const updateSpy = sinon.spy()
+      const updateSpy = vi.fn()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
       progressItem.value = 0.1
 
-      expect(updateSpy.calledOnce).to.be.true
+      expect(updateSpy).toHaveBeenCalledTimes(1)
     })
 
     it('should emit a "update" event on assignment of "maxValue"', () => {
-      const updateSpy = sinon.spy()
+      const updateSpy = vi.fn()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
       progressItem.maxValue = 0.1
 
-      expect(updateSpy.calledOnce).to.be.true
+      expect(updateSpy).toHaveBeenCalledTimes(1)
     })
 
     it('should emit a "update" event on assignment of "title"', () => {
-      const updateSpy = sinon.spy()
+      const updateSpy = vi.fn()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
       progressItem.title = 'test'
 
-      expect(updateSpy.calledOnce).to.be.true
-      expect(progressItem.title).to.equal('test')
+      expect(updateSpy).toHaveBeenCalledTimes(1)
+      expect(progressItem.title).toBe('test')
     })
 
     it('should emit a "update" event on assignment of "detail"', () => {
-      const updateSpy = sinon.spy()
+      const updateSpy = vi.fn()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
       progressItem.detail = 'test'
 
-      expect(updateSpy.calledOnce).to.be.true
-      expect(progressItem.detail).to.equal('test')
+      expect(updateSpy).toHaveBeenCalledTimes(1)
+      expect(progressItem.detail).toBe('test')
     })
 
     it('should emit a "update" event on assignment of "css"', () => {
-      const updateSpy = sinon.spy()
+      const updateSpy = vi.fn()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
@@ -78,100 +74,100 @@ describe('ProgressItem', () => {
         errorBackground: 'red',
       }
 
-      expect(updateSpy.calledOnce).to.be.true
-      expect(progressItem.cssVars).to.deep.equal({
+      expect(updateSpy).toHaveBeenCalledTimes(1)
+      expect(progressItem.cssVars).toEqual({
         errorBackground: 'red',
       })
-      expect(progressItem.cssTransferable).to.deep.equal([
+      expect(progressItem.cssTransferable).toEqual([
         ['--error-background', 'red'],
       ])
     })
 
     it('should emit a "update" event on assignment of "theme"', () => {
-      const updateSpy = sinon.spy()
+      const updateSpy = vi.fn()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
       progressItem.theme = 'none'
 
-      expect(updateSpy.calledOnce).to.be.true
-      expect(progressItem.theme).to.equal('none')
+      expect(updateSpy).toHaveBeenCalledTimes(1)
+      expect(progressItem.theme).toBe('none')
     })
 
     it('should emit a "update" event on assignment of "indeterminate"', () => {
-      const updateSpy = sinon.spy()
+      const updateSpy = vi.fn()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
       progressItem.indeterminate = true
 
-      expect(updateSpy.calledOnce).to.be.true
+      expect(updateSpy).toHaveBeenCalledTimes(1)
     })
 
     it('should emit a "update" event on assignment of "cancellable"', () => {
-      const updateSpy = sinon.spy()
+      const updateSpy = vi.fn()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
       progressItem.cancellable = false
 
-      expect(updateSpy.calledOnce).to.be.true
-      expect(progressItem.cancellable).to.be.false
+      expect(updateSpy).toHaveBeenCalledTimes(1)
+      expect(progressItem.cancellable).toBe(false)
     })
 
     it('should emit a "update" event on assignment of "pauseable"', () => {
-      const updateSpy = sinon.spy()
+      const updateSpy = vi.fn()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
       progressItem.pauseable = true
 
-      expect(updateSpy.calledOnce).to.be.true
-      expect(progressItem.pauseable).to.be.true
+      expect(updateSpy).toHaveBeenCalledTimes(1)
+      expect(progressItem.pauseable).toBe(true)
     })
 
     it('should emit a "update" event on assignment of "error"', () => {
-      const updateSpy = sinon.spy()
+      const updateSpy = vi.fn()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
       progressItem.error = true
 
-      expect(updateSpy.calledOnce).to.be.true
-      expect(progressItem.error).to.be.true
+      expect(updateSpy).toHaveBeenCalledTimes(1)
+      expect(progressItem.error).toBe(true)
     })
 
     it('should emit a "update" event on assignment of "completeAutomatically"', () => {
-      const updateSpy = sinon.spy()
+      const updateSpy = vi.fn()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
       progressItem.completeAutomatically = false
 
-      expect(updateSpy.calledOnce).to.be.true
-      expect(progressItem.completeAutomatically).to.be.false
+      expect(updateSpy).toHaveBeenCalledTimes(1)
+      expect(progressItem.completeAutomatically).toBe(false)
     })
 
     it('should emit a "update" event on assignment of "autoRemove"', () => {
-      const updateSpy = sinon.spy()
+      const updateSpy = vi.fn()
 
       const progressItem = new ProgressItem()
       progressItem.on('update', updateSpy)
 
       progressItem.autoRemove = false
 
-      expect(updateSpy.calledOnce).to.be.true
-      expect(progressItem.autoRemove).to.be.false
+      expect(updateSpy).toHaveBeenCalledTimes(1)
+      expect(progressItem.autoRemove).toBe(false)
     })
 
     it('should NOT emit a "update" event on assignment of current options', () => {
-      const updateSpy = sinon.spy()
+      const updateSpy = vi.fn()
 
       const progressItem = new ProgressItem({
         value: 0.1,
@@ -207,107 +203,107 @@ describe('ProgressItem', () => {
       progressItem.completeAutomatically = false
       progressItem.autoRemove = false
 
-      expect(updateSpy.called).to.be.false
+      expect(updateSpy).not.toHaveBeenCalled()
     })
 
     // paused event
     it('should emit a "paused" event when paused', () => {
-      const pauseSpy = sinon.spy()
+      const pauseSpy = vi.fn()
       const progressItem = new ProgressItem()
       progressItem.on('paused', pauseSpy)
 
       progressItem.paused = true
 
-      expect(pauseSpy).to.have.been.calledOnce
-      expect(pauseSpy).to.have.been.calledWith(true)
+      expect(pauseSpy).toHaveBeenCalledTimes(1)
+      expect(pauseSpy).toHaveBeenCalledWith(true)
 
       progressItem.paused = false
-      expect(pauseSpy).to.have.been.calledTwice
-      expect(pauseSpy).to.have.been.calledWith(false)
+      expect(pauseSpy).toHaveBeenCalledTimes(2)
+      expect(pauseSpy).toHaveBeenCalledWith(false)
     })
 
     // willCancel event
     it('should emit a "willCancel" event when cancelled', () => {
-      const willCancelSpy = sinon.spy()
+      const willCancelSpy = vi.fn()
       const progressItem = new ProgressItem()
       progressItem.on('willCancel', willCancelSpy)
 
       progressItem.cancel()
 
-      expect(willCancelSpy).to.have.been.calledOnce
+      expect(willCancelSpy).toHaveBeenCalledTimes(1)
     })
 
     // willCancel with preventDefault
     it('should not emit a "cancelled" event when cancelled with preventDefault', () => {
-      const cancelledSpy = sinon.spy()
+      const cancelledSpy = vi.fn()
       const progressItem = new ProgressItem()
       progressItem.on('cancelled', cancelledSpy)
       progressItem.on('willCancel', (e) => e.preventDefault())
 
       progressItem.cancel()
 
-      expect(cancelledSpy).to.not.have.been.called
+      expect(cancelledSpy).not.toHaveBeenCalled()
     })
 
     // cancelled event
     it('should emit a "cancelled" event when cancelled', () => {
-      const cancelledSpy = sinon.spy()
+      const cancelledSpy = vi.fn()
       const progressItem = new ProgressItem()
       progressItem.on('cancelled', cancelledSpy)
 
       progressItem.cancel()
 
-      expect(cancelledSpy).to.have.been.calledOnce
+      expect(cancelledSpy).toHaveBeenCalledTimes(1)
     })
 
     // remove event
     it('should emit a "remove" event when removed', () => {
-      const removeSpy = sinon.spy()
+      const removeSpy = vi.fn()
       const progressItem = new ProgressItem()
       progressItem.on('remove', removeSpy)
 
       progressItem.remove()
 
-      expect(removeSpy).to.have.been.calledOnce
+      expect(removeSpy).toHaveBeenCalledTimes(1)
     })
 
     // complete event
     it('should emit a "complete" event when completed', () => {
-      const completeSpy = sinon.spy()
+      const completeSpy = vi.fn()
       const progressItem = new ProgressItem()
       progressItem.on('complete', completeSpy)
 
       progressItem.complete()
 
-      expect(completeSpy).to.have.been.calledOnce
+      expect(completeSpy).toHaveBeenCalledTimes(1)
     })
 
     // emit complete event when progress is 100
     it('should emit a "complete" event when progress is 100', () => {
-      const completeSpy = sinon.spy()
+      const completeSpy = vi.fn()
       const progressItem = new ProgressItem()
       progressItem.on('complete', completeSpy)
 
       progressItem.value = 100
 
-      expect(completeSpy).to.have.been.calledOnce
+      expect(completeSpy).toHaveBeenCalledTimes(1)
     })
 
     describe('show/hide', () => {
       it('should emit "show" when initiallyVisible is true', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem()
         progressItem.on('show', showSpy)
 
         // wait for events to fire
         await pause(20)
 
-        expect(showSpy).to.have.been.calledOnce
-        expect(progressItem.visible).to.be.true
+        expect(showSpy).toHaveBeenCalledTimes(1)
+        expect(progressItem.visible).toBe(true)
       })
 
       it('should not emit "show" immediately if initiallyVisible is false', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem({
           initiallyVisible: false,
         })
@@ -316,12 +312,12 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(1)
 
-        expect(showSpy).to.not.have.been.called
-        expect(progressItem.visible).to.be.false
+        expect(showSpy).not.toHaveBeenCalled()
+        expect(progressItem.visible).toBe(false)
       })
 
       it('should emit "show" when show() is called', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem({
           initiallyVisible: false,
         })
@@ -329,39 +325,39 @@ describe('ProgressItem', () => {
 
         await pause(1)
 
-        expect(progressItem.visible).to.be.false
-        expect(showSpy).to.not.have.been.called
+        expect(progressItem.visible).toBe(false)
+        expect(showSpy).not.toHaveBeenCalled()
 
         progressItem.show()
 
         // wait for events to fire
         await pause(1)
 
-        expect(progressItem.visible).to.be.true
-        expect(showSpy).to.have.been.calledOnce
+        expect(progressItem.visible).toBe(true)
+        expect(showSpy).toHaveBeenCalledTimes(1)
       })
 
       it('should emit "hide" when hide() is called', async () => {
-        const hideSpy = sinon.spy()
+        const hideSpy = vi.fn()
         const progressItem = new ProgressItem()
         progressItem.on('hide', hideSpy)
 
         await pause(10)
 
-        expect(progressItem.visible).to.be.true
-        expect(hideSpy).to.not.have.been.called
+        expect(progressItem.visible).toBe(true)
+        expect(hideSpy).not.toHaveBeenCalled()
 
         progressItem.hide()
 
         // wait for events to fire
         await pause(1)
 
-        expect(hideSpy).to.have.been.calledOnce
-        expect(progressItem.visible).to.be.false
+        expect(hideSpy).toHaveBeenCalledTimes(1)
+        expect(progressItem.visible).toBe(false)
       })
 
       it('should emit "show" after a delay when delayIndeterminateMs has value', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem({
           indeterminate: true,
           delayIndeterminateMs: 100,
@@ -371,18 +367,18 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(1)
 
-        expect(progressItem.visible).to.be.false
-        expect(showSpy).to.not.have.been.called
+        expect(progressItem.visible).toBe(false)
+        expect(showSpy).not.toHaveBeenCalled()
 
         // wait for delayIndeterminateMs
         await pause(150)
 
-        expect(progressItem.visible).to.be.true
-        expect(showSpy).to.have.been.calledOnce
+        expect(progressItem.visible).toBe(true)
+        expect(showSpy).toHaveBeenCalledTimes(1)
       })
 
       it('should emit "show" immediately when delayIndeterminateMs is 0', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem({
           indeterminate: true,
           delayIndeterminateMs: 0,
@@ -392,12 +388,12 @@ describe('ProgressItem', () => {
         // wait for setImmediate to fire
         await pause(20)
 
-        expect(progressItem.visible).to.be.true
-        expect(showSpy).to.have.been.calledOnce
+        expect(progressItem.visible).toBe(true)
+        expect(showSpy).toHaveBeenCalledTimes(1)
       })
 
       it('should emit "show" immediately when delayIndeterminateMs is negative', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem({
           indeterminate: true,
           delayIndeterminateMs: -100,
@@ -407,12 +403,12 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(20)
 
-        expect(progressItem.visible).to.be.true
-        expect(showSpy).to.have.been.calledOnce
+        expect(progressItem.visible).toBe(true)
+        expect(showSpy).toHaveBeenCalledTimes(1)
       })
 
       it('should emit "show" immediately when delayIndeterminateMs is undefined', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem({
           indeterminate: true,
           delayIndeterminateMs: undefined,
@@ -422,12 +418,12 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(20)
 
-        expect(progressItem.visible).to.be.true
-        expect(showSpy).to.have.been.calledOnce
+        expect(progressItem.visible).toBe(true)
+        expect(showSpy).toHaveBeenCalledTimes(1)
       })
 
       it('should emit "show" after a delay when showWhenEstimateExceedsMs has value', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem({
           showWhenEstimateExceedsMs: 200,
         })
@@ -436,22 +432,22 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(1)
 
-        expect(progressItem.visible).to.be.false
-        expect(showSpy).to.not.have.been.called
-        expect(progressItem.getEstimatedTotalTime()).to.be.undefined
+        expect(progressItem.visible).toBe(false)
+        expect(showSpy).not.toHaveBeenCalled()
+        expect(progressItem.getEstimatedTotalTime()).toBeUndefined()
 
         // wait for showWhenEstimateExceedsMs
         await pause(100)
         progressItem.value = 49
-        expect(progressItem.getEstimatedTotalTime()).to.be.greaterThan(200)
+        expect(progressItem.getEstimatedTotalTime()).toBeGreaterThan(200)
         await pause(1)
 
-        expect(showSpy).to.have.been.calledOnce
-        expect(progressItem.visible).to.be.true
+        expect(showSpy).toHaveBeenCalledTimes(1)
+        expect(progressItem.visible).toBe(true)
       })
 
       it('should not emit "show" when estimated time exceeds showWhenEstimateExceedsMs', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem({
           showWhenEstimateExceedsMs: 2000,
         })
@@ -460,22 +456,22 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(1)
 
-        expect(progressItem.visible).to.be.false
-        expect(showSpy).to.not.have.been.called
-        expect(progressItem.getEstimatedTotalTime()).to.be.undefined
+        expect(progressItem.visible).toBe(false)
+        expect(showSpy).not.toHaveBeenCalled()
+        expect(progressItem.getEstimatedTotalTime()).toBeUndefined()
 
         // wait for showWhenEstimateExceedsMs
         await pause(100)
         progressItem.value = 49
-        expect(progressItem.getEstimatedTotalTime()).to.be.lessThan(2000)
+        expect(progressItem.getEstimatedTotalTime()).toBeLessThan(2000)
         await pause(1)
 
-        expect(showSpy).to.not.have.been.called
-        expect(progressItem.visible).to.be.false
+        expect(showSpy).not.toHaveBeenCalled()
+        expect(progressItem.visible).toBe(false)
       })
 
       it('should emit "show" immediately when showWhenEstimateExceedsMs is 0', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem({
           showWhenEstimateExceedsMs: 0,
         })
@@ -484,12 +480,12 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(10)
 
-        expect(progressItem.visible).to.be.true
-        expect(showSpy).to.have.been.calledOnce
+        expect(progressItem.visible).toBe(true)
+        expect(showSpy).toHaveBeenCalledTimes(1)
       })
 
       it('should emit "show" immediately when showWhenEstimateExceedsMs is negative', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem({
           showWhenEstimateExceedsMs: -100,
         })
@@ -498,12 +494,12 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(10)
 
-        expect(progressItem.visible).to.be.true
-        expect(showSpy).to.have.been.calledOnce
+        expect(progressItem.visible).toBe(true)
+        expect(showSpy).toHaveBeenCalledTimes(1)
       })
 
       it('should emit "show" immediately when showWhenEstimateExceedsMs is undefined', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem({
           showWhenEstimateExceedsMs: undefined,
         })
@@ -512,12 +508,12 @@ describe('ProgressItem', () => {
         // wait for events to fire
         await pause(10)
 
-        expect(progressItem.visible).to.be.true
-        expect(showSpy).to.have.been.calledOnce
+        expect(progressItem.visible).toBe(true)
+        expect(showSpy).toHaveBeenCalledTimes(1)
       })
 
       it('should cancel delayIndeterminateMs timeout when item is removed', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem({
           indeterminate: true,
           delayIndeterminateMs: 100,
@@ -526,8 +522,8 @@ describe('ProgressItem', () => {
 
         // wait briefly but not long enough for delay
         await pause(30)
-        expect(progressItem.visible).to.be.false
-        expect(showSpy).to.not.have.been.called
+        expect(progressItem.visible).toBe(false)
+        expect(showSpy).not.toHaveBeenCalled()
 
         // remove the item before delay fires
         progressItem.remove()
@@ -536,12 +532,12 @@ describe('ProgressItem', () => {
         await pause(150)
 
         // show should never have been called
-        expect(showSpy).to.not.have.been.called
-        expect(progressItem.visible).to.be.false
+        expect(showSpy).not.toHaveBeenCalled()
+        expect(progressItem.visible).toBe(false)
       })
 
       it('should cancel delayIndeterminateMs timeout when item is cancelled', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem({
           indeterminate: true,
           delayIndeterminateMs: 100,
@@ -550,7 +546,7 @@ describe('ProgressItem', () => {
 
         // wait briefly but not long enough for delay
         await pause(30)
-        expect(progressItem.visible).to.be.false
+        expect(progressItem.visible).toBe(false)
 
         // cancel the item before delay fires
         progressItem.cancel()
@@ -559,11 +555,11 @@ describe('ProgressItem', () => {
         await pause(150)
 
         // show should never have been called
-        expect(showSpy).to.not.have.been.called
+        expect(showSpy).not.toHaveBeenCalled()
       })
 
       it('should cancel delayIndeterminateMs timeout when item is completed', async () => {
-        const showSpy = sinon.spy()
+        const showSpy = vi.fn()
         const progressItem = new ProgressItem({
           indeterminate: true,
           delayIndeterminateMs: 100,
@@ -573,7 +569,7 @@ describe('ProgressItem', () => {
 
         // wait briefly but not long enough for delay
         await pause(30)
-        expect(progressItem.visible).to.be.false
+        expect(progressItem.visible).toBe(false)
 
         // complete the item before delay fires
         progressItem.complete()
@@ -582,7 +578,7 @@ describe('ProgressItem', () => {
         await pause(150)
 
         // show should never have been called
-        expect(showSpy).to.not.have.been.called
+        expect(showSpy).not.toHaveBeenCalled()
       })
     })
   })

@@ -716,11 +716,13 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
   async #updateItem(item: ProgressItem) {
     // istanbul ignore next
     if (!this.browserWindow) {
-      throw new Error(
-        'ProgressWindow.updateItem() called without window instance'
-      )
+      return item
     }
     await this.whenReady()
+    // Check again after await in case window was destroyed
+    if (!this.browserWindow) {
+      return item
+    }
     this.browserWindow.webContents.send(
       'progress-item-update',
       item.transferable()
@@ -737,18 +739,20 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
    * @returns - resolves when the item has been removed
    */
   async removeItem(id: string) {
-    // istanbul ignore next
-    if (!this.browserWindow) {
-      throw new Error(
-        'ProgressWindow.removeItem() called without window instance'
-      )
-    }
     const item = this.progressItems[id]
     if (!item) return
     item.removeAllListeners()
     delete this.progressItems[id]
+    // istanbul ignore next
+    if (!this.browserWindow) {
+      return
+    }
     await this.whenReady()
-    this.browserWindow?.webContents.send('progress-item-remove', id)
+    // Check again after await in case window was destroyed
+    if (!this.browserWindow) {
+      return
+    }
+    this.browserWindow.webContents.send('progress-item-remove', id)
     this.emit('itemRemoved', id)
     this.#setWindowProgress()
     this.#maybeCloseWindow()
@@ -772,9 +776,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
   /** Set the system progress bar via the BrowserWindow instance */
   #setWindowProgress() {
     if (!this.browserWindow) {
-      throw new Error(
-        'ProgressWindow.setWindowProgress() called before window was created'
-      )
+      return
     }
     const items = Object.values(this.progressItems)
 
