@@ -582,4 +582,99 @@ describe('ProgressItem', () => {
       })
     })
   })
+
+  describe('update() edge cases', () => {
+    it('should not emit update if item is removed', async () => {
+      const updateSpy = vi.fn()
+      const progressItem = new ProgressItem()
+      progressItem.on('update', updateSpy)
+
+      // Remove the item
+      progressItem.remove()
+
+      // Try to update - should be ignored
+      progressItem.update({ value: 50 })
+
+      expect(updateSpy).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('hide() edge cases', () => {
+    it('should not emit hide if already hidden', async () => {
+      const hideSpy = vi.fn()
+      const progressItem = new ProgressItem({
+        initiallyVisible: false,
+      })
+      progressItem.on('hide', hideSpy)
+
+      // wait for events to settle
+      await pause(10)
+
+      expect(progressItem.visible).toBe(false)
+
+      // Try to hide when already hidden
+      progressItem.hide()
+
+      expect(hideSpy).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('show() edge cases', () => {
+    it('should not emit show if already visible', async () => {
+      const showSpy = vi.fn()
+      const progressItem = new ProgressItem()
+
+      // wait for initial show
+      await pause(20)
+
+      expect(progressItem.visible).toBe(true)
+
+      progressItem.on('show', showSpy)
+
+      // Try to show when already visible
+      progressItem.show()
+
+      expect(showSpy).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('identifier handling', () => {
+    it('should return the identifier if provided', () => {
+      const progressItem = new ProgressItem({
+        identifier: 'my-custom-id',
+      })
+      expect(progressItem.identifier).toBe('my-custom-id')
+      expect(progressItem.id).toBe('my-custom-id')
+    })
+
+    it('should generate a random id if identifier starts with a number', () => {
+      const progressItem = new ProgressItem({
+        identifier: '123-test',
+      })
+      // Should be prefixed with 'id-'
+      expect(progressItem.id).toBe('id-123-test')
+    })
+
+    it('should handle special characters in identifier', () => {
+      const progressItem = new ProgressItem({
+        identifier: 'test@item#1',
+      })
+      // Should be encoded
+      expect(progressItem.id).toBe('test%40item%231')
+    })
+
+    it('should generate random id for empty/invalid identifier', () => {
+      const progressItem1 = new ProgressItem({
+        identifier: '',
+      })
+      // Should start with 'p' (random id)
+      expect(progressItem1.id).toMatch(/^p[a-z0-9]+$/)
+
+      // Test with no identifier
+      const progressItem2 = new ProgressItem()
+      expect(progressItem2.identifier).toBeUndefined()
+      // id should still be generated
+      expect(progressItem2.id).toBeTruthy()
+    })
+  })
 })

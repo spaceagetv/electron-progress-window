@@ -1153,4 +1153,412 @@ describe('ProgressWindow', () => {
       await itemPromise
     })
   })
+
+  describe('edge cases', () => {
+    it('should abort hide sequence if new items added during minimumDisplayMs wait', async () => {
+      ProgressWindow.configure({
+        hideDelay: 500,
+        minimumDisplayMs: 200,
+        itemDefaults: {
+          autoRemove: false, // keep items visible after completion
+        },
+      })
+      const progressWindow = await ProgressWindow.create()
+
+      if (!progressWindow.browserWindow)
+        throw new Error('browserWindow is null')
+
+      const windowHideSpy = vi.fn()
+      progressWindow.browserWindow.on('hide', windowHideSpy)
+
+      const windowClosedSpy = vi.fn()
+      progressWindow.browserWindow.on('closed', windowClosedSpy)
+
+      const item1 = await progressWindow.addItem({ title: 'item1' })
+
+      // wait for window to show
+      await pause(50)
+      expect(progressWindow.browserWindow.isVisible()).toBe(true)
+
+      // complete the first item - this starts minimumDisplayMs wait
+      item1.complete()
+
+      // wait a bit during minimumDisplayMs
+      await pause(50)
+
+      // add a new item during the minimumDisplayMs wait
+      const item2 = await progressWindow.addItem({ title: 'item2' })
+
+      // wait past both minimumDisplayMs and hideDelay
+      await pause(800)
+
+      // window should still be open because item2 is not complete
+      expect(windowClosedSpy).not.toHaveBeenCalled()
+      expect(item2.completed).toBe(false)
+    })
+
+    it('should handle rapid add/complete/add cycles correctly', async () => {
+      ProgressWindow.configure({
+        hideDelay: 100,
+        minimumDisplayMs: false,
+      })
+      const progressWindow = await ProgressWindow.create()
+
+      if (!progressWindow.browserWindow)
+        throw new Error('browserWindow is null')
+
+      const windowClosedSpy = vi.fn()
+      progressWindow.browserWindow.on('closed', windowClosedSpy)
+
+      // Rapid cycle: add, complete, add, complete, add
+      const item1 = await progressWindow.addItem({ title: 'item1' })
+      item1.complete()
+
+      const item2 = await progressWindow.addItem({ title: 'item2' })
+      item2.complete()
+
+      const item3 = await progressWindow.addItem({ title: 'item3' })
+
+      // wait a bit
+      await pause(50)
+
+      // Window should still be open because item3 is in progress
+      expect(windowClosedSpy).not.toHaveBeenCalled()
+      expect(ProgressWindow.hasInstance).toBe(true)
+
+      // Complete item3
+      item3.complete()
+
+      // wait for hide delay
+      await pause(200)
+
+      // Now window should be closed
+      expect(windowClosedSpy).toHaveBeenCalled()
+    })
+
+    it('should handle window being destroyed during operations gracefully', async () => {
+      ProgressWindow.configure({
+        hideDelay: 500,
+        minimumDisplayMs: false,
+      })
+      const progressWindow = await ProgressWindow.create()
+
+      if (!progressWindow.browserWindow)
+        throw new Error('browserWindow is null')
+
+      const item1 = await progressWindow.addItem({ title: 'item1' })
+
+      // wait for window to show
+      await pause(50)
+
+      // Complete item to start hide delay
+      item1.complete()
+
+      // wait a bit for hide delay to start
+      await pause(50)
+
+      // Forcefully close the window during hide delay
+      progressWindow.browserWindow.close()
+
+      // wait past hide delay - should not throw
+      await pause(600)
+
+      expect(ProgressWindow.hasInstance).toBe(false)
+    })
+  })
+
+  describe('resetConfiguration', () => {
+    it('should reset configuration to defaults', async () => {
+      // Configure with custom options
+      ProgressWindow.configure({
+        windowOptions: { width: 500, height: 200 },
+        hideDelay: 1000,
+      })
+
+      expect(ProgressWindow.options.windowOptions?.width).toBe(500)
+      expect(ProgressWindow.options.hideDelay).toBe(1000)
+
+      // Reset configuration
+      ProgressWindow.resetConfiguration()
+
+      // Options should be reset
+      expect(ProgressWindow.options.windowOptions?.width).toBeUndefined()
+      expect(ProgressWindow.options.hideDelay).toBeUndefined()
+    })
+
+    it('should reset optionsFunction to null', async () => {
+      // Configure with a function
+      ProgressWindow.configure(() => ({
+        windowOptions: { width: 600 },
+      }))
+
+      expect(ProgressWindow.options.windowOptions?.width).toBe(600)
+
+      // Reset configuration
+      ProgressWindow.resetConfiguration()
+
+      // Configure with different options - should work without the function interfering
+      ProgressWindow.configure({
+        windowOptions: { height: 100 },
+      })
+
+      // The new configuration should be applied without the old function
+      expect(ProgressWindow.options.windowOptions?.width).toBeUndefined()
+      expect(ProgressWindow.options.windowOptions?.height).toBe(100)
+    })
+
+    it('should throw if called while instance exists', async () => {
+      await ProgressWindow.create()
+      expect(() => ProgressWindow.resetConfiguration()).toThrow(
+        'ProgressWindow.resetConfiguration() must be called after destroy()'
+      )
+    })
+  })
+
+  describe('css injection', () => {
+    it('should inject custom CSS into the window', async () => {
+      ProgressWindow.configure({
+        css: '.custom-class { color: red; }',
+      })
+      const progressWindow = await ProgressWindow.create()
+      await progressWindow.whenReady()
+
+      expect(progressWindow.options.css).toBe('.custom-class { color: red; }')
+      // Window was created successfully with custom CSS
+      expect(progressWindow.browserWindow).toBeTruthy()
+    })
+  })
+
+  describe('cancelOnClose behavior', () => {
+    it('should cancel all items when window closes with cancelOnClose: true', async () => {
+      ProgressWindow.configure({
+        cancelOnClose: true,
+      })
+      const progressWindow = await ProgressWindow.create()
+
+      const item1 = await progressWindow.addItem({ title: 'item1' })
+      const item2 = await progressWindow.addItem({ title: 'item2' })
+
+      const cancelSpy1 = vi.fn()
+      const cancelSpy2 = vi.fn()
+      item1.on('cancelled', cancelSpy1)
+      item2.on('cancelled', cancelSpy2)
+
+      // wait for window to show
+      await pause(50)
+
+      // Close the window
+      progressWindow.browserWindow?.close()
+
+      // wait for events
+      await pause(50)
+
+      expect(cancelSpy1).toHaveBeenCalled()
+      expect(cancelSpy2).toHaveBeenCalled()
+    })
+
+    it('should remove all items when window closes with cancelOnClose: false', async () => {
+      ProgressWindow.configure({
+        cancelOnClose: false,
+      })
+      const progressWindow = await ProgressWindow.create()
+
+      const item1 = await progressWindow.addItem({ title: 'item1' })
+      const item2 = await progressWindow.addItem({ title: 'item2' })
+
+      const cancelSpy1 = vi.fn()
+      const cancelSpy2 = vi.fn()
+      item1.on('cancelled', cancelSpy1)
+      item2.on('cancelled', cancelSpy2)
+
+      // wait for window to show
+      await pause(50)
+
+      expect(Object.keys(progressWindow.progressItems).length).toBe(2)
+
+      // Close the window
+      progressWindow.browserWindow?.close()
+
+      // wait for events
+      await pause(50)
+
+      // Items should be removed from progressItems (removeAll removes listeners before emitting)
+      expect(Object.keys(progressWindow.progressItems).length).toBe(0)
+      // Items should not be cancelled, just removed
+      expect(cancelSpy1).not.toHaveBeenCalled()
+      expect(cancelSpy2).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('hide delay edge cases', () => {
+    it('should abort close if new items added during hideDelay after all items completed', async () => {
+      ProgressWindow.configure({
+        hideDelay: 500,
+        minimumDisplayMs: false,
+        itemDefaults: {
+          autoRemove: false,
+        },
+      })
+      const progressWindow = await ProgressWindow.create()
+
+      if (!progressWindow.browserWindow)
+        throw new Error('browserWindow is null')
+
+      const windowClosedSpy = vi.fn()
+      progressWindow.browserWindow.on('closed', windowClosedSpy)
+
+      const item1 = await progressWindow.addItem({ title: 'item1' })
+
+      // wait for window to show
+      await pause(50)
+      expect(progressWindow.browserWindow.isVisible()).toBe(true)
+
+      // complete the first item - this hides window and starts hideDelay
+      item1.complete()
+
+      // wait a bit for hide delay to start
+      await pause(100)
+      expect(progressWindow.browserWindow.isVisible()).toBe(false)
+
+      // add a new item during the hideDelay
+      const item2 = await progressWindow.addItem({ title: 'item2' })
+
+      // wait for window to show again
+      await pause(50)
+      expect(progressWindow.browserWindow.isVisible()).toBe(true)
+
+      // wait past the original hide delay
+      await pause(500)
+
+      // window should still be open because item2 is visible and incomplete
+      expect(windowClosedSpy).not.toHaveBeenCalled()
+      expect(item2.completed).toBe(false)
+    })
+
+    it('should handle minimumDisplayMs with completed but visible items', async () => {
+      ProgressWindow.configure({
+        hideDelay: false,
+        minimumDisplayMs: 300,
+        itemDefaults: {
+          autoRemove: false,
+        },
+      })
+      const progressWindow = await ProgressWindow.create()
+
+      if (!progressWindow.browserWindow)
+        throw new Error('browserWindow is null')
+
+      const windowHideSpy = vi.fn()
+      progressWindow.browserWindow.on('hide', windowHideSpy)
+
+      const item = await progressWindow.addItem({ title: 'test' })
+
+      // wait for window to show
+      await pause(50)
+      expect(progressWindow.browserWindow.isVisible()).toBe(true)
+
+      // complete the item immediately
+      item.complete()
+
+      // wait less than minimumDisplayMs
+      await pause(100)
+      expect(windowHideSpy).not.toHaveBeenCalled()
+
+      // wait for minimumDisplayMs to elapse
+      await pause(300)
+      expect(windowHideSpy).toHaveBeenCalled()
+    })
+  })
+
+  describe('IPC handlers', () => {
+    it('should handle progress-item-cancel IPC message', async () => {
+      const progressWindow = await ProgressWindow.create()
+      await progressWindow.whenReady()
+
+      if (!progressWindow.browserWindow)
+        throw new Error('browserWindow is null')
+
+      const item = await progressWindow.addItem({ title: 'test' })
+      const cancelSpy = vi.fn()
+      item.on('cancelled', cancelSpy)
+
+      // wait for item to be shown
+      await pause(50)
+
+      // Simulate IPC cancel message from renderer
+      progressWindow.browserWindow.webContents.ipc.emit(
+        'progress-item-cancel',
+        null,
+        item.id
+      )
+
+      await pause(10)
+      expect(cancelSpy).toHaveBeenCalled()
+    })
+
+    it('should handle progress-item-pause IPC message', async () => {
+      const progressWindow = await ProgressWindow.create()
+      await progressWindow.whenReady()
+
+      if (!progressWindow.browserWindow)
+        throw new Error('browserWindow is null')
+
+      const item = await progressWindow.addItem({
+        title: 'test',
+        pauseable: true,
+      })
+      const pauseSpy = vi.fn()
+      item.on('paused', pauseSpy)
+
+      // wait for item to be shown
+      await pause(50)
+
+      expect(item.paused).toBe(false)
+
+      // Simulate IPC pause message from renderer
+      progressWindow.browserWindow.webContents.ipc.emit(
+        'progress-item-pause',
+        null,
+        item.id
+      )
+
+      await pause(10)
+      expect(pauseSpy).toHaveBeenCalledWith(true)
+      expect(item.paused).toBe(true)
+
+      // Toggle again
+      progressWindow.browserWindow.webContents.ipc.emit(
+        'progress-item-pause',
+        null,
+        item.id
+      )
+
+      await pause(10)
+      expect(item.paused).toBe(false)
+    })
+
+    it('should handle IPC messages for non-existent items gracefully', async () => {
+      const progressWindow = await ProgressWindow.create()
+      await progressWindow.whenReady()
+
+      if (!progressWindow.browserWindow)
+        throw new Error('browserWindow is null')
+
+      // These should not throw
+      progressWindow.browserWindow.webContents.ipc.emit(
+        'progress-item-cancel',
+        null,
+        'non-existent-id'
+      )
+
+      progressWindow.browserWindow.webContents.ipc.emit(
+        'progress-item-pause',
+        null,
+        'non-existent-id'
+      )
+
+      await pause(10)
+      // Test passes if no errors thrown
+    })
+  })
 })

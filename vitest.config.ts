@@ -7,10 +7,15 @@ export default defineConfig({
     environment: 'node',
     testTimeout: 10000,
     coverage: {
-      provider: 'v8',
+      provider: 'istanbul',
       reporter: ['text', 'lcov', 'html'],
       include: ['src/**/*.ts'],
-      exclude: ['src/**/*.d.ts'],
+      exclude: [
+        'src/**/*.d.ts',
+        // Preload and renderer run in Electron/browser context, tested via E2E
+        'src/ProgressWindow/preload.ts',
+        'src/ProgressWindow/renderer.ts',
+      ],
     },
   },
 })

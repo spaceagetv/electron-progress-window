@@ -1,3 +1,4 @@
+/* istanbul ignore file -- @preserve Preload script runs in Electron renderer context, tested via E2E */
 /**
  * Preload script for the ProgressWindow renderer process.
  *
