@@ -929,6 +929,19 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     }
     if (this.options.closeOnComplete) {
       const items = Object.values(this.progressItems)
+      // If there are no items left, hide immediately and potentially close after hideDelay
+      // This prevents the empty titlebar from lingering after the last item is removed
+      // while still allowing window reuse if hideDelay is enabled
+      if (items.length === 0) {
+        if (this.options.hideDelay) {
+          // Hide immediately but wait for hideDelay before closing (allows window reuse)
+          this.#hideAndWaitThenClose()
+        } else {
+          // No hideDelay, close immediately
+          this.#closeIfEmpty()
+        }
+        return
+      }
       if (items.every((item) => item.completed)) {
         // Use #hideThenCloseIfEmpty if either hideDelay or minimumDisplayMs is set
         // This ensures we respect minimum display time even when hideDelay is false
@@ -1058,11 +1071,12 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       return
     }
 
-    // Check if there are now visible items (in case items were added during min display wait)
-    const visibleItems = Object.values(this.progressItems).filter(
-      (item) => item.visible
+    // Check if there are now visible AND incomplete items
+    // (in case new items were added during min display wait)
+    const activeItems = Object.values(this.progressItems).filter(
+      (item) => item.visible && !item.completed
     )
-    if (visibleItems.length > 0) {
+    if (activeItems.length > 0) {
       return
     }
 
@@ -1086,13 +1100,58 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
         return
       }
 
-      // Check if new visible items were added while we waited
-      const newVisibleItems = Object.values(this.progressItems).filter(
-        (item) => item.visible
+      // Check if new visible AND incomplete items were added while we waited
+      const newActiveItems = Object.values(this.progressItems).filter(
+        (item) => item.visible && !item.completed
       )
-      if (newVisibleItems.length > 0) {
+      if (newActiveItems.length > 0) {
         // New items were added, don't close - the window should already be visible
         // from the 'show' event handler
+        return
+      }
+    }
+
+    this.#closeIfEmpty()
+  }
+
+  /**
+   * Hide the window immediately, then close after hideDelay.
+   * Used when all items have been removed (not just completed) to prevent
+   * the empty titlebar from lingering while still allowing window reuse.
+   */
+  async #hideAndWaitThenClose() {
+    // istanbul ignore next
+    if (!this.browserWindow) {
+      return
+    }
+
+    // Cancel any existing hide delay
+    this.#cancelHideDelay()
+
+    // Hide immediately - don't wait for minimumDisplayMs since there's nothing to display
+    this.browserWindow.hide()
+    this.#windowShownAt = null
+
+    const hideDelayMs = this.#getHideDelayMs()
+    if (hideDelayMs > 0) {
+      // Wait for hide delay before closing (allows window reuse)
+      await new Promise<void>((resolve) => {
+        this.#hideDelayTimeout = setTimeout(resolve, hideDelayMs)
+      })
+
+      // Check if we were cancelled during the wait (new item added)
+      if (this.#hideDelayTimeout === null) {
+        return
+      }
+      this.#hideDelayTimeout = null
+
+      // istanbul ignore next
+      if (!this.browserWindow) {
+        return
+      }
+
+      // Check if new items were added while we waited
+      if (Object.keys(this.progressItems).length > 0) {
         return
       }
     }
