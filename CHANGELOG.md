@@ -1,3 +1,9 @@
+## [2.1.5](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.4...v2.1.5) (2026-01-20)
+
+### Bug Fixes
+
+* close window immediately when last item is removed ([2fcc276](https://github.com/spaceagetv/electron-progress-window/commit/2fcc276a65f1171acb78375ef3c080404e445683))
+
 ## [2.1.4](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.3...v2.1.4) (2026-01-03)
 
 ### Bug Fixes
