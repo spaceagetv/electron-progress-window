@@ -1067,6 +1067,50 @@ describe('ProgressWindow', () => {
       expect(windowClosedSpy).toHaveBeenCalled()
     })
 
+    it('should hide immediately when item is auto-removed with hideDelay + minimumDisplayMs (fixes #61)', async () => {
+      // This test verifies the fix for GitHub issue #61 where an empty titlebar
+      // would show for minimumDisplayMs after items were auto-removed
+      ProgressWindow.configure({
+        hideDelay: 500,
+        minimumDisplayMs: 3000, // Long delay that we should NOT wait for when no items
+      })
+      const progressWindow = await ProgressWindow.create()
+
+      if (!progressWindow.browserWindow)
+        throw new Error('browserWindow is null')
+
+      const windowHideSpy = vi.fn()
+      progressWindow.browserWindow.on('hide', windowHideSpy)
+
+      const windowClosedSpy = vi.fn()
+      progressWindow.browserWindow.on('closed', windowClosedSpy)
+
+      const item = await progressWindow.addItem({ title: 'test' })
+
+      // wait for window to show
+      await pause(50)
+      expect(progressWindow.browserWindow.isVisible()).toBe(true)
+
+      // complete the item (with autoRemove: true by default, this removes it)
+      item.complete()
+
+      // wait a small amount - window should HIDE immediately, not wait 3000ms
+      await pause(100)
+
+      // window should be hidden immediately (not waiting for minimumDisplayMs)
+      expect(windowHideSpy).toHaveBeenCalled()
+      expect(progressWindow.browserWindow.isVisible()).toBe(false)
+
+      // window should NOT be closed yet (waiting for hideDelay)
+      expect(windowClosedSpy).not.toHaveBeenCalled()
+
+      // wait for hideDelay to elapse
+      await pause(500)
+
+      // now window should be closed
+      expect(windowClosedSpy).toHaveBeenCalled()
+    })
+
     it('should wait for content size update before showing window', async () => {
       // Create a window and remove the automatic content size emulation
       // so we can control when content size updates are sent
