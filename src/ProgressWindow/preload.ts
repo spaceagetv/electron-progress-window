@@ -7,14 +7,8 @@
  *
  * @internal
  */
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import type { ProgressItemTransferable } from './ProgressItem'
-
-// IpcRendererEvent interface - minimal type for our needs
-interface IpcRendererEvent {
-  sender: unknown
-  senderId: number
-}
 
 /**
  * The API exposed to the renderer process via window.progressWindowAPI
@@ -58,6 +52,7 @@ export interface ProgressWindowAPI {
 // Store listener references to allow cleanup and prevent memory leaks.
 // Each on* method replaces any existing listener for that event.
 type IpcListener = (event: IpcRendererEvent, ...args: unknown[]) => void
+type IpcListenerAny = (...args: unknown[]) => void
 const listeners: Record<string, IpcListener> = {}
 
 /**
@@ -68,11 +63,7 @@ function setListener(channel: string, listener: IpcListener): void {
   // Remove existing listener if present
   const existingListener = listeners[channel]
   if (existingListener) {
-    // Use removeListener (alias: off) - cast needed for type compatibility
-    ;(ipcRenderer as unknown as NodeJS.EventEmitter).removeListener(
-      channel,
-      existingListener
-    )
+    ipcRenderer.removeListener(channel, existingListener as IpcListenerAny)
   }
   // Store and register the new listener
   listeners[channel] = listener
