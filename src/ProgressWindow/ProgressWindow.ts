@@ -1052,6 +1052,43 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     const hideDelayMs = this.#getHideDelayMs()
     const minimumDisplayMs = this.#getMinimumDisplayMs()
 
+    // Check if there are any visible items to display
+    // If there are no visible items, skip minimumDisplayMs entirely to avoid
+    // showing an empty titlebar (fixes #61)
+    const visibleItems = Object.values(this.progressItems).filter(
+      (item) => item.visible
+    )
+    if (visibleItems.length === 0) {
+      // No visible items - hide immediately and wait for hideDelay before closing
+      this.browserWindow.hide()
+      this.#windowShownAt = null
+
+      if (hideDelayMs > 0) {
+        await new Promise<void>((resolve) => {
+          this.#hideDelayTimeout = setTimeout(resolve, hideDelayMs)
+        })
+
+        // istanbul ignore next -- Check if we were cancelled during the wait
+        if (this.#hideDelayTimeout === null) {
+          return
+        }
+        this.#hideDelayTimeout = null
+
+        // istanbul ignore next
+        if (!this.browserWindow) {
+          return
+        }
+
+        // istanbul ignore next -- Check if new items were added while we waited
+        if (Object.keys(this.progressItems).length > 0) {
+          return
+        }
+      }
+
+      this.#closeIfEmpty()
+      return
+    }
+
     // Calculate how long the window has been shown
     const shownDuration = this.#windowShownAt
       ? Date.now() - this.#windowShownAt
