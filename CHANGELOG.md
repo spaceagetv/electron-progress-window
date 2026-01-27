@@ -1,3 +1,9 @@
+## [2.1.6](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.5...v2.1.6) (2026-01-27)
+
+### Bug Fixes
+
+* hide window immediately when no visible items (fixes [#61](https://github.com/spaceagetv/electron-progress-window/issues/61)) ([e92b6f8](https://github.com/spaceagetv/electron-progress-window/commit/e92b6f8e665d59abba00ca2b4b8b7aa48cd3bf81))
+
 ## [2.1.5](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.4...v2.1.5) (2026-01-20)
 
 ### Bug Fixes
