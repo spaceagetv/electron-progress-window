@@ -1,3 +1,9 @@
+## [2.1.9](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.8...v2.1.9) (2026-08-11)
+
+### Bug Fixes
+
+* remove invalid linear-gradient from the progress indicator ([82cfb69](https://github.com/spaceagetv/electron-progress-window/commit/82cfb6926cc3e80fac34bad56d803588e7c65fca)), closes [#85](https://github.com/spaceagetv/electron-progress-window/issues/85)
+
 ## [2.1.8](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.7...v2.1.8) (2026-08-11)
 
 ### Bug Fixes
