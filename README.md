@@ -38,6 +38,39 @@ Display multiple progress bars in an Electron window.
 npm install @spaceagetv/electron-progress-window
 ```
 
+## Theming
+
+Every color, shadow and hover state in the window is driven by a CSS custom
+property. Pass a stylesheet through the `css` option, or set individual
+properties per item with `cssVars` (see
+[`itemCssMap`](docs/electron-progress-window.itemcssmap.md) for the full list).
+
+Design systems usually scope their token file to a selector such as
+`[data-theme="dark"]` or `.theme-dark`. Use `htmlAttributes` or `bodyClass` to
+put that selector on the progress page's root element, so the token file can be
+injected verbatim instead of being rewritten:
+
+```javascript
+ProgressWindow.configure({
+  htmlAttributes: { 'data-theme': 'dark' },
+  // or: bodyClass: 'theme-dark',
+  css: fs.readFileSync('./design-system/tokens.css', 'utf8'),
+})
+```
+
+To flatten the default glossy progress bar:
+
+```javascript
+ProgressWindow.configure({
+  css: `
+    html {
+      --progress-shadow: none;
+      --indicator-shadow: none;
+    }
+  `,
+})
+```
+
 ## Usage
 
 ```javascript

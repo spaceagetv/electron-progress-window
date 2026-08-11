@@ -81,6 +81,14 @@ export const itemCssMap = {
   errorProgressBackground: '--error-progress-background',
   /** Foreground of the progress bar when error is true. Default: #670000 */
   errorProgressForeground: '--error-progress-foreground',
+  /** Background of a pause/cancel icon while hovered. Default: #eeeeee */
+  actionHoverBackground: '--action-hover-background',
+  /** Background of a pause/cancel icon while pressed. Default: #dddddd */
+  actionPressedBackground: '--action-pressed-background',
+  /** Box-shadow on the progress bar track. Set to `none` for a flat look. Default: inset 0 -1px 1px rgba(255, 255, 255, 0.495) */
+  progressShadow: '--progress-shadow',
+  /** Box-shadow on the progress bar indicator. Set to `none` for a flat look. Default: inset 0 2px 9px rgba(255, 255, 255, 0.274), inset 0 -2px 6px rgba(0, 0, 0, 0.304) */
+  indicatorShadow: '--indicator-shadow',
 } as const
 
 export type ItemCssProperty = keyof typeof itemCssMap

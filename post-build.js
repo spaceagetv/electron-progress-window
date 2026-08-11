@@ -82,7 +82,9 @@ let cjsScriptContent = fs.readFileSync(cjsScriptPath, 'utf-8')
 let esmScriptContent = fs.readFileSync(esmScriptPath, 'utf-8')
 
 // Replace the htmlContent fs.readFileSync with the embedded content
-const htmlRegex = /const htmlContent = [^;]+;/
+// Anchored to the start of a line so that prose mentioning the assignment
+// (in a comment, for example) cannot be matched instead of the statement.
+const htmlRegex = /^[ \t]*const htmlContent = [^;]+;/m
 cjsScriptContent = cjsScriptContent.replace(
   htmlRegex,
   `const htmlContent = \`${escapeForTemplate(htmlContentWithScript)}\`;`

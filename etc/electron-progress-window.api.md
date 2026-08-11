@@ -35,6 +35,10 @@ export const itemCssMap: {
     readonly errorTextColor: "--error-text-color";
     readonly errorProgressBackground: "--error-progress-background";
     readonly errorProgressForeground: "--error-progress-foreground";
+    readonly actionHoverBackground: "--action-hover-background";
+    readonly actionPressedBackground: "--action-pressed-background";
+    readonly progressShadow: "--progress-shadow";
+    readonly indicatorShadow: "--indicator-shadow";
 };
 
 // @public (undocumented)
@@ -213,11 +217,13 @@ export interface ProgressWindowOptions {
     animateResize?: boolean;
     autoHeight?: boolean;
     autoWidth?: boolean;
+    bodyClass?: string;
     cancelOnClose?: boolean;
     closeOnComplete?: boolean;
     css?: string;
     focusOnAdd?: boolean;
     hideDelay?: boolean | number;
+    htmlAttributes?: Record<string, string>;
     itemDefaults?: Partial<ProgressItemOptions>;
     minimumDisplayMs?: boolean | number;
     // @internal

@@ -424,6 +424,58 @@ test.describe('ProgressWindow E2E Tests', () => {
 
       expect(pageBackground.trim()).toBe('transparent')
     })
+
+    test('should drive the progress shadows from custom properties', async () => {
+      const { progressItem } = await createProgressItem(
+        mainWindow,
+        electronApp,
+        'shadow vars',
+        { time: 10 }
+      )
+
+      // Defaults keep the existing glossy inset highlights
+      const defaultTrackShadow = await progressItem
+        .locator('.progress-item-progress')
+        .evaluate((el) => getComputedStyle(el).boxShadow)
+      expect(defaultTrackShadow).not.toBe('none')
+
+      await progressItem.evaluate((el) => {
+        el.style.setProperty('--progress-shadow', 'none')
+        el.style.setProperty('--indicator-shadow', 'none')
+      })
+
+      const trackShadow = await progressItem
+        .locator('.progress-item-progress')
+        .evaluate((el) => getComputedStyle(el).boxShadow)
+      const indicatorShadow = await progressItem
+        .locator('.progress-item-indicator')
+        .evaluate((el) => getComputedStyle(el).boxShadow)
+
+      expect(trackShadow).toBe('none')
+      expect(indicatorShadow).toBe('none')
+    })
+
+    test('should drive the action icon hover state from a custom property', async () => {
+      const { progressItem } = await createProgressItem(
+        mainWindow,
+        electronApp,
+        'hover var',
+        { time: 10, enableCancel: true }
+      )
+
+      await progressItem.evaluate((el) =>
+        el.style.setProperty('--action-hover-background', 'rgb(0, 128, 0)')
+      )
+
+      const cancelIcon = progressItem.locator('.progress-item-cancel svg')
+      await cancelIcon.hover()
+
+      const background = await cancelIcon.evaluate(
+        (el) => getComputedStyle(el).backgroundColor
+      )
+
+      expect(background).toBe('rgb(0, 128, 0)')
+    })
   }) // End of UI and Configuration Tests
 
   // Timing and state tests - run sequentially
