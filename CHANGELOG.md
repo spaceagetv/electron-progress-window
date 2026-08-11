@@ -1,3 +1,13 @@
+## [2.2.0](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.9...v2.2.0) (2026-08-11)
+
+### Features
+
+* add theme hooks and move remaining hardcoded styles behind variables ([46d01dc](https://github.com/spaceagetv/electron-progress-window/commit/46d01dc4e545820fa9891ef1cd5b2f031d7d0227))
+
+### Bug Fixes
+
+* reject event handler names in htmlAttributes and vary the stripe color ([fe83b4a](https://github.com/spaceagetv/electron-progress-window/commit/fe83b4a93a21c76a3baa8e8d171ebe7f3fe66cf2))
+
 ## [2.1.9](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.8...v2.1.9) (2026-08-11)
 
 ### Bug Fixes
