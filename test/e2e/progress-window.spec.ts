@@ -564,6 +564,28 @@ test.describe('ProgressWindow E2E Tests', () => {
       await expect(progressItem).toHaveClass(/error/, { timeout: 5000 })
     })
 
+    test('should apply --error-progress-background to the track in error state', async () => {
+      const { progressItem } = await createProgressItem(
+        mainWindow,
+        electronApp,
+        'error progress background',
+        { time: 5, error: true }
+      )
+
+      await expect(progressItem).toHaveClass(/error/, { timeout: 5000 })
+
+      // Set the variable the same way the cssVars API does - on the item element
+      await progressItem.evaluate((el) =>
+        el.style.setProperty('--error-progress-background', 'rgb(0, 128, 0)')
+      )
+
+      const trackBackground = await progressItem
+        .locator('.progress-item-progress')
+        .evaluate((el) => getComputedStyle(el).backgroundColor)
+
+      expect(trackBackground).toBe('rgb(0, 128, 0)')
+    })
+
     test('should handle multiple concurrent operations', async () => {
       // Create 3 different progress items simultaneously
       const item1Promise = createProgressItem(
