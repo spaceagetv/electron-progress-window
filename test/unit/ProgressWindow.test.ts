@@ -5,6 +5,13 @@ import { ProgressItem, ProgressWindow } from '../../src/ProgressWindow'
 import { withTimeout } from './withTimeout'
 import { pause } from './pause'
 
+// Decode the page that was handed to browserWindow.loadURL()
+const loadedHtml = (progressWindow: ProgressWindow): string => {
+  const loadURL = progressWindow.browserWindow?.loadURL as SinonSpy
+  const url = loadURL.firstCall.args[0] as string
+  return decodeURIComponent(url.replace('data:text/html;charset=UTF8,', ''))
+}
+
 describe('ProgressWindow', () => {
   // Store the handler so we can remove it in afterAll
   const createdHandler = async (progressWindow: ProgressWindow) => {
@@ -1370,6 +1377,85 @@ describe('ProgressWindow', () => {
       expect(progressWindow.options.css).toBe('.custom-class { color: red; }')
       // Window was created successfully with custom CSS
       expect(progressWindow.browserWindow).toBeTruthy()
+    })
+
+    it('should insert CSS containing $ replacement patterns literally', async () => {
+      const css = `.a::after { content: "$& $' $\` $1"; }`
+      ProgressWindow.configure({ css })
+      const progressWindow = await ProgressWindow.create()
+
+      expect(loadedHtml(progressWindow)).toContain(css)
+    })
+  })
+
+  describe('theme hooks', () => {
+    it('should set htmlAttributes on the html element', async () => {
+      ProgressWindow.configure({
+        htmlAttributes: { 'data-theme': 'dark', lang: 'en' },
+      })
+      const progressWindow = await ProgressWindow.create()
+
+      expect(loadedHtml(progressWindow)).toContain(
+        '<html data-theme="dark" lang="en">'
+      )
+    })
+
+    it('should escape htmlAttributes values', async () => {
+      ProgressWindow.configure({
+        htmlAttributes: { 'data-theme': 'da"rk><script>' },
+      })
+      const progressWindow = await ProgressWindow.create()
+
+      expect(loadedHtml(progressWindow)).toContain(
+        '<html data-theme="da&quot;rk&gt;&lt;script&gt;">'
+      )
+    })
+
+    it('should throw on an invalid htmlAttributes name', () => {
+      ProgressWindow.configure({
+        htmlAttributes: { 'data-theme onload=alert(1)': 'dark' },
+      })
+
+      expect(() => ProgressWindow.instance).toThrow(
+        'is not a valid htmlAttributes attribute name'
+      )
+    })
+
+    it('should throw on an event handler attribute name', () => {
+      ProgressWindow.configure({
+        htmlAttributes: { onload: 'alert(1)' },
+      })
+
+      expect(() => ProgressWindow.instance).toThrow(
+        'cannot set the event handler attribute "onload"'
+      )
+    })
+
+    it('should throw on an event handler attribute name regardless of case', () => {
+      ProgressWindow.configure({
+        htmlAttributes: { OnClick: 'alert(1)' },
+      })
+
+      expect(() => ProgressWindow.instance).toThrow(
+        'cannot set the event handler attribute "OnClick"'
+      )
+    })
+
+    it('should append bodyClass to the body element', async () => {
+      ProgressWindow.configure({ bodyClass: 'theme-dark brand' })
+      const progressWindow = await ProgressWindow.create()
+
+      expect(loadedHtml(progressWindow)).toContain(
+        'class="progress-window theme-dark brand"'
+      )
+    })
+
+    it('should leave the markup untouched when neither option is set', async () => {
+      const progressWindow = await ProgressWindow.create()
+      const html = loadedHtml(progressWindow)
+
+      expect(html).toContain('<html>')
+      expect(html).toContain('class="progress-window"')
     })
   })
 
