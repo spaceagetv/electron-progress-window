@@ -148,8 +148,8 @@ export type ProgressItemTransferable = {
 // @public
 export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     constructor(options?: ProgressWindowOptions);
-    static addItem(options?: ProgressItem | Partial<ProgressItemOptions>): Promise<ProgressItem>;
-    addItem(options?: ProgressItem | Partial<ProgressItemOptions>): Promise<ProgressItem>;
+    static addItem(options?: Partial<ProgressItemOptions> | ProgressItem): Promise<ProgressItem>;
+    addItem(options?: Partial<ProgressItemOptions> | ProgressItem): Promise<ProgressItem>;
     browserWindow: BrowserWindow | null;
     cancelAll(): void;
     static close(): void;
