@@ -40,10 +40,12 @@ npm install @spaceagetv/electron-progress-window
 
 ## Theming
 
-Every color, shadow and hover state in the window is driven by a CSS custom
-property. Pass a stylesheet through the `css` option, or set individual
-properties per item with `cssVars` (see
-[`itemCssMap`](docs/electron-progress-window.itemcssmap.md) for the full list).
+The window's colors, shadows and hover states are driven by CSS custom
+properties. Pass a stylesheet through the `css` option, or set individual
+properties per item with `cssVars` — see
+[`itemCssMap`](docs/electron-progress-window.itemcssmap.md) for the full list of
+what is configurable. Anything not covered there can still be overridden with an
+ordinary CSS rule through the `css` option.
 
 Design systems usually scope their token file to a selector such as
 `[data-theme="dark"]` or `.theme-dark`. Use `htmlAttributes` or `bodyClass` to

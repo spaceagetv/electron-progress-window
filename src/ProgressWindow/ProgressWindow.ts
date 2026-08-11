@@ -95,6 +95,14 @@ function getPreloadPath(): string {
 const ATTRIBUTE_NAME_PATTERN = /^[a-zA-Z][\w:.-]*$/
 
 /**
+ * Event handler attribute names (`onload`, `onclick`, ...). These are rejected
+ * rather than escaped: their values are script, so escaping the value does not
+ * make them safe. A theme hook has no legitimate need for one.
+ * @internal
+ */
+const EVENT_HANDLER_ATTRIBUTE_PATTERN = /^on/i
+
+/**
  * Escape a string for use inside a double-quoted HTML attribute value.
  * @internal
  */
@@ -134,6 +142,11 @@ function buildProgressHtml(
         if (!ATTRIBUTE_NAME_PATTERN.test(name)) {
           throw new Error(
             `ProgressWindow: "${name}" is not a valid htmlAttributes attribute name`
+          )
+        }
+        if (EVENT_HANDLER_ATTRIBUTE_PATTERN.test(name)) {
+          throw new Error(
+            `ProgressWindow: htmlAttributes cannot set the event handler attribute "${name}"`
           )
         }
         return `${name}="${escapeAttributeValue(value)}"`
@@ -192,6 +205,12 @@ export interface ProgressWindowOptions {
    * Design systems commonly scope their token stylesheet to a selector such as
    * `[data-theme="dark"]`. Set the matching attribute here and the token file
    * can be passed to `css` verbatim.
+   *
+   * @remarks
+   * Values are HTML-escaped. Names must be valid HTML attribute names, and
+   * event handler attributes (`onload`, `onclick`, and anything else starting
+   * with `on`) are rejected — their values are script, so escaping cannot make
+   * them safe. Invalid names throw rather than being silently dropped.
    *
    * @example
    * ```ts

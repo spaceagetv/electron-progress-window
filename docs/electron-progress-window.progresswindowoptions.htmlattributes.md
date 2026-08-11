@@ -14,6 +14,10 @@ Design systems commonly scope their token stylesheet to a selector such as `[dat
 htmlAttributes?: Record<string, string>;
 ```
 
+## Remarks
+
+Values are HTML-escaped. Names must be valid HTML attribute names, and event handler attributes (`onload`<!-- -->, `onclick`<!-- -->, and anything else starting with `on`<!-- -->) are rejected — their values are script, so escaping cannot make them safe. Invalid names throw rather than being silently dropped.
+
 ## Example
 
 

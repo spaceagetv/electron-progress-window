@@ -1421,6 +1421,26 @@ describe('ProgressWindow', () => {
       )
     })
 
+    it('should throw on an event handler attribute name', () => {
+      ProgressWindow.configure({
+        htmlAttributes: { onload: 'alert(1)' },
+      })
+
+      expect(() => ProgressWindow.instance).toThrow(
+        'cannot set the event handler attribute "onload"'
+      )
+    })
+
+    it('should throw on an event handler attribute name regardless of case', () => {
+      ProgressWindow.configure({
+        htmlAttributes: { OnClick: 'alert(1)' },
+      })
+
+      expect(() => ProgressWindow.instance).toThrow(
+        'cannot set the event handler attribute "OnClick"'
+      )
+    })
+
     it('should append bodyClass to the body element', async () => {
       ProgressWindow.configure({ bodyClass: 'theme-dark brand' })
       const progressWindow = await ProgressWindow.create()

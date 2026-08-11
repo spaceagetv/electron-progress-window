@@ -358,6 +358,25 @@ test.describe('ProgressWindow E2E Tests', () => {
       await expect(progressItem).toHaveClass(/stripes/)
     })
 
+    test('should drive the stripes overlay from a custom property', async () => {
+      const { progressItem } = await createProgressItem(
+        mainWindow,
+        electronApp,
+        'stripes color',
+        { time: 10, theme: 'stripes' }
+      )
+
+      await progressItem.evaluate((el) =>
+        el.style.setProperty('--stripes-color', 'rgb(0, 128, 0)')
+      )
+
+      const backgroundImage = await progressItem
+        .locator('.progress-item-indicator')
+        .evaluate((el) => getComputedStyle(el).backgroundImage)
+
+      expect(backgroundImage).toContain('rgb(0, 128, 0)')
+    })
+
     test('should render the indicator as a flat --progress-foreground-color fill', async () => {
       const { progressItem } = await createProgressItem(
         mainWindow,
