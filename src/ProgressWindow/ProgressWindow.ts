@@ -89,6 +89,84 @@ function getPreloadPath(): string {
 }
 
 /**
+ * Valid HTML attribute name: a letter followed by letters, digits, `-`, `_`, `:` or `.`
+ * @internal
+ */
+const ATTRIBUTE_NAME_PATTERN = /^[a-zA-Z][\w:.-]*$/
+
+/**
+ * Event handler attribute names (`onload`, `onclick`, ...). These are rejected
+ * rather than escaped: their values are script, so escaping the value does not
+ * make them safe. A theme hook has no legitimate need for one.
+ * @internal
+ */
+const EVENT_HANDLER_ATTRIBUTE_PATTERN = /^on/i
+
+/**
+ * Escape a string for use inside a double-quoted HTML attribute value.
+ * @internal
+ */
+function escapeAttributeValue(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+/**
+ * Assemble the progress page HTML from the template, applying the `css`,
+ * `htmlAttributes` and `bodyClass` options.
+ *
+ * Replacements use a function so that `$&`, `$'` and friends in the caller's
+ * values are inserted literally rather than being treated as replacement
+ * patterns.
+ *
+ * @internal
+ */
+function buildProgressHtml(
+  template: string,
+  options: ProgressWindowOptions
+): string {
+  let html = template
+
+  if (options.css) {
+    const css = options.css
+    html = html.replace('/** additional styles insert point */', () => css)
+  }
+
+  const attributes = Object.entries(options.htmlAttributes ?? {})
+  if (attributes.length > 0) {
+    const serialized = attributes
+      .map(([name, value]) => {
+        if (!ATTRIBUTE_NAME_PATTERN.test(name)) {
+          throw new Error(
+            `ProgressWindow: "${name}" is not a valid htmlAttributes attribute name`
+          )
+        }
+        if (EVENT_HANDLER_ATTRIBUTE_PATTERN.test(name)) {
+          throw new Error(
+            `ProgressWindow: htmlAttributes cannot set the event handler attribute "${name}"`
+          )
+        }
+        return `${name}="${escapeAttributeValue(value)}"`
+      })
+      .join(' ')
+    html = html.replace('<html>', () => `<html ${serialized}>`)
+  }
+
+  if (options.bodyClass) {
+    const bodyClass = escapeAttributeValue(options.bodyClass)
+    html = html.replace(
+      'class="progress-window"',
+      () => `class="progress-window ${bodyClass}"`
+    )
+  }
+
+  return html
+}
+
+/**
  * Options for creating/configuring a ProgressWindow
  * @public
  */
@@ -129,6 +207,36 @@ export interface ProgressWindowOptions {
    * images directly in the stylesheet.
    */
   css?: string
+  /**
+   * Attributes to set on the page's `html` element.
+   *
+   * Design systems commonly scope their token stylesheet to a selector such as
+   * `[data-theme="dark"]`. Set the matching attribute here and the token file
+   * can be passed to `css` verbatim.
+   *
+   * @remarks
+   * Values are HTML-escaped. Names must be valid HTML attribute names, and
+   * event handler attributes (`onload`, `onclick`, and anything else starting
+   * with `on`) are rejected — their values are script, so escaping cannot make
+   * them safe. Invalid names throw rather than being silently dropped.
+   *
+   * @example
+   * ```ts
+   * ProgressWindow.configure({
+   *   htmlAttributes: { 'data-theme': 'dark' },
+   *   css: myDesignSystemTokens,
+   * })
+   * ```
+   */
+  htmlAttributes?: Record<string, string>
+  /**
+   * Class name(s) added to the page's `body` element, alongside the
+   * `progress-window` class that is always present.
+   *
+   * Use this for design systems that scope their tokens to a class such as
+   * `.theme-dark`.
+   */
+  bodyClass?: string
   /** Options passed to Electron's BrowserWindow constructor */
   windowOptions?: Partial<BrowserWindowConstructorOptions>
   /** Default options for new ProgressItem instances */
@@ -556,6 +664,17 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     this.#screenInstance = this.options.testingFixtures!.scr
     this.itemDefaults = this.options.itemDefaults ?? {}
 
+    // NOTE: post-build.js rewrites the htmlContent assignment below to embed
+    // the HTML at build time. Keep it a single statement, starting at the
+    // beginning of its line, with no internal semicolons.
+    const htmlContent = fs.readFileSync(
+      path.resolve(__dirname, 'index.html'),
+      'utf8'
+    )
+    // Assemble the page before creating the window, so an invalid
+    // htmlAttributes name throws without leaving an orphaned BrowserWindow
+    const html = buildProgressHtml(htmlContent, this.options)
+
     // create the window
     this.browserWindow = new bwFunction(this.options.windowOptions)
     // prevent the window from navigating away from the initial URL
@@ -571,20 +690,9 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
         resolve(this)
       })
     })
-    const htmlContent = fs.readFileSync(
-      path.resolve(__dirname, 'index.html'),
-      'utf8'
-    )
-    const htmlWithCss = this.options.css
-      ? htmlContent.replace(
-          '/** additional styles insert point */',
-          this.options.css
-        )
-      : htmlContent
-
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.browserWindow!.loadURL(
-      'data:text/html;charset=UTF8,' + encodeURIComponent(htmlWithCss)
+      'data:text/html;charset=UTF8,' + encodeURIComponent(html)
     )
 
     // we're going to get x/y here too... but we'll just ignore them

@@ -22,5 +22,10 @@ itemCssMap: {
     readonly errorTextColor: "--error-text-color";
     readonly errorProgressBackground: "--error-progress-background";
     readonly errorProgressForeground: "--error-progress-foreground";
+    readonly actionHoverBackground: "--action-hover-background";
+    readonly actionPressedBackground: "--action-pressed-background";
+    readonly stripesColor: "--stripes-color";
+    readonly progressShadow: "--progress-shadow";
+    readonly indicatorShadow: "--indicator-shadow";
 }
 ```

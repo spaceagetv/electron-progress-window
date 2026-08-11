@@ -94,6 +94,27 @@ _(Optional)_ Automatically adjust window width as needed. Default: false
 </td></tr>
 <tr><td>
 
+[bodyClass?](./electron-progress-window.progresswindowoptions.bodyclass.md)
+
+
+</td><td>
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+_(Optional)_ Class name(s) added to the page's `body` element, alongside the `progress-window` class that is always present.
+
+Use this for design systems that scope their tokens to a class such as `.theme-dark`<!-- -->.
+
+
+</td></tr>
+<tr><td>
+
 [cancelOnClose?](./electron-progress-window.progresswindowoptions.cancelonclose.md)
 
 
@@ -184,6 +205,27 @@ boolean \| number
 </td><td>
 
 _(Optional)_ Delay (in ms) before closing the window after all items complete. This allows the window to reappear quickly if a new item is added. Set to `true` for default 3000ms, `false` to close immediately, or a number for custom delay. Default: true (3000ms)
+
+
+</td></tr>
+<tr><td>
+
+[htmlAttributes?](./electron-progress-window.progresswindowoptions.htmlattributes.md)
+
+
+</td><td>
+
+
+</td><td>
+
+Record&lt;string, string&gt;
+
+
+</td><td>
+
+_(Optional)_ Attributes to set on the page's `html` element.
+
+Design systems commonly scope their token stylesheet to a selector such as `[data-theme="dark"]`<!-- -->. Set the matching attribute here and the token file can be passed to `css` verbatim.
 
 
 </td></tr>

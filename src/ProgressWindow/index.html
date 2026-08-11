@@ -23,6 +23,12 @@
         --error-text-color: #ffffff;
         --error-progress-background: var(--progress-background);
         --error-progress-foreground: #670000;
+        --action-hover-background: #eeeeee;
+        --action-pressed-background: #dddddd;
+        --stripes-color: rgba(255, 255, 255, 0.25);
+        --progress-shadow: inset 0 -1px 1px rgba(255, 255, 255, 0.495);
+        --indicator-shadow: inset 0 2px 9px rgba(255, 255, 255, 0.274),
+          inset 0 -2px 6px rgba(0, 0, 0, 0.304);
 
         font-size: var(--font-size);
         font-family: var(--font-family);
@@ -67,11 +73,11 @@
       }
 
       .progress-item-actions svg:hover {
-        background-color: #eeeeee;
+        background-color: var(--action-hover-background);
       }
 
       .progress-item-actions svg:active {
-        background-color: #dddddd;
+        background-color: var(--action-pressed-background);
       }
 
       .progress-item-title {
@@ -124,7 +130,7 @@
         height: var(--progress-height);
         padding: var(--progress-padding);
         border-radius: calc(var(--progress-height) + var(--progress-padding));
-        box-shadow: inset 0 -1px 1px rgba(255, 255, 255, 0.495);
+        box-shadow: var(--progress-shadow);
       }
 
       .progress-item-indicator {
@@ -134,8 +140,7 @@
         border-top-left-radius: var(--progress-height);
         border-bottom-left-radius: var(--progress-height);
         background-color: var(--progress-foreground-color);
-        box-shadow: inset 0 2px 9px rgba(255, 255, 255, 0.274),
-          inset 0 -2px 6px rgba(0, 0, 0, 0.304);
+        box-shadow: var(--indicator-shadow);
         position: relative;
         overflow: hidden;
         width: var(--progress-value);
@@ -174,11 +179,11 @@
       .stripes .progress-item-indicator {
         background-image: linear-gradient(
           -45deg,
-          rgba(255, 255, 255, 0.25) 25%,
+          var(--stripes-color) 25%,
           transparent 25%,
           transparent 50%,
-          rgba(255, 255, 255, 0.25) 50%,
-          rgba(255, 255, 255, 0.25) 75%,
+          var(--stripes-color) 50%,
+          var(--stripes-color) 75%,
           transparent 75%,
           transparent
         );
