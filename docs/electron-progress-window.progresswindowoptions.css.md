@@ -4,10 +4,15 @@
 
 ## ProgressWindowOptions.css property
 
-Additional CSS to inject into the window
+Additional CSS to inject into the window.
 
 **Signature:**
 
 ```typescript
 css?: string;
 ```
+
+## Remarks
+
+The page is loaded from a `data:` URL with an opaque origin, so it cannot fetch subresources — any `url()` pointing at a file, relative path or custom protocol will fail to load. Use `inlineAsset()` to embed fonts and images directly in the stylesheet.
+

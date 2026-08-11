@@ -119,7 +119,15 @@ export interface ProgressWindowOptions {
   focusOnAdd?: boolean
   /** Animate window resize (macOS only). Default: false */
   animateResize?: boolean
-  /** Additional CSS to inject into the window */
+  /**
+   * Additional CSS to inject into the window.
+   *
+   * @remarks
+   * The page is loaded from a `data:` URL with an opaque origin, so it cannot
+   * fetch subresources — any `url()` pointing at a file, relative path or
+   * custom protocol will fail to load. Use `inlineAsset()` to embed fonts and
+   * images directly in the stylesheet.
+   */
   css?: string
   /** Options passed to Electron's BrowserWindow constructor */
   windowOptions?: Partial<BrowserWindowConstructorOptions>
