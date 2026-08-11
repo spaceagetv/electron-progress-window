@@ -358,6 +358,35 @@ test.describe('ProgressWindow E2E Tests', () => {
       await expect(progressItem).toHaveClass(/stripes/)
     })
 
+    test('should render the indicator as a flat --progress-foreground-color fill', async () => {
+      const { progressItem } = await createProgressItem(
+        mainWindow,
+        electronApp,
+        'flat indicator',
+        { time: 10, theme: 'none' }
+      )
+
+      const indicator = progressItem.locator('.progress-item-indicator')
+
+      await progressItem.evaluate((el) =>
+        el.style.setProperty('--progress-foreground-color', 'rgb(0, 128, 0)')
+      )
+
+      const { backgroundImage, backgroundColor } = await indicator.evaluate(
+        (el) => {
+          const style = getComputedStyle(el)
+          return {
+            backgroundImage: style.backgroundImage,
+            backgroundColor: style.backgroundColor,
+          }
+        }
+      )
+
+      // No gradient should mask the theme color when the stripes theme is off
+      expect(backgroundImage).toBe('none')
+      expect(backgroundColor).toBe('rgb(0, 128, 0)')
+    })
+
     test('should apply custom CSS colors', async () => {
       const { progressItem } = await createProgressItem(
         mainWindow,
