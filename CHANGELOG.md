@@ -1,3 +1,9 @@
+## [2.1.7](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.6...v2.1.7) (2026-08-11)
+
+### Bug Fixes
+
+* declare --page-background custom property ([282c80e](https://github.com/spaceagetv/electron-progress-window/commit/282c80e56239c870cdf92dd415777a61d15ee309)), closes [#83](https://github.com/spaceagetv/electron-progress-window/issues/83)
+
 ## [2.1.6](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.5...v2.1.6) (2026-01-27)
 
 ### Bug Fixes
