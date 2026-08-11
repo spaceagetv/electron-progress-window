@@ -378,6 +378,23 @@ test.describe('ProgressWindow E2E Tests', () => {
       expect(itemBackground.trim()).toBe('#4ecdc4')
       expect(textColor.trim()).toBe('#ffffff')
     })
+
+    test('should declare --page-background so html has a resolvable background', async () => {
+      const { progressWindow } = await createProgressItem(
+        mainWindow,
+        electronApp,
+        'page background',
+        { time: 10 }
+      )
+
+      const pageBackground = await progressWindow.evaluate(() =>
+        getComputedStyle(document.documentElement).getPropertyValue(
+          '--page-background'
+        )
+      )
+
+      expect(pageBackground.trim()).toBe('transparent')
+    })
   }) // End of UI and Configuration Tests
 
   // Timing and state tests - run sequentially
