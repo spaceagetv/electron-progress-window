@@ -1,3 +1,9 @@
+## [2.1.8](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.7...v2.1.8) (2026-08-11)
+
+### Bug Fixes
+
+* apply --error-progress-background to the progress track ([0b7ffc8](https://github.com/spaceagetv/electron-progress-window/commit/0b7ffc805ede0d1331607f2e7dd43af66a956ef2)), closes [#84](https://github.com/spaceagetv/electron-progress-window/issues/84)
+
 ## [2.1.7](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.6...v2.1.7) (2026-08-11)
 
 ### Bug Fixes
