@@ -25,15 +25,18 @@ describe('inlineAsset', () => {
   })
 
   it('should infer media types case-insensitively', () => {
-    // A real file, since Linux filesystems are case-sensitive
-    const upperCasePath = path.join(os.tmpdir(), 'inline-asset-test.PNG')
-    fs.copyFileSync(PNG_PATH, upperCasePath)
+    // A real file, since Linux filesystems are case-sensitive, in a unique
+    // directory so parallel runs and retries cannot collide
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'inline-asset-'))
 
     try {
+      const upperCasePath = path.join(dir, 'brand.PNG')
+      fs.copyFileSync(PNG_PATH, upperCasePath)
+
       const uri = inlineAsset(upperCasePath)
       expect(uri.startsWith('data:image/png;base64,')).toBe(true)
     } finally {
-      fs.rmSync(upperCasePath, { force: true })
+      fs.rmSync(dir, { recursive: true, force: true })
     }
   })
 
