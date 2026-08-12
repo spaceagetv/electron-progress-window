@@ -10,13 +10,18 @@ on:
     branches:
       - main
 
+# Repo default may be broader than this; pin CI down to read-only and let
+# individual jobs widen only if they ever need to (none currently do).
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [22.x]
+        node-version: [22.x, 24.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -30,12 +35,25 @@ jobs:
         run: npm run lint
       - name: Run tests
         run: npm test
+      - name: Audit dependencies
+        # Audits the whole tree and prints every finding; --audit-level only
+        # controls the exit code. `critical` is the threshold that is actually
+        # actionable today: the dev toolchain (api-extractor/api-documenter,
+        # electron-mocks) carries known high/moderate advisories that npm can
+        # only "fix" by downgrading to older majors, so gating at `high` would
+        # fail every run from day one and get muted. Raise this the moment
+        # those clear.
+        #
+        # Deliberately not `--omit=dev`: this package has zero runtime
+        # dependencies, so that variant audits an empty tree and can never
+        # fail, which reads like coverage without being any.
+        run: npm audit --audit-level=critical
 
   e2e:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [22.x]
+        node-version: [22.x, 24.x]
 
     runs-on: ${{ matrix.os }}
 

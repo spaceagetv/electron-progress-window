@@ -5,11 +5,13 @@ on:
     branches:
       - main
 
+# Each scope below is exercised by semantic-release + the doc-commit step;
+# none can be dropped without breaking a step in this job.
 permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-  id-token: write
+  contents: write # @semantic-release/git push, GitHub release, docs commit/push
+  issues: write # @semantic-release/github comments on closed issues
+  pull-requests: write # @semantic-release/github comments on merged PRs
+  id-token: write # OIDC token for npm trusted publishing / provenance
 
 jobs:
   release:
@@ -25,6 +27,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
+          # No registry-url here on purpose: this repo publishes via npm
+          # trusted publishing (OIDC), not a registry token/.npmrc. Adding
+          # registry-url back makes setup-node write a token-based .npmrc
+          # and has broken provenance publishing before (see git history
+          # on this file) — don't re-add it.
 
       - name: Upgrade npm to 11.5.1+ for trusted publishing
         run: npm install -g npm@latest
@@ -41,10 +48,24 @@ jobs:
           NPM_CONFIG_PROVENANCE: true
         run: npx semantic-release
 
+      # .releaserc.json sets @semantic-release/npm to npmPublish: false, so the
+      # publish happens here instead, to keep npm trusted publishing (OIDC).
+      #
+      # It must be conditional. Pushes to main that carry no releasable commits
+      # (chore/docs/ci/test) leave semantic-release exiting 0 without bumping,
+      # and an unconditional publish then re-publishes an existing version and
+      # dies with E403 — failing the job spuriously and skipping the doc steps
+      # below. The @semantic-release/git plugin commits "chore(release): x.y.z"
+      # on success, so HEAD's subject is the signal for whether to publish.
       - name: Publish to npm with provenance
         env:
           NPM_CONFIG_PROVENANCE: true
-        run: npm publish --access public
+        run: |
+          if git log -1 --pretty=%s | grep -q '^chore(release):'; then
+            npm publish --access public
+          else
+            echo "No new release was cut; skipping npm publish."
+          fi
 
       - name: Build Documentation
         run: npm run docs
@@ -57,5 +78,14 @@ jobs:
           git config --local user.name "GitHub Actions"
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
           git add -A
-          git commit -m "Generate API docs" || echo "No changes to commit"
-          git push
+          # Test for "nothing to commit" explicitly rather than swallowing a
+          # non-zero `git commit`, which would also hide a failing hook, a
+          # locked index, or a bad identity — and then push nothing, green.
+          if git diff --cached --quiet; then
+            echo "No documentation changes to commit."
+          else
+            # [skip ci] so this push does not re-trigger this workflow.
+            # Without it, every release left a second, pointless run behind it.
+            git commit -m "Generate API docs [skip ci]"
+            git push
+          fi
