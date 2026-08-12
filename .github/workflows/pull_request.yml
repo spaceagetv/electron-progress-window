@@ -51,7 +51,7 @@ jobs:
             package-lock.json
             examples/playground/package-lock.json
       - name: Cache Electron binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/.electron-cache
           key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json', 'examples/playground/package-lock.json') }}
@@ -138,7 +138,7 @@ jobs:
             package-lock.json
             examples/playground/package-lock.json
       - name: Cache Electron binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/.electron-cache
           key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json', 'examples/playground/package-lock.json') }}
