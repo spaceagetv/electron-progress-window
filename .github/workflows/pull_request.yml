@@ -52,6 +52,26 @@ jobs:
           restore-keys: ${{ runner.os }}-electron-
       - name: Install dependencies
         run: npm ci
+      - name: Prefetch Electron binary
+        # `npm ci` does not fetch the ~100MB Electron binary — electron's
+        # index.js downloads it lazily on the first `require('electron')`,
+        # which lands in the middle of the test run. That is a single
+        # un-retried GET against the GitHub release CDN, and it is the most
+        # fragile thing in this job: #93 lost runs to both `socket hang up`
+        # and `503 Service Unavailable` there.
+        #
+        # Pulling it here retries the transient failures and populates
+        # ELECTRON_CACHE, so actions/cache has something to save and later
+        # runs skip the download entirely. bash so the loop works on Windows.
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            if node -e "require('electron')"; then exit 0; fi
+            echo "Electron download attempt $attempt failed; retrying in 15s."
+            sleep 15
+          done
+          echo "Electron binary could not be downloaded after 3 attempts."
+          exit 1
       - name: Run linter
         run: npm run lint
       - name: Run tests
@@ -103,6 +123,26 @@ jobs:
           restore-keys: ${{ runner.os }}-electron-
       - name: Install dependencies
         run: npm ci
+      - name: Prefetch Electron binary
+        # `npm ci` does not fetch the ~100MB Electron binary — electron's
+        # index.js downloads it lazily on the first `require('electron')`,
+        # which lands in the middle of the test run. That is a single
+        # un-retried GET against the GitHub release CDN, and it is the most
+        # fragile thing in this job: #93 lost runs to both `socket hang up`
+        # and `503 Service Unavailable` there.
+        #
+        # Pulling it here retries the transient failures and populates
+        # ELECTRON_CACHE, so actions/cache has something to save and later
+        # runs skip the download entirely. bash so the loop works on Windows.
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            if node -e "require('electron')"; then exit 0; fi
+            echo "Electron download attempt $attempt failed; retrying in 15s."
+            sleep 15
+          done
+          echo "Electron binary could not be downloaded after 3 attempts."
+          exit 1
       - name: Install Playwright system dependencies (Linux)
         if: runner.os == 'Linux'
         run: npx playwright install-deps
