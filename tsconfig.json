@@ -1,30 +1,25 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
+    // Base config is also the type-check config (src + test). The test suite
+    // imports extensionlessly, so resolution here must tolerate that; each
+    // build config overrides module/moduleResolution for its own emit format.
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
-    "target": "es6",
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "skipLibCheck": true,
-    "moduleResolution": "node",
     "sourceMap": true,
-    "outDir": "dist",
-    "baseUrl": ".",
     "declaration": true,
     "declarationMap": true,
-    "types": ["vitest/globals"],
-    "paths": {
-      "*": [
-        "node_modules/*",
-        "src/types/*"
-      ]
-    }
+    "outDir": "dist",
+    "types": ["vitest/globals"]
   },
-  "include": [
-    "src/**/*",
-    "test/**/*",
-    "global.d.ts"
-  ]
+  "include": ["src/**/*", "test/**/*", "global.d.ts"]
 }

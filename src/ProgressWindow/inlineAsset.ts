@@ -78,7 +78,7 @@ export function inlineAsset(filePath: string, mediaType?: string): string {
     throw new Error(
       `inlineAsset: cannot infer a media type for "${
         extension || filePath
-      }". Pass the mediaType argument explicitly.`
+      }". Pass the mediaType argument explicitly.`,
     )
   }
   const base64 = fs.readFileSync(filePath).toString('base64')

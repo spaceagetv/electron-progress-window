@@ -7,8 +7,8 @@
  *
  * @internal
  */
-import type { ProgressItemTransferable } from './ProgressItem'
-import type { ProgressWindowAPI } from './preload'
+import type { ProgressItemTransferable } from './ProgressItem.js'
+import type { ProgressWindowAPI } from './preload.js'
 
 // Access the API exposed by the preload script
 declare global {
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         widget.element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       }
       updateContentSize()
-    }
+    },
   )
 
   window.progressWindowAPI.onItemRemove((progressItemId: string) => {
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         widget.update(progressItem)
       }
       updateContentSize()
-    }
+    },
   )
 })
 
@@ -157,25 +157,25 @@ class ProgressWidget {
       <div class="progress-item-detail"></div>
     `
     this.progressElement = this.element.querySelector(
-      '.progress-item-progress'
+      '.progress-item-progress',
     ) as HTMLDivElement
     this.progressIndicator = this.element.querySelector(
-      '.progress-item-indicator'
+      '.progress-item-indicator',
     ) as HTMLDivElement
     this.cancelElement = this.element.querySelector(
-      '.progress-item-cancel'
+      '.progress-item-cancel',
     ) as HTMLSpanElement
     this.pauseElement = this.element.querySelector(
-      '.progress-item-pause'
+      '.progress-item-pause',
     ) as HTMLSpanElement
     this.titleElement = this.element.querySelector(
-      '.progress-item-title'
+      '.progress-item-title',
     ) as HTMLDivElement
     // Set title immediately to avoid extra DOM update
     // Use textContent for security - prevents XSS
     this.titleElement.textContent = item.title
     this.detailElement = this.element.querySelector(
-      '.progress-item-detail'
+      '.progress-item-detail',
     ) as HTMLDivElement
     // Set detail immediately to avoid extra DOM update
     // Use textContent for security - prevents XSS
@@ -188,7 +188,7 @@ class ProgressWidget {
     this.item = item
     this.element.classList.toggle(
       'complete-automatically',
-      item.completeAutomatically
+      item.completeAutomatically,
     )
     this.element.classList.toggle('cancelled', item.cancelled)
     this.element.classList.toggle('completed', item.completed)
@@ -207,7 +207,7 @@ class ProgressWidget {
     if (oldItem.value !== item.value || force) {
       this.element.style.setProperty(
         '--progress-value',
-        (item.value / item.maxValue) * 100 + '%'
+        (item.value / item.maxValue) * 100 + '%',
       )
     }
 

@@ -7,14 +7,13 @@ import { EventEmitter } from 'events'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
-import crypto from 'crypto'
 
 import {
   ProgressItemOptions,
   ProgressItem,
   TypedEventEmitter,
-} from './ProgressItem'
-import { deepMerge } from './utils'
+} from './ProgressItem.js'
+import { deepMerge } from './utils.js'
 
 /**
  * PRELOAD SCRIPT HANDLING
@@ -53,7 +52,7 @@ function getPreloadContent(): string {
     // It only runs during development/testing when preload.js exists as a file.
     preloadContent = fs.readFileSync(
       path.resolve(__dirname, 'preload.js'),
-      'utf8'
+      'utf8',
     )
   }
   return preloadContent
@@ -62,28 +61,29 @@ function getPreloadContent(): string {
 /**
  * Get the path to the preload script file.
  * Writes the embedded preload content to a temp file on first call.
- * Uses content hash in filename for cache invalidation across versions.
+ *
+ * The file goes in a directory created by `fs.mkdtempSync`, which gives an
+ * unpredictable name and mode 0700. That matters: a preload script runs with
+ * Node integration, so on platforms where `os.tmpdir()` is a shared,
+ * world-writable directory (Linux `/tmp`), a fixed or content-derived filename
+ * lets any local user pre-create the file and have this library hand Electron
+ * *their* code to execute. A fresh private directory also means the file we
+ * read back is always the one we just wrote, rather than a possibly truncated
+ * leftover from a process that died mid-write.
+ *
+ * The cost is one small write per process instead of one per machine, which is
+ * not worth optimizing back into a shared path.
+ *
  * @internal
  */
 // istanbul ignore next -- only used in production Electron context
 function getPreloadPath(): string {
   if (!preloadPath) {
-    const content = getPreloadContent()
-    // Hash ensures unique filename per preload script version
-    const hash = crypto
-      .createHash('md5')
-      .update(content)
-      .digest('hex')
-      .slice(0, 8)
-    preloadPath = path.join(
-      os.tmpdir(),
-      `electron-progress-window-preload-${hash}.js`
+    const dir = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'electron-progress-window-'),
     )
-
-    // Only write if this version's file doesn't already exist
-    if (!fs.existsSync(preloadPath)) {
-      fs.writeFileSync(preloadPath, content, 'utf8')
-    }
+    preloadPath = path.join(dir, 'preload.js')
+    fs.writeFileSync(preloadPath, getPreloadContent(), 'utf8')
   }
   return preloadPath
 }
@@ -126,7 +126,7 @@ function escapeAttributeValue(value: string): string {
  */
 function buildProgressHtml(
   template: string,
-  options: ProgressWindowOptions
+  options: ProgressWindowOptions,
 ): string {
   let html = template
 
@@ -141,12 +141,12 @@ function buildProgressHtml(
       .map(([name, value]) => {
         if (!ATTRIBUTE_NAME_PATTERN.test(name)) {
           throw new Error(
-            `ProgressWindow: "${name}" is not a valid htmlAttributes attribute name`
+            `ProgressWindow: "${name}" is not a valid htmlAttributes attribute name`,
           )
         }
         if (EVENT_HANDLER_ATTRIBUTE_PATTERN.test(name)) {
           throw new Error(
-            `ProgressWindow: htmlAttributes cannot set the event handler attribute "${name}"`
+            `ProgressWindow: htmlAttributes cannot set the event handler attribute "${name}"`,
           )
         }
         return `${name}="${escapeAttributeValue(value)}"`
@@ -159,7 +159,7 @@ function buildProgressHtml(
     const bodyClass = escapeAttributeValue(options.bodyClass)
     html = html.replace(
       'class="progress-window"',
-      () => `class="progress-window ${bodyClass}"`
+      () => `class="progress-window ${bodyClass}"`,
     )
   }
 
@@ -451,11 +451,11 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
    * ```
    */
   static configure(
-    options: ProgressWindowOptions | ProgressWindowOptionsFunction
+    options: ProgressWindowOptions | ProgressWindowOptionsFunction,
   ) {
     if (this.#instance) {
       throw new Error(
-        'ProgressWindow.configure() must be set before the first ProgressWindow is created'
+        'ProgressWindow.configure() must be set before the first ProgressWindow is created',
       )
     }
     if (typeof options === 'function') {
@@ -478,7 +478,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       return deepMerge(
         {},
         this.#options,
-        this.#optionsFunction()
+        this.#optionsFunction(),
       ) as ProgressWindowOptions
     }
     return this.#options
@@ -524,7 +524,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
    * Use the returned item to update the progress, or change the title or detail.
    */
   static addItem(
-    options = {} as Partial<ProgressItemOptions> | ProgressItem
+    options = {} as Partial<ProgressItemOptions> | ProgressItem,
   ): Promise<ProgressItem> {
     return this.instance.addItem(options)
   }
@@ -545,7 +545,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
   static resetConfiguration(): void {
     if (this.#instance) {
       throw new Error(
-        'ProgressWindow.resetConfiguration() must be called after destroy()'
+        'ProgressWindow.resetConfiguration() must be called after destroy()',
       )
     }
     this.#options = {}
@@ -652,15 +652,15 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       this.defaults,
       ProgressWindow.options,
       options,
-      overrides
+      overrides,
     ) as ProgressWindowOptions
 
     // Are we using BrowserWindow or a mock?
     // testingFixtures is always defined via defaults
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const bwFunction = this.options.testingFixtures!.bw!
     // Are we using screen or a mock?
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     this.#screenInstance = this.options.testingFixtures!.scr
     this.itemDefaults = this.options.itemDefaults ?? {}
 
@@ -669,7 +669,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     // beginning of its line, with no internal semicolons.
     const htmlContent = fs.readFileSync(
       path.resolve(__dirname, 'index.html'),
-      'utf8'
+      'utf8',
     )
     // Assemble the page before creating the window, so an invalid
     // htmlAttributes name throws without leaving an orphaned BrowserWindow
@@ -679,27 +679,25 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     this.browserWindow = new bwFunction(this.options.windowOptions)
     // prevent the window from navigating away from the initial URL
     // istanbul ignore next
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     this.browserWindow!.webContents.on('will-navigate', (event) => {
       event.preventDefault()
     })
     this.#ready = new Promise((resolve) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.browserWindow!.once('ready-to-show', () => {
         this.emit('ready')
         resolve(this)
       })
     })
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     this.browserWindow!.loadURL(
-      'data:text/html;charset=UTF8,' + encodeURIComponent(html)
+      'data:text/html;charset=UTF8,' + encodeURIComponent(html),
     )
 
     // we're going to get x/y here too... but we'll just ignore them
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     this.#lastContentDimensions = this.browserWindow!.getContentBounds()
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.browserWindow!.on('close', () => {
       // Clean up any pending timeouts
       this.#cancelHideDelay()
@@ -716,35 +714,35 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       }
       this.browserWindow?.setProgressBar(-1)
     })
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     this.browserWindow!.on('closed', () => {
       this.browserWindow = null
       this.emit('windowClosed')
     })
     // istanbul ignore next
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     this.browserWindow!.webContents.ipc.on(
       'progress-update-content-size',
       (_event, dimensions: { width: number; height: number }) => {
         this.#updateContentSize(dimensions)
-      }
+      },
     )
     // istanbul ignore next
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     this.browserWindow!.webContents.ipc.on(
       'progress-item-cancel',
       (_event, itemId: string) => {
         this.progressItems[itemId]?.cancel()
-      }
+      },
     )
     // istanbul ignore next
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     this.browserWindow!.webContents.ipc.on(
       'progress-item-pause',
       (_event, itemId: string) => {
         const item = this.progressItems[itemId]
         if (item) item.paused = !item.paused
-      }
+      },
     )
     ProgressWindow.staticEvents.emit('created', this)
   }
@@ -776,7 +774,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       options = deepMerge(
         {},
         this.itemDefaults,
-        options
+        options,
       ) as Partial<ProgressItemOptions>
       item = new ProgressItem(options)
     }
@@ -805,7 +803,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
 
       this.browserWindow.webContents.send(
         'progress-item-add',
-        item.transferable()
+        item.transferable(),
       )
       this.#setWindowProgress()
 
@@ -817,7 +815,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
       if (!this.browserWindow) return
       this.browserWindow.webContents.send(
         'progress-item-remove',
-        item.transferable()
+        item.transferable(),
       )
       this.#setWindowProgress()
       this.#maybeCloseWindow()
@@ -845,7 +843,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     }
     this.browserWindow.webContents.send(
       'progress-item-update',
-      item.transferable()
+      item.transferable(),
     )
     this.emit('itemUpdated', item)
     this.#setWindowProgress()
@@ -921,7 +919,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     }
     // normalize all progress values to 0-1
     const values = items.map(
-      (item) => Math.min(item.value, item.maxValue) / item.maxValue
+      (item) => Math.min(item.value, item.maxValue) / item.maxValue,
     )
 
     // get the average
@@ -944,7 +942,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     // istanbul ignore next
     if (!this.browserWindow) {
       throw new Error(
-        'ProgressWindow.updateContentSize() called without browserWindow instance'
+        'ProgressWindow.updateContentSize() called without browserWindow instance',
       )
     }
 
@@ -975,7 +973,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
 
     // find the display that the window is currently on
     const display = this.#screenInstance.getDisplayMatching(
-      this.browserWindow.getBounds()
+      this.browserWindow.getBounds(),
     )
     // get the display's work area
     const {
@@ -1025,11 +1023,11 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     // make sure window isn't overlapping edge of display
     const x = Math.min(
       Math.max(proposedX, displayX),
-      displayX + displayWidth - contentWidth
+      displayX + displayWidth - contentWidth,
     )
     const y = Math.min(
       Math.max(proposedY, displayY),
-      displayY + displayHeight - contentHeight
+      displayY + displayHeight - contentHeight,
     )
 
     const bounds = {
@@ -1047,7 +1045,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     // istanbul ignore next
     if (!this.browserWindow) {
       throw new Error(
-        'ProgressWindow.maybeCloseWindow() called before window was created'
+        'ProgressWindow.maybeCloseWindow() called before window was created',
       )
     }
     if (this.options.closeOnComplete) {
@@ -1172,7 +1170,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     // If there are no visible items, skip minimumDisplayMs entirely to avoid
     // showing an empty titlebar (fixes #61)
     const visibleItems = Object.values(this.progressItems).filter(
-      (item) => item.visible
+      (item) => item.visible,
     )
     if (visibleItems.length === 0) {
       // No visible items - hide immediately and wait for hideDelay before closing
@@ -1238,7 +1236,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     // istanbul ignore next -- Check if there are now visible AND incomplete items
     // (in case new items were added during min display wait)
     const activeItems = Object.values(this.progressItems).filter(
-      (item) => item.visible && !item.completed
+      (item) => item.visible && !item.completed,
     )
     if (activeItems.length > 0) {
       return
@@ -1266,7 +1264,7 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
 
       // istanbul ignore next -- Check if new visible AND incomplete items were added while we waited
       const newActiveItems = Object.values(this.progressItems).filter(
-        (item) => item.visible && !item.completed
+        (item) => item.visible && !item.completed,
       )
       if (newActiveItems.length > 0) {
         // New items were added, don't close - the window should already be visible

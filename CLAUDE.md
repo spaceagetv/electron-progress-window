@@ -31,7 +31,7 @@ npm run type-check
 ## Testing Commands
 
 ```bash
-# Unit tests (Mocha/Chai/Sinon)
+# Unit tests (Vitest)
 npm test
 npm run test:coverage
 
@@ -57,6 +57,10 @@ npm run lint:fix    # Auto-fix errors and format code
 
 Prettier is integrated with ESLint, so `lint:fix` handles both linting and formatting.
 
+Config lives in `eslint.config.mjs` (ESLint 10 flat config). It is `.mjs` rather than
+`.js` because the root `package.json` has no `"type": "module"`. The `eslint:recommended`
+layer comes from the explicit `@eslint/js` devDependency — ESLint 10 no longer bundles it.
+
 ## Code Style
 
 - **No semicolons** (Prettier config)
@@ -73,9 +77,28 @@ Prettier is integrated with ESLint, so `lint:fix` handles both linting and forma
 The library exports both CommonJS and ESM:
 - Main: `dist/cjs/index.js` (CommonJS)
 - Module: `dist/esm/index.js` (ESM)
-- Types: `dist/cjs/index.d.ts`
+- Types: per-condition, via the `exports` map — `dist/esm/index.d.ts` for
+  `import`, `dist/cjs/index.d.ts` for `require`
 
 Built via separate tsconfig files: `tsconfig.cjs.json` and `tsconfig.esm.json`.
+`post-build.js` then writes `dist/cjs/package.json` (`{"type":"commonjs"}`) and
+`dist/esm/package.json` (`{"type":"module"}`). Without those markers Node reads
+the root `package.json`, which has no `"type"`, and parses the ESM build as
+CommonJS — `SyntaxError: Unexpected token 'export'`.
+
+**Every relative import in `src/` must carry an explicit `.js` extension**
+(`import { deepMerge } from './utils.js'`), even though the source file is
+`.ts`. Node's ESM loader requires it. The ESM build uses
+`moduleResolution: "bundler"`, which permits extensionless specifiers, so
+`tsc`, ESLint and the test suite will all happily pass on a missing one and the
+package will then fail to load in a consumer's app. `post-build.js` verifies
+every emitted relative specifier resolves and fails the build if one does not —
+that check is the only thing standing between a dropped extension and a broken
+publish, so don't remove it.
+
+`moduleResolution` cannot simply be switched to `nodenext` here: without a root
+`"type": "module"`, `nodenext` classifies the sources as CommonJS and emits
+`require()` into `dist/esm`.
 
 ### Main Classes (src/ProgressWindow/)
 
@@ -130,8 +153,10 @@ Both `ProgressWindow` and `ProgressItem` extend EventEmitter with type-safe even
 
 **Unit Tests** (`test/unit/*.test.ts`):
 - Located in `test/unit/` directory
+- Run by Vitest (`vitest.config.ts`), with `globals: true`, so `describe`/`it`/`expect`/`vi` need no import
 - Use `electron-mocks` to mock Electron APIs without launching a real app
-- Import pattern: `import { BrowserWindow } from 'electron-mocks'`
+- Import pattern: `import { MockBrowserWindow, MockScreen } from 'electron-mocks'`
+- `electron-mocks` builds its fakes on Sinon spies, so `@types/sinon` is a devDependency purely to type those mocks
 - Test helpers: `withTimeout.ts` (timeout wrapper), `pause.ts` (async delay)
 
 **E2E Tests** (`test/e2e/*.spec.ts`):
@@ -148,7 +173,7 @@ electron-progress-window/
 ├── src/                    # Source code
 │   └── ProgressWindow/     # Main module (ProgressWindow & ProgressItem classes)
 ├── test/                   # All tests
-│   ├── unit/              # Unit tests (Mocha/Chai with electron-mocks)
+│   ├── unit/              # Unit tests (Vitest with electron-mocks)
 │   └── e2e/               # E2E tests (Playwright with real Electron app)
 ├── examples/              # Example applications
 │   └── playground/        # Test playground (used by E2E tests)

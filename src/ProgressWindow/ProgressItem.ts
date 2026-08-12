@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import { deepEqual, deepMerge } from './utils'
+import { deepEqual, deepMerge } from './utils.js'
 
 /**
  * A simple cancelable event that works in both Node.js and browser environments.
@@ -240,7 +240,7 @@ export class ProgressItem extends ProgressItemEventsEmitter {
       delayIndeterminateMs: Math.max(0, options.delayIndeterminateMs || 0),
       showWhenEstimateExceedsMs: Math.max(
         0,
-        options.showWhenEstimateExceedsMs || 0
+        options.showWhenEstimateExceedsMs || 0,
       ),
     })
 
@@ -282,7 +282,9 @@ export class ProgressItem extends ProgressItemEventsEmitter {
    * Determines whether the item should be shown immediately or after a delay.
    */
   private handleVisibility() {
-    let shouldShow = false
+    // Assigned by both branches below; no initializer, so a future edit that
+    // drops one branch is a compile error rather than a silent "never shows".
+    let shouldShow: boolean
 
     if (this.indeterminate) {
       shouldShow = this.initiallyVisible && this.delayIndeterminateMs <= 0

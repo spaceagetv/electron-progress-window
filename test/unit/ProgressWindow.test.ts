@@ -25,10 +25,10 @@ describe('ProgressWindow', () => {
     const windowBounds = browserWindow.getBounds()
     browserWindow.setBounds({
       x: Math.round(
-        screenBounds.x + (screenBounds.width - windowBounds.width) / 2
+        screenBounds.x + (screenBounds.width - windowBounds.width) / 2,
       ),
       y: Math.round(
-        screenBounds.y + (screenBounds.height - windowBounds.height) / 2
+        screenBounds.y + (screenBounds.height - windowBounds.height) / 2,
       ),
     })
 
@@ -51,7 +51,7 @@ describe('ProgressWindow', () => {
       // emulate the item resizing the window - only count VISIBLE items
       const bounds = browserWindow.getBounds()
       const visibleItemCount = Object.values(
-        progressWindow.progressItems
+        progressWindow.progressItems,
       ).filter((item) => item.visible).length
       const height = visibleItemCount * 60 + 20
       browserWindow.webContents.ipc.emit('progress-update-content-size', null, {
@@ -764,13 +764,13 @@ describe('ProgressWindow', () => {
     const complete2WithTimeoutPromise = withTimeout(
       completePromise2,
       100,
-      'complete event never fired'
+      'complete event never fired',
     )
     item1.complete()
 
     // expect complete2WithTimeoutPromise to reject
     await expect(complete2WithTimeoutPromise).rejects.toThrow(
-      'complete event never fired'
+      'complete event never fired',
     )
 
     const cancelPromise = withTimeout(
@@ -778,7 +778,7 @@ describe('ProgressWindow', () => {
         item1.once('cancelled', () => resolve())
       }),
       100,
-      'cancelled event never fired'
+      'cancelled event never fired',
     )
     item1.cancel()
     await expect(cancelPromise).rejects.toThrow('cancelled event never fired')
@@ -818,7 +818,7 @@ describe('ProgressWindow', () => {
         item1.once('cancelled', () => resolve())
       }),
       100,
-      'cancelled event never fired'
+      'cancelled event never fired',
     )
     item1.cancel()
     await willCancelPromise
@@ -1154,7 +1154,7 @@ describe('ProgressWindow', () => {
       progressWindow.browserWindow.webContents.ipc.emit(
         'progress-update-content-size',
         null,
-        { width: 300, height: 80 }
+        { width: 300, height: 80 },
       )
 
       // Now window should be shown
@@ -1361,7 +1361,7 @@ describe('ProgressWindow', () => {
     it('should throw if called while instance exists', async () => {
       await ProgressWindow.create()
       expect(() => ProgressWindow.resetConfiguration()).toThrow(
-        'ProgressWindow.resetConfiguration() must be called after destroy()'
+        'ProgressWindow.resetConfiguration() must be called after destroy()',
       )
     })
   })
@@ -1396,7 +1396,7 @@ describe('ProgressWindow', () => {
       const progressWindow = await ProgressWindow.create()
 
       expect(loadedHtml(progressWindow)).toContain(
-        '<html data-theme="dark" lang="en">'
+        '<html data-theme="dark" lang="en">',
       )
     })
 
@@ -1407,7 +1407,7 @@ describe('ProgressWindow', () => {
       const progressWindow = await ProgressWindow.create()
 
       expect(loadedHtml(progressWindow)).toContain(
-        '<html data-theme="da&quot;rk&gt;&lt;script&gt;">'
+        '<html data-theme="da&quot;rk&gt;&lt;script&gt;">',
       )
     })
 
@@ -1417,7 +1417,7 @@ describe('ProgressWindow', () => {
       })
 
       expect(() => ProgressWindow.instance).toThrow(
-        'is not a valid htmlAttributes attribute name'
+        'is not a valid htmlAttributes attribute name',
       )
     })
 
@@ -1427,7 +1427,7 @@ describe('ProgressWindow', () => {
       })
 
       expect(() => ProgressWindow.instance).toThrow(
-        'cannot set the event handler attribute "onload"'
+        'cannot set the event handler attribute "onload"',
       )
     })
 
@@ -1437,7 +1437,7 @@ describe('ProgressWindow', () => {
       })
 
       expect(() => ProgressWindow.instance).toThrow(
-        'cannot set the event handler attribute "OnClick"'
+        'cannot set the event handler attribute "OnClick"',
       )
     })
 
@@ -1446,7 +1446,7 @@ describe('ProgressWindow', () => {
       const progressWindow = await ProgressWindow.create()
 
       expect(loadedHtml(progressWindow)).toContain(
-        'class="progress-window theme-dark brand"'
+        'class="progress-window theme-dark brand"',
       )
     })
 
@@ -1619,7 +1619,7 @@ describe('ProgressWindow', () => {
       progressWindow.browserWindow.webContents.ipc.emit(
         'progress-item-cancel',
         null,
-        item.id
+        item.id,
       )
 
       await pause(10)
@@ -1649,7 +1649,7 @@ describe('ProgressWindow', () => {
       progressWindow.browserWindow.webContents.ipc.emit(
         'progress-item-pause',
         null,
-        item.id
+        item.id,
       )
 
       await pause(10)
@@ -1660,7 +1660,7 @@ describe('ProgressWindow', () => {
       progressWindow.browserWindow.webContents.ipc.emit(
         'progress-item-pause',
         null,
-        item.id
+        item.id,
       )
 
       await pause(10)
@@ -1678,13 +1678,13 @@ describe('ProgressWindow', () => {
       progressWindow.browserWindow.webContents.ipc.emit(
         'progress-item-cancel',
         null,
-        'non-existent-id'
+        'non-existent-id',
       )
 
       progressWindow.browserWindow.webContents.ipc.emit(
         'progress-item-pause',
         null,
-        'non-existent-id'
+        'non-existent-id',
       )
 
       await pause(10)

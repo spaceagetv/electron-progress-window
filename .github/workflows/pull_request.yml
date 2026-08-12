@@ -10,13 +10,29 @@ on:
     branches:
       - main
 
+# Repo default may be broader than this; pin CI down to read-only and let
+# individual jobs widen only if they ever need to (none currently do).
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [22.x]
+        node-version: [22.x, 24.x]
+
+    # Electron's postinstall downloads a ~100MB binary from the release CDN.
+    # Left uncached that runs on every job, and a socket hang up there fails
+    # the job outright — which is exactly what happened on #93.
+    #
+    # `runner.temp` would be the tidier location, but the runner context is
+    # not available in job-level env — it would expand to an empty string and
+    # point ELECTRON_CACHE at /electron-cache. The cache is restored after
+    # checkout, so living in the workspace is safe from its clean step.
+    env:
+      ELECTRON_CACHE: ${{ github.workspace }}/.electron-cache
 
     steps:
       - uses: actions/checkout@v4
@@ -24,20 +40,79 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            examples/playground/package-lock.json
+      - name: Cache Electron binaries
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.electron-cache
+          key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json', 'examples/playground/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-electron-
       - name: Install dependencies
         run: npm ci
+      - name: Prefetch Electron binary
+        # `npm ci` does not fetch the ~100MB Electron binary — electron's
+        # index.js downloads it lazily on the first `require('electron')`,
+        # which lands in the middle of the test run. That is a single
+        # un-retried GET against the GitHub release CDN, and it is the most
+        # fragile thing in this job: #93 lost runs to both `socket hang up`
+        # and `503 Service Unavailable` there.
+        #
+        # Pulling it here retries the transient failures and populates
+        # ELECTRON_CACHE, so actions/cache has something to save and later
+        # runs skip the download entirely. bash so the loop works on Windows.
+        shell: bash
+        run: |
+          # Escalating backoff: the failures seen on #93 were the CDN
+          # refusing the connection outright (`fetch failed` in ~150ms, and
+          # a 503 on Windows), not slow transfers. Retrying tightly just
+          # re-hits the same throttle, so back off further each time.
+          for delay in 15 30 60 0; do
+            if node -e "require('electron')"; then exit 0; fi
+            if [ "$delay" -eq 0 ]; then break; fi
+            echo "Electron download failed; retrying in ${delay}s."
+            sleep "$delay"
+          done
+          echo "Electron binary could not be downloaded after 4 attempts."
+          exit 1
       - name: Run linter
         run: npm run lint
       - name: Run tests
         run: npm test
+      - name: Audit dependencies
+        # Audits the whole tree and prints every finding; --audit-level only
+        # controls the exit code. `critical` is the threshold that is actually
+        # actionable today: the dev toolchain (api-extractor/api-documenter,
+        # electron-mocks) carries known high/moderate advisories that npm can
+        # only "fix" by downgrading to older majors, so gating at `high` would
+        # fail every run from day one and get muted. Raise this the moment
+        # those clear.
+        #
+        # Deliberately not `--omit=dev`: this package has zero runtime
+        # dependencies, so that variant audits an empty tree and can never
+        # fail, which reads like coverage without being any.
+        run: npm audit --audit-level=critical
 
   e2e:
     strategy:
+      # One job's flaky Electron download used to cancel the other five, so a
+      # run reported a single failure and nothing about the platforms that
+      # would have passed. Let every OS report its own result.
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [22.x]
+        node-version: [22.x, 24.x]
 
     runs-on: ${{ matrix.os }}
+
+    # Same as the build job, and it matters more here: this job installs
+    # Electron twice — once for the repo, once for examples/playground via
+    # global-setup.ts. Both now resolve to the same version, so the second
+    # install is a cache hit rather than a second download.
+    env:
+      ELECTRON_CACHE: ${{ github.workspace }}/.electron-cache
 
     steps:
       - uses: actions/checkout@v4
@@ -45,8 +120,43 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            examples/playground/package-lock.json
+      - name: Cache Electron binaries
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.electron-cache
+          key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json', 'examples/playground/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-electron-
       - name: Install dependencies
         run: npm ci
+      - name: Prefetch Electron binary
+        # `npm ci` does not fetch the ~100MB Electron binary — electron's
+        # index.js downloads it lazily on the first `require('electron')`,
+        # which lands in the middle of the test run. That is a single
+        # un-retried GET against the GitHub release CDN, and it is the most
+        # fragile thing in this job: #93 lost runs to both `socket hang up`
+        # and `503 Service Unavailable` there.
+        #
+        # Pulling it here retries the transient failures and populates
+        # ELECTRON_CACHE, so actions/cache has something to save and later
+        # runs skip the download entirely. bash so the loop works on Windows.
+        shell: bash
+        run: |
+          # Escalating backoff: the failures seen on #93 were the CDN
+          # refusing the connection outright (`fetch failed` in ~150ms, and
+          # a 503 on Windows), not slow transfers. Retrying tightly just
+          # re-hits the same throttle, so back off further each time.
+          for delay in 15 30 60 0; do
+            if node -e "require('electron')"; then exit 0; fi
+            if [ "$delay" -eq 0 ]; then break; fi
+            echo "Electron download failed; retrying in ${delay}s."
+            sleep "$delay"
+          done
+          echo "Electron binary could not be downloaded after 4 attempts."
+          exit 1
       - name: Install Playwright system dependencies (Linux)
         if: runner.os == 'Linux'
         run: npx playwright install-deps

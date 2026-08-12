@@ -201,8 +201,8 @@ describe('utils', () => {
             [
               [1, 2],
               [3, 4],
-            ]
-          )
+            ],
+          ),
         ).toBe(true)
         expect(
           deepEqual(
@@ -213,8 +213,8 @@ describe('utils', () => {
             [
               [1, 2],
               [3, 5],
-            ]
-          )
+            ],
+          ),
         ).toBe(false)
       })
 
@@ -245,10 +245,10 @@ describe('utils', () => {
 
       it('should handle nested objects', () => {
         expect(deepEqual({ a: { b: { c: 1 } } }, { a: { b: { c: 1 } } })).toBe(
-          true
+          true,
         )
         expect(deepEqual({ a: { b: { c: 1 } } }, { a: { b: { c: 2 } } })).toBe(
-          false
+          false,
         )
       })
 
