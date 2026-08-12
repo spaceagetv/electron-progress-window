@@ -23,16 +23,22 @@ jobs:
       matrix:
         node-version: [22.x, 24.x]
 
-    # Electron's postinstall downloads a ~100MB binary from the release CDN.
-    # Left uncached that runs on every job, and a socket hang up there fails
-    # the job outright — which is exactly what happened on #93.
+    # Electron's ~100MB binary comes from the release CDN once per job, and
+    # a refused connection there fails the job outright — #93 lost runs to
+    # both `socket hang up` and a 503.
     #
-    # `runner.temp` would be the tidier location, but the runner context is
-    # not available in job-level env — it would expand to an empty string and
-    # point ELECTRON_CACHE at /electron-cache. The cache is restored after
-    # checkout, so living in the workspace is safe from its clean step.
+    # electron_config_cache, not ELECTRON_CACHE: electron/install.js reads
+    # `process.env.electron_config_cache` and passes it to @electron/get as
+    # cacheRoot. ELECTRON_CACHE belongs to electron-builder and this
+    # installer ignores it — set that one and the binary quietly lands in
+    # ~/.cache/electron, leaving actions/cache nothing to save.
+    #
+    # github.workspace rather than the tidier runner.temp because the runner
+    # context is not available in job-level env; it would expand to an empty
+    # string. The cache is restored after checkout, so the workspace clean
+    # step cannot wipe it.
     env:
-      ELECTRON_CACHE: ${{ github.workspace }}/.electron-cache
+      electron_config_cache: ${{ github.workspace }}/.electron-cache
 
     steps:
       - uses: actions/checkout@v4
@@ -61,7 +67,7 @@ jobs:
         # and `503 Service Unavailable` there.
         #
         # Pulling it here retries the transient failures and populates
-        # ELECTRON_CACHE, so actions/cache has something to save and later
+        # electron_config_cache, so actions/cache has something to save and later
         # runs skip the download entirely. bash so the loop works on Windows.
         shell: bash
         run: |
@@ -107,12 +113,13 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
-    # Same as the build job, and it matters more here: this job installs
-    # Electron twice — once for the repo, once for examples/playground via
-    # global-setup.ts. Both now resolve to the same version, so the second
-    # install is a cache hit rather than a second download.
+    # See the build job for why this is electron_config_cache and not
+    # ELECTRON_CACHE. It matters more here: this job installs Electron twice,
+    # once for the repo and once for examples/playground via global-setup.ts.
+    # Both resolve to the same version now, so the second one is a cache hit
+    # rather than a second trip to the CDN.
     env:
-      ELECTRON_CACHE: ${{ github.workspace }}/.electron-cache
+      electron_config_cache: ${{ github.workspace }}/.electron-cache
 
     steps:
       - uses: actions/checkout@v4
@@ -141,7 +148,7 @@ jobs:
         # and `503 Service Unavailable` there.
         #
         # Pulling it here retries the transient failures and populates
-        # ELECTRON_CACHE, so actions/cache has something to save and later
+        # electron_config_cache, so actions/cache has something to save and later
         # runs skip the download entirely. bash so the loop works on Windows.
         shell: bash
         run: |
