@@ -299,11 +299,16 @@ function checkSpecifiersResolve(label, dir) {
   for (const file of walk(dir)) {
     const source = fs.readFileSync(file, 'utf-8')
     const specifiers = [
-      // import/export ... from './x'  |  import('./x')  |  require('./x')
+      // import/export ... from './x'
       ...source.matchAll(/\bfrom\s+['"](\.[^'"]*)['"]/g),
+      // import('./x')  |  require('./x')
       ...source.matchAll(
         /\b(?:import|require)\s*\(\s*['"](\.[^'"]*)['"]\s*\)/g,
       ),
+      // import './x' — a side-effect import has no `from` and no parens, so
+      // neither pattern above sees it. src/ has none today; the guard exists
+      // for the change that adds one.
+      ...source.matchAll(/\bimport\s+['"](\.[^'"]*)['"]/g),
     ].map((m) => m[1])
 
     for (const specifier of specifiers) {
