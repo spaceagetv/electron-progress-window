@@ -205,7 +205,7 @@ jobs:
         if: runner.os != 'Linux'
         run: npm run test:e2e
       - name: Upload Playwright Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           # upload-artifact@v4 rejects a duplicate name outright, and the
