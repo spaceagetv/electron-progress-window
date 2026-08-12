@@ -27,6 +27,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
+          cache: npm
+          # Deliberately no Electron binary cache or prefetch here, unlike
+          # the CI workflow. Nothing in this job calls `require('electron')`
+          # — npm ci, tsc, post-build.js, semantic-release and api-extractor
+          # all run without it, and the library's electron imports are
+          # type-only at build time. Adding a prefetch would introduce a
+          # ~100MB download this job does not currently make.
+          #
           # No registry-url here on purpose: this repo publishes via npm
           # trusted publishing (OIDC), not a registry token/.npmrc. Adding
           # registry-url back makes setup-node write a token-based .npmrc
