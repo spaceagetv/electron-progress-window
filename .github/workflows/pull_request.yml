@@ -65,12 +65,17 @@ jobs:
         # runs skip the download entirely. bash so the loop works on Windows.
         shell: bash
         run: |
-          for attempt in 1 2 3; do
+          # Escalating backoff: the failures seen on #93 were the CDN
+          # refusing the connection outright (`fetch failed` in ~150ms, and
+          # a 503 on Windows), not slow transfers. Retrying tightly just
+          # re-hits the same throttle, so back off further each time.
+          for delay in 15 30 60 0; do
             if node -e "require('electron')"; then exit 0; fi
-            echo "Electron download attempt $attempt failed; retrying in 15s."
-            sleep 15
+            if [ "$delay" -eq 0 ]; then break; fi
+            echo "Electron download failed; retrying in ${delay}s."
+            sleep "$delay"
           done
-          echo "Electron binary could not be downloaded after 3 attempts."
+          echo "Electron binary could not be downloaded after 4 attempts."
           exit 1
       - name: Run linter
         run: npm run lint
@@ -92,6 +97,10 @@ jobs:
 
   e2e:
     strategy:
+      # One job's flaky Electron download used to cancel the other five, so a
+      # run reported a single failure and nothing about the platforms that
+      # would have passed. Let every OS report its own result.
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         node-version: [22.x, 24.x]
@@ -136,12 +145,17 @@ jobs:
         # runs skip the download entirely. bash so the loop works on Windows.
         shell: bash
         run: |
-          for attempt in 1 2 3; do
+          # Escalating backoff: the failures seen on #93 were the CDN
+          # refusing the connection outright (`fetch failed` in ~150ms, and
+          # a 503 on Windows), not slow transfers. Retrying tightly just
+          # re-hits the same throttle, so back off further each time.
+          for delay in 15 30 60 0; do
             if node -e "require('electron')"; then exit 0; fi
-            echo "Electron download attempt $attempt failed; retrying in 15s."
-            sleep 15
+            if [ "$delay" -eq 0 ]; then break; fi
+            echo "Electron download failed; retrying in ${delay}s."
+            sleep "$delay"
           done
-          echo "Electron binary could not be downloaded after 3 attempts."
+          echo "Electron binary could not be downloaded after 4 attempts."
           exit 1
       - name: Install Playwright system dependencies (Linux)
         if: runner.os == 'Linux'
