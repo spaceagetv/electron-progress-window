@@ -23,12 +23,33 @@ jobs:
       matrix:
         node-version: [22.x, 24.x]
 
+    # Electron's postinstall downloads a ~100MB binary from the release CDN.
+    # Left uncached that runs on every job, and a socket hang up there fails
+    # the job outright — which is exactly what happened on #93.
+    #
+    # `runner.temp` would be the tidier location, but the runner context is
+    # not available in job-level env — it would expand to an empty string and
+    # point ELECTRON_CACHE at /electron-cache. The cache is restored after
+    # checkout, so living in the workspace is safe from its clean step.
+    env:
+      ELECTRON_CACHE: ${{ github.workspace }}/.electron-cache
+
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            examples/playground/package-lock.json
+      - name: Cache Electron binaries
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.electron-cache
+          key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json', 'examples/playground/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-electron-
       - name: Install dependencies
         run: npm ci
       - name: Run linter
@@ -57,12 +78,29 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
+    # Same as the build job, and it matters more here: this job installs
+    # Electron twice — once for the repo, once for examples/playground via
+    # global-setup.ts. Both now resolve to the same version, so the second
+    # install is a cache hit rather than a second download.
+    env:
+      ELECTRON_CACHE: ${{ github.workspace }}/.electron-cache
+
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            examples/playground/package-lock.json
+      - name: Cache Electron binaries
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.electron-cache
+          key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json', 'examples/playground/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-electron-
       - name: Install dependencies
         run: npm ci
       - name: Install Playwright system dependencies (Linux)
