@@ -41,9 +41,9 @@ jobs:
       electron_config_cache: ${{ github.workspace }}/.electron-cache
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
@@ -51,7 +51,7 @@ jobs:
             package-lock.json
             examples/playground/package-lock.json
       - name: Cache Electron binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/.electron-cache
           key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json', 'examples/playground/package-lock.json') }}
@@ -151,9 +151,9 @@ jobs:
       EPW_BUNDLED: ${{ matrix.bundled && '1' || '' }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
@@ -161,7 +161,7 @@ jobs:
             package-lock.json
             examples/playground/package-lock.json
       - name: Cache Electron binaries
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/.electron-cache
           key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json', 'examples/playground/package-lock.json') }}
@@ -205,7 +205,7 @@ jobs:
         if: runner.os != 'Linux'
         run: npm run test:e2e
       - name: Upload Playwright Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           # upload-artifact@v4 rejects a duplicate name outright, and the
