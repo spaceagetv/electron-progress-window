@@ -1,3 +1,9 @@
+## [2.3.0](https://github.com/spaceagetv/electron-progress-window/compare/v2.2.0...v2.3.0) (2026-08-12)
+
+### Features
+
+* add inlineAsset() helper for fonts and images in custom CSS ([64db87f](https://github.com/spaceagetv/electron-progress-window/commit/64db87f1608b7bb37b2c2be6419d0bbbb8f0da46)), closes [#86](https://github.com/spaceagetv/electron-progress-window/issues/86)
+
 ## [2.2.0](https://github.com/spaceagetv/electron-progress-window/compare/v2.1.9...v2.2.0) (2026-08-11)
 
 ### Features
