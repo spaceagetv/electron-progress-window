@@ -1,7 +1,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    // NOT nodenext: without a root "type": "module", nodenext would classify
+    // every .ts file as CommonJS and emit require() here too. ESNext +
+    // bundler emits the import/export syntax verbatim; the source already
+    // carries explicit .js extensions, so the output is Node-ESM resolvable.
+    // post-build.js drops a dist/esm/package.json with {"type":"module"}.
     "module": "ESNext",
+    "moduleResolution": "bundler",
+    "rootDir": "./src",
     "outDir": "./dist/esm"
   },
   "include": ["./src"]

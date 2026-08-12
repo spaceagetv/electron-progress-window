@@ -45,7 +45,7 @@ export function deepMerge<T extends object>(
       if (isPlainObject(sourceValue) && isPlainObject(targetValue)) {
         ;(target as Record<string, unknown>)[key] = deepMerge(
           { ...targetValue },
-          sourceValue
+          sourceValue,
         )
       } else if (sourceValue !== undefined) {
         ;(target as Record<string, unknown>)[key] = sourceValue

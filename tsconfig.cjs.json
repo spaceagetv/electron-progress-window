@@ -1,7 +1,12 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "CommonJS",
+    // node16 treats every source file as CommonJS (the root package.json has no
+    // "type" field) and emits require()/exports. post-build.js drops a
+    // dist/cjs/package.json with {"type":"commonjs"} to pin that at runtime.
+    "module": "node16",
+    "moduleResolution": "node16",
+    "rootDir": "./src",
     "outDir": "./dist/cjs"
   },
   "include": ["./src"]

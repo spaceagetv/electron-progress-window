@@ -8,7 +8,7 @@
  * @internal
  */
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
-import type { ProgressItemTransferable } from './ProgressItem'
+import type { ProgressItemTransferable } from './ProgressItem.js'
 
 /**
  * The API exposed to the renderer process via window.progressWindowAPI
@@ -86,19 +86,19 @@ contextBridge.exposeInMainWorld('progressWindowAPI', {
 
   onItemAdd: (callback: (item: ProgressItemTransferable) => void) => {
     setListener('progress-item-add', (_event, item) =>
-      callback(item as ProgressItemTransferable)
+      callback(item as ProgressItemTransferable),
     )
   },
 
   onItemUpdate: (callback: (item: ProgressItemTransferable) => void) => {
     setListener('progress-item-update', (_event, item) =>
-      callback(item as ProgressItemTransferable)
+      callback(item as ProgressItemTransferable),
     )
   },
 
   onItemRemove: (callback: (itemId: string) => void) => {
     setListener('progress-item-remove', (_event, itemId) =>
-      callback(itemId as string)
+      callback(itemId as string),
     )
   },
 } satisfies ProgressWindowAPI)

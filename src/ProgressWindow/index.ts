@@ -1,3 +1,3 @@
-export * from './ProgressItem'
-export * from './ProgressWindow'
-export * from './inlineAsset'
+export * from './ProgressItem.js'
+export * from './ProgressWindow.js'
+export * from './inlineAsset.js'
