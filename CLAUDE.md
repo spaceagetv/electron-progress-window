@@ -47,6 +47,13 @@ npm run test:e2e -- --grep "should pause and resume"
 - The `test.beforeAll` hook builds both the main library AND the playground app
 - A single Electron instance is reused across all tests (see beforeAll/afterAll)
 - Each test cleans up progress windows in beforeEach, keeping only the main window
+- `EPW_BUNDLED=1 npm run test:e2e` builds the playground's main process with
+  esbuild instead of tsc, inlining this library into one file the way a
+  consuming app packed with webpack/vite/forge would. CI runs this as one extra
+  `bundled: true` entry in the e2e matrix. It is the runtime half of the
+  bundler-safety guarantee whose build-time half lives in `post-build.js`: that
+  script fails the build if any asset is still read off disk relative to
+  `__dirname`, and this proves the result actually runs once bundled.
 
 ## Linting
 

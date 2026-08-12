@@ -116,8 +116,28 @@ jobs:
         # tests and lint, where the host Node is what actually runs the code.
         # Doubling this matrix doubles the Electron downloads for no coverage.
         node-version: [22.x]
+        bundled: [false]
+        # One extra combination, not a fourth dimension: it rebuilds the
+        # playground's main process with esbuild, inlining this library the
+        # way a consuming app packed with webpack/vite/forge would. That is
+        # the scenario examples/progress-window-typescript-webpack used to
+        # stand in for by hand, without ever being built by CI.
+        #
+        # `bundled` differs from the [false] above, so GitHub adds this as a
+        # new job rather than merging it into the existing ubuntu one. Ubuntu
+        # alone is enough: bundling is a build-time transform of JS, so a
+        # break in it is platform-independent, unlike the Electron and window
+        # behaviour the other three jobs exist to cover.
+        include:
+          - os: ubuntu-latest
+            node-version: 22.x
+            bundled: true
 
     runs-on: ${{ matrix.os }}
+
+    # Without this, every matrix value lands in the job name and the
+    # unbundled jobs read "e2e (ubuntu-latest, 22.x, false)".
+    name: e2e (${{ matrix.os }}${{ matrix.bundled && ', bundled' || '' }})
 
     # See the build job for why this is electron_config_cache and not
     # ELECTRON_CACHE. It matters more here: this job installs Electron twice,
@@ -126,6 +146,9 @@ jobs:
     # rather than a second trip to the CDN.
     env:
       electron_config_cache: ${{ github.workspace }}/.electron-cache
+      # global-setup.ts checks for exactly "1"; matrix.bundled is a boolean,
+      # so it has to be mapped rather than passed through as "true"/"false".
+      EPW_BUNDLED: ${{ matrix.bundled && '1' || '' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -185,6 +208,9 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report-${{ matrix.os }}
+          # upload-artifact@v4 rejects a duplicate name outright, and the
+          # bundled job runs on ubuntu like one of the others, so the OS is
+          # no longer unique on its own.
+          name: playwright-report-${{ matrix.os }}${{ matrix.bundled && '-bundled' || '' }}
           path: playwright-report/
           retention-days: 30

@@ -25,10 +25,14 @@ updates:
           - "minor"
           - "patch"
 
-  # examples/progress-window-typescript-webpack is not built or run by
-  # any workflow — it's a static reference snippet. Deliberately excluded:
-  # Dependabot PRs against it would be unverified noise (nothing in CI
-  # would catch a breakage) rather than a useful signal.
+  # examples/playground is the only example. examples/progress-window-typescript-webpack
+  # used to live here too, as a hand-checked demonstration that this library
+  # survives being bundled — but nothing built or ran it, so it only ever
+  # produced unverified Dependabot noise. That property is now covered for
+  # real: post-build.js fails the build if any asset is still read off disk
+  # relative to __dirname, and the `bundled: true` E2E job in
+  # pull_request.yml runs the whole suite against an esbuild-bundled
+  # playground.
 
   - package-ecosystem: "github-actions"
     directory: "/"
