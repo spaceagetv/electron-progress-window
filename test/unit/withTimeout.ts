@@ -8,7 +8,7 @@
 export function withTimeout<T>(
   promise: Promise<T>,
   timeout: number,
-  timeoutMessage: string
+  timeoutMessage: string,
 ): Promise<T> {
   const timeoutPromise = new Promise<T>((_, reject) => {
     const id = setTimeout(() => {

@@ -5,7 +5,7 @@ import { inlineAsset } from '../../src/ProgressWindow'
 
 const PNG_PATH = path.resolve(
   __dirname,
-  '../../images/electron-progress-window.png'
+  '../../images/electron-progress-window.png',
 )
 
 describe('inlineAsset', () => {
@@ -20,7 +20,7 @@ describe('inlineAsset', () => {
     const base64 = uri.slice('data:image/png;base64,'.length)
 
     expect(
-      Buffer.from(base64, 'base64').equals(fs.readFileSync(PNG_PATH))
+      Buffer.from(base64, 'base64').equals(fs.readFileSync(PNG_PATH)),
     ).toBe(true)
   })
 
@@ -48,7 +48,7 @@ describe('inlineAsset', () => {
 
   it('should throw for an extension it does not know', () => {
     expect(() => inlineAsset('/tmp/brand.unknownext')).toThrow(
-      'cannot infer a media type'
+      'cannot infer a media type',
     )
   })
 

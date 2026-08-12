@@ -35,7 +35,7 @@ declare global {
 async function waitForWindowCount(
   electronApp: ElectronApplication,
   count: number,
-  comparator: 'equal' | 'greaterThan' = 'equal'
+  comparator: 'equal' | 'greaterThan' = 'equal',
 ) {
   await expect
     .poll(() => electronApp.windows().length, {
@@ -53,7 +53,7 @@ function generateTestId(testTitle: string): string {
 // Helper to get progress window (creates if doesn't exist)
 async function getProgressWindow(
   electronApp: ElectronApplication,
-  mainWindow: Page
+  mainWindow: Page,
 ): Promise<Page> {
   const windows = electronApp.windows()
   let progressWindow = windows.find((w) => w !== mainWindow)
@@ -102,7 +102,7 @@ async function createProgressItem(
     error?: boolean
     theme?: string
     cssCustom?: boolean
-  }
+  },
 ): Promise<{
   progressWindow: Page
   progressItem: Locator
@@ -129,7 +129,7 @@ async function createProgressItem(
         cssCustom: opts.cssCustom ?? false,
       })
     },
-    { identifier: testId, opts: { title: testTitle, ...options } }
+    { identifier: testId, opts: { title: testTitle, ...options } },
   )
 
   const progressWindow = await getProgressWindow(electronApp, mainWindow)
@@ -158,7 +158,7 @@ test.beforeAll(async () => {
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
-      '--disable-gpu'
+      '--disable-gpu',
     )
   }
 
@@ -205,10 +205,10 @@ test.describe('ProgressWindow E2E Tests', () => {
 
       // Check for specific buttons using data attributes to avoid ambiguity
       await expect(
-        mainWindow.locator('button.timer[data-time="3"]').first()
+        mainWindow.locator('button.timer[data-time="3"]').first(),
       ).toBeVisible()
       await expect(
-        mainWindow.locator('button.timer[data-time="10"]').first()
+        mainWindow.locator('button.timer[data-time="10"]').first(),
       ).toBeVisible()
     })
 
@@ -233,12 +233,12 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'show progress bar',
-        { time: 3 }
+        { time: 3 },
       )
 
       // Check for progress item elements
       await expect(
-        progressItem.locator('.progress-item-progress')
+        progressItem.locator('.progress-item-progress'),
       ).toBeVisible()
     })
 
@@ -247,7 +247,7 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'show description',
-        { time: 3, description: true }
+        { time: 3, description: true },
       )
 
       // Check for detail/description text
@@ -259,7 +259,7 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'indeterminate progress',
-        { time: 5, indeterminate: true }
+        { time: 5, indeterminate: true },
       )
 
       // Check that the progress item has the indeterminate class
@@ -272,14 +272,14 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'multi-item-1',
-        { time: 10 }
+        { time: 10 },
       )
 
       const item2Promise = createProgressItem(
         mainWindow,
         electronApp,
         'multi-item-2',
-        { time: 10, description: true }
+        { time: 10, description: true },
       )
 
       const [{ progressWindow, progressItem: item1 }, { progressItem: item2 }] =
@@ -299,7 +299,7 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'pauseable enabled',
-        { time: 10, enablePause: true }
+        { time: 10, enablePause: true },
       )
 
       // Check for pause button
@@ -311,12 +311,12 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'pauseable disabled',
-        { time: 10, enablePause: false }
+        { time: 10, enablePause: false },
       )
 
       // Pause button should not be visible
       await expect(
-        progressItem.locator('.progress-item-pause')
+        progressItem.locator('.progress-item-pause'),
       ).not.toBeVisible()
     })
 
@@ -325,7 +325,7 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'cancellable enabled',
-        { time: 10, enableCancel: true }
+        { time: 10, enableCancel: true },
       )
 
       // Check for cancel button
@@ -337,12 +337,12 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'cancellable disabled',
-        { time: 10, enableCancel: false }
+        { time: 10, enableCancel: false },
       )
 
       // Cancel button should not be visible
       await expect(
-        progressItem.locator('.progress-item-cancel')
+        progressItem.locator('.progress-item-cancel'),
       ).not.toBeVisible()
     })
 
@@ -351,7 +351,7 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'stripes theme',
-        { time: 10, theme: 'stripes' }
+        { time: 10, theme: 'stripes' },
       )
 
       // Check that progress item has stripes class
@@ -363,11 +363,11 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'stripes color',
-        { time: 10, theme: 'stripes' }
+        { time: 10, theme: 'stripes' },
       )
 
       await progressItem.evaluate((el) =>
-        el.style.setProperty('--stripes-color', 'rgb(0, 128, 0)')
+        el.style.setProperty('--stripes-color', 'rgb(0, 128, 0)'),
       )
 
       const backgroundImage = await progressItem
@@ -382,13 +382,13 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'flat indicator',
-        { time: 10, theme: 'none' }
+        { time: 10, theme: 'none' },
       )
 
       const indicator = progressItem.locator('.progress-item-indicator')
 
       await progressItem.evaluate((el) =>
-        el.style.setProperty('--progress-foreground-color', 'rgb(0, 128, 0)')
+        el.style.setProperty('--progress-foreground-color', 'rgb(0, 128, 0)'),
       )
 
       const { backgroundImage, backgroundColor } = await indicator.evaluate(
@@ -398,7 +398,7 @@ test.describe('ProgressWindow E2E Tests', () => {
             backgroundImage: style.backgroundImage,
             backgroundColor: style.backgroundColor,
           }
-        }
+        },
       )
 
       // No gradient should mask the theme color when the stripes theme is off
@@ -411,15 +411,15 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'custom CSS',
-        { time: 10, cssCustom: true }
+        { time: 10, cssCustom: true },
       )
 
       // Verify custom colors are applied by checking CSS variables
       const itemBackground = await progressItem.evaluate((el) =>
-        getComputedStyle(el).getPropertyValue('--item-background')
+        getComputedStyle(el).getPropertyValue('--item-background'),
       )
       const textColor = await progressItem.evaluate((el) =>
-        getComputedStyle(el).getPropertyValue('--text-color')
+        getComputedStyle(el).getPropertyValue('--text-color'),
       )
 
       // The custom colors should be applied
@@ -432,13 +432,13 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'page background',
-        { time: 10 }
+        { time: 10 },
       )
 
       const pageBackground = await progressWindow.evaluate(() =>
         getComputedStyle(document.documentElement).getPropertyValue(
-          '--page-background'
-        )
+          '--page-background',
+        ),
       )
 
       expect(pageBackground.trim()).toBe('transparent')
@@ -449,7 +449,7 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'shadow vars',
-        { time: 10 }
+        { time: 10 },
       )
 
       // Defaults keep the existing glossy inset highlights
@@ -479,18 +479,18 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'hover var',
-        { time: 10, enableCancel: true }
+        { time: 10, enableCancel: true },
       )
 
       await progressItem.evaluate((el) =>
-        el.style.setProperty('--action-hover-background', 'rgb(0, 128, 0)')
+        el.style.setProperty('--action-hover-background', 'rgb(0, 128, 0)'),
       )
 
       const cancelIcon = progressItem.locator('.progress-item-cancel svg')
       await cancelIcon.hover()
 
       const background = await cancelIcon.evaluate(
-        (el) => getComputedStyle(el).backgroundColor
+        (el) => getComputedStyle(el).backgroundColor,
       )
 
       expect(background).toBe('rgb(0, 128, 0)')
@@ -507,7 +507,7 @@ test.describe('ProgressWindow E2E Tests', () => {
         'auto-remove test',
         {
           time: 3,
-        }
+        },
       )
 
       // Item should be visible initially
@@ -524,7 +524,7 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'persistent item',
-        { time: 5, persist: true }
+        { time: 5, persist: true },
       )
 
       // Wait for timer to complete and verify item is still visible (persistent)
@@ -533,11 +533,11 @@ test.describe('ProgressWindow E2E Tests', () => {
         .poll(
           async () => {
             const progressValue = await progressItem.evaluate((el) =>
-              getComputedStyle(el).getPropertyValue('--progress-value')
+              getComputedStyle(el).getPropertyValue('--progress-value'),
             )
             return parseFloat(progressValue)
           },
-          { timeout: 7000 }
+          { timeout: 7000 },
         )
         .toBeGreaterThanOrEqual(1)
 
@@ -550,12 +550,12 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'progress update test',
-        { time: 3 }
+        { time: 3 },
       )
 
       // Get initial progress value from CSS custom property
       const initialValue = await progressItem.evaluate((el) =>
-        getComputedStyle(el).getPropertyValue('--progress-value')
+        getComputedStyle(el).getPropertyValue('--progress-value'),
       )
 
       // Poll for progress value to change instead of using hard-coded delay
@@ -563,11 +563,11 @@ test.describe('ProgressWindow E2E Tests', () => {
         .poll(
           async () => {
             const currentValue = await progressItem.evaluate((el) =>
-              getComputedStyle(el).getPropertyValue('--progress-value')
+              getComputedStyle(el).getPropertyValue('--progress-value'),
             )
             return parseFloat(currentValue)
           },
-          { timeout: 5000, intervals: [100, 250] }
+          { timeout: 5000, intervals: [100, 250] },
         )
         .toBeGreaterThan(parseFloat(initialValue))
     })
@@ -577,7 +577,7 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'pause resume test',
-        { time: 10 }
+        { time: 10 },
       )
 
       // Wait for progress to start by polling for non-zero progress
@@ -585,11 +585,11 @@ test.describe('ProgressWindow E2E Tests', () => {
         .poll(
           async () => {
             const value = await progressItem.evaluate((el) =>
-              getComputedStyle(el).getPropertyValue('--progress-value')
+              getComputedStyle(el).getPropertyValue('--progress-value'),
             )
             return parseFloat(value)
           },
-          { timeout: 2000 }
+          { timeout: 2000 },
         )
         .toBeGreaterThan(0)
 
@@ -601,7 +601,7 @@ test.describe('ProgressWindow E2E Tests', () => {
 
       // Get the paused value
       const valueWhenPaused = await progressItem.evaluate((el) =>
-        getComputedStyle(el).getPropertyValue('--progress-value')
+        getComputedStyle(el).getPropertyValue('--progress-value'),
       )
 
       // Poll to verify progress stays the same while paused (check multiple times)
@@ -609,11 +609,11 @@ test.describe('ProgressWindow E2E Tests', () => {
         .poll(
           async () => {
             const currentValue = await progressItem.evaluate((el) =>
-              getComputedStyle(el).getPropertyValue('--progress-value')
+              getComputedStyle(el).getPropertyValue('--progress-value'),
             )
             return currentValue
           },
-          { timeout: 2000, intervals: [500, 500, 500] }
+          { timeout: 2000, intervals: [500, 500, 500] },
         )
         .toBe(valueWhenPaused)
 
@@ -625,11 +625,11 @@ test.describe('ProgressWindow E2E Tests', () => {
         .poll(
           async () => {
             const value = await progressItem.evaluate((el) =>
-              getComputedStyle(el).getPropertyValue('--progress-value')
+              getComputedStyle(el).getPropertyValue('--progress-value'),
             )
             return parseFloat(value)
           },
-          { timeout: 3000 }
+          { timeout: 3000 },
         )
         .toBeGreaterThan(parseFloat(valueWhenPaused))
     })
@@ -639,7 +639,7 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'cancel test',
-        { time: 10 }
+        { time: 10 },
       )
 
       // Verify progress item is visible
@@ -657,7 +657,7 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'error state test',
-        { time: 5, error: true }
+        { time: 5, error: true },
       )
 
       // Wait for error class to be applied (happens at 50% progress)
@@ -669,14 +669,14 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'error progress background',
-        { time: 5, error: true }
+        { time: 5, error: true },
       )
 
       await expect(progressItem).toHaveClass(/error/, { timeout: 5000 })
 
       // Set the variable the same way the cssVars API does - on the item element
       await progressItem.evaluate((el) =>
-        el.style.setProperty('--error-progress-background', 'rgb(0, 128, 0)')
+        el.style.setProperty('--error-progress-background', 'rgb(0, 128, 0)'),
       )
 
       const trackBackground = await progressItem
@@ -692,21 +692,21 @@ test.describe('ProgressWindow E2E Tests', () => {
         mainWindow,
         electronApp,
         'concurrent-1',
-        { time: 5 }
+        { time: 5 },
       )
 
       const item2Promise = createProgressItem(
         mainWindow,
         electronApp,
         'concurrent-2',
-        { time: 8, description: true }
+        { time: 8, description: true },
       )
 
       const item3Promise = createProgressItem(
         mainWindow,
         electronApp,
         'concurrent-3',
-        { time: 10, indeterminate: true }
+        { time: 10, indeterminate: true },
       )
 
       const [
@@ -784,7 +784,7 @@ test.describe('ProgressWindow E2E Tests', () => {
           description: i % 2 === 0,
           indeterminate: i % 3 === 0,
           theme: i % 2 === 0 ? 'stripes' : 'none',
-        })
+        }),
       )
 
       const items = await Promise.all(itemPromises)
@@ -895,13 +895,13 @@ test.describe('ProgressWindow E2E Tests', () => {
 
       // Get progress values
       const progress1 = await item1.progressItem.evaluate((el) =>
-        parseFloat(getComputedStyle(el).getPropertyValue('--progress-value'))
+        parseFloat(getComputedStyle(el).getPropertyValue('--progress-value')),
       )
       const progress2 = await item2.progressItem.evaluate((el) =>
-        parseFloat(getComputedStyle(el).getPropertyValue('--progress-value'))
+        parseFloat(getComputedStyle(el).getPropertyValue('--progress-value')),
       )
       const progress3 = await item3.progressItem.evaluate((el) =>
-        parseFloat(getComputedStyle(el).getPropertyValue('--progress-value'))
+        parseFloat(getComputedStyle(el).getPropertyValue('--progress-value')),
       )
 
       // Quick should be furthest along
