@@ -56,6 +56,32 @@ However, you can create multiple instances, if you want to create multiple windo
 </td></tr>
 </tbody></table>
 
+## Functions
+
+<table><thead><tr><th>
+
+Function
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[inlineAsset(filePath, mediaType)](./electron-progress-window.inlineasset.md)
+
+
+</td><td>
+
+Read a file and return it as a base64 `data:` URI, for use inside the `css` option of a ProgressWindow.
+
+
+</td></tr>
+</tbody></table>
+
 ## Interfaces
 
 <table><thead><tr><th>

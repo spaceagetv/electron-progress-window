@@ -166,7 +166,7 @@ string
 
 </td><td>
 
-_(Optional)_ Additional CSS to inject into the window
+_(Optional)_ Additional CSS to inject into the window.
 
 
 </td></tr>

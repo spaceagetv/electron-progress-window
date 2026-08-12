@@ -16,6 +16,9 @@ export class CancelableEvent {
     readonly type: string;
 }
 
+// @public
+export function inlineAsset(filePath: string, mediaType?: string): string;
+
 // @public (undocumented)
 export type ItemCss = Partial<Record<ItemCssProperty, string>>;
 

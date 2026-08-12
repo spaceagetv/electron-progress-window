@@ -38,6 +38,43 @@ Display multiple progress bars in an Electron window.
 npm install @spaceagetv/electron-progress-window
 ```
 
+## Fonts and images in custom CSS
+
+The progress page is loaded from a `data:` URL, which has an opaque origin.
+Together with the window's `sandbox` and `webSecurity` settings, that means the
+page cannot fetch subresources of any kind — not `file://`, not a relative
+path, not a custom protocol registered by your app. Any `url()` in the `css`
+option pointing at a file will silently fail to load.
+
+Use `inlineAsset()` to embed the file in the stylesheet instead:
+
+```javascript
+const path = require('path')
+const { ProgressWindow, inlineAsset } = require('@spaceagetv/electron-progress-window')
+
+const brandFont = inlineAsset(path.join(__dirname, 'assets/brand.woff2'))
+
+ProgressWindow.configure({
+  css: `
+    @font-face {
+      font-family: 'Brand';
+      src: url('${brandFont}') format('woff2');
+    }
+    html {
+      --font-family: 'Brand', sans-serif;
+    }
+  `,
+})
+```
+
+The media type is inferred from the file extension for common font and image
+formats; pass it as a second argument for anything else.
+
+Inlined assets end up in the page URL, so watch the total size — a full
+variable font is roughly 75 KB of base64 before `encodeURIComponent` expands
+`+`, `/` and `=`. Subsetting a font to the characters you actually use makes a
+large difference.
+
 ## Theming
 
 The window's colors, shadows and hover states are driven by CSS custom
