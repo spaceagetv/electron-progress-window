@@ -1063,6 +1063,13 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
         }
         return
       }
+      // Items remain, but none of them are visible - the renderer has dropped
+      // every row, so the window is an empty frame. Hide it rather than
+      // waiting for the remaining items to complete, which may never happen.
+      if (!items.some((item) => item.visible)) {
+        this.#hideThenCloseIfEmpty()
+        return
+      }
       if (items.every((item) => item.completed)) {
         // Use #hideThenCloseIfEmpty if either hideDelay or minimumDisplayMs is set
         // This ensures we respect minimum display time even when hideDelay is false
@@ -1118,6 +1125,17 @@ export class ProgressWindow extends ProgressWindowInstanceEventsEmitter {
     if (this.#showFallbackTimeout !== null) {
       clearTimeout(this.#showFallbackTimeout)
       this.#showFallbackTimeout = null
+    }
+
+    // The show is deferred until the renderer confirms (or the fallback
+    // fires), so the tracked task can finish in the meantime and take every
+    // item with it. Showing now would leave an empty window on screen until
+    // hideDelay elapses - or indefinitely, if the item was only hidden.
+    const visibleItems = Object.values(this.progressItems).filter(
+      (item) => item.visible,
+    )
+    if (visibleItems.length === 0) {
+      return
     }
 
     // Show with or without focus based on options
