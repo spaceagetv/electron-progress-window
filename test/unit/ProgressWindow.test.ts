@@ -958,6 +958,62 @@ describe('ProgressWindow', () => {
       expect(sendSpy.callCount).toBe(1)
       expect(sendSpy.calledWith('progress-item-add')).toBe(true)
     })
+
+    it('should not show the window when the item is removed before the show lands', async () => {
+      // The show is deferred until the renderer reports its content size, so a
+      // task that finishes in that gap used to leave an empty window on screen.
+      ProgressWindow.configure({ hideDelay: 1000 })
+      const progressWindow = new ProgressWindow()
+      const progressItem = await progressWindow.addItem({
+        title: 'Hello World',
+        delayIndeterminateMs: 50,
+        indeterminate: true,
+      })
+      if (!progressWindow.browserWindow) throw new Error('no browserWindow')
+      const browserWindow = progressWindow.browserWindow
+
+      // Remove as soon as the item becomes visible - before the renderer
+      // confirms - then drive the renderer's confirmation by hand, so the
+      // race is reproduced deterministically rather than by wall clock.
+      progressItem.on('show', () => {
+        progressItem.remove()
+        browserWindow.webContents.ipc.emit(
+          'progress-update-content-size',
+          null,
+          { height: 20, width: browserWindow.getBounds().width },
+        )
+      })
+
+      // Long enough for the delay to elapse and the 100ms fallback show to fire
+      await pause(300)
+
+      expect(progressItem.visible).toBe(false)
+      expect(browserWindow.isVisible()).toBe(false)
+      expect((browserWindow.show as SinonSpy).called).toBe(false)
+    })
+
+    it('should hide the window when its only item is hidden rather than removed', async () => {
+      // A hidden-but-incomplete item leaves the window on screen with no rows
+      // in it, and nothing else schedules a close.
+      ProgressWindow.configure({ hideDelay: 1000 })
+      const progressWindow = new ProgressWindow()
+      const progressItem = await progressWindow.addItem({
+        title: 'Hello World',
+        indeterminate: true,
+      })
+      await pause(50)
+
+      if (!progressWindow.browserWindow) throw new Error('no browserWindow')
+      const browserWindow = progressWindow.browserWindow
+      expect(progressItem.visible).toBe(true)
+      expect(browserWindow.isVisible()).toBe(true)
+
+      progressItem.hide()
+      await pause(50)
+
+      expect(progressItem.completed).toBe(false)
+      expect(browserWindow.isVisible()).toBe(false)
+    })
   })
 
   describe('window timing behavior', () => {
