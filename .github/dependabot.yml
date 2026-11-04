@@ -10,6 +10,9 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      security:
+        applies-to: security-updates
+        patterns: ["*"]
     # majors are left ungrouped so they each get their own PR for review
 
   # examples/playground is built and driven by the E2E suite in
@@ -24,6 +27,9 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      security:
+        applies-to: security-updates
+        patterns: ["*"]
 
   # examples/playground is the only example. examples/progress-window-typescript-webpack
   # used to live here too, as a hand-checked demonstration that this library
@@ -43,3 +49,6 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      security:
+        applies-to: security-updates
+        patterns: ["*"]
